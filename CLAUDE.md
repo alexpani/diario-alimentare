@@ -139,7 +139,7 @@ Session-based (express-session, 30 giorni).
 ```
 Mac (sviluppo) → commit+push automatico → GitHub
                                               ↓
-                                    LXC: bash /opt/diario-alimentare/update.sh
+                             LXC (root): bash /opt/diario-alimentare/update.sh
 ```
 
 ### Comandi utili sull'LXC
