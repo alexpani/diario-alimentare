@@ -171,7 +171,7 @@ window.DiaryTab = (() => {
       : `<div class="entry-food-img-placeholder">🥗</div>`;
 
     return `
-      <div class="entry-row">
+      <div class="entry-row" data-entry-id="${e.id}">
         ${imgHtml}
         <div class="entry-info">
           <div class="entry-name">${e.food.name}${e.food.brand ? ` <span style="font-weight:400;color:var(--color-text-secondary);font-size:12px">${e.food.brand}</span>` : ''}</div>
