@@ -23,11 +23,11 @@ echo -e "${BOLD}${CYAN}FoodDiary — Aggiornamento${RESET}"
 echo ""
 
 info "Pull da GitHub..."
-git -C "$APP_DIR" pull --ff-only
+su -s /bin/bash "$APP_USER" -c "git -C '$APP_DIR' pull --ff-only"
 ok "Codice aggiornato"
 
 info "Installazione dipendenze..."
-npm ci --prefix "$APP_DIR" --omit=dev --silent
+su -s /bin/bash "$APP_USER" -c "npm ci --prefix '$APP_DIR' --omit=dev --silent"
 ok "Dipendenze ok"
 
 info "Riavvio app..."
