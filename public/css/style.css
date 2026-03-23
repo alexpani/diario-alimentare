@@ -40,10 +40,26 @@
 }
 
 /* Elementi con colori hardcoded */
-[data-theme="dark"] .login-card           { background: #1C1C1E; }
-[data-theme="dark"] .tab-bar              { background: #1C1C1E; }
+[data-theme="dark"] .login-card,
+[data-theme="dark"] .tab-bar,
+[data-theme="dark"] .card,
+[data-theme="dark"] .meal-section,
+[data-theme="dark"] .chart-card,
+[data-theme="dark"] .diary-day-card,
+[data-theme="dark"] .food-card,
+[data-theme="dark"] .modal-sheet,
+[data-theme="dark"] .modal-dialog,
+[data-theme="dark"] .confirm-box,
+[data-theme="dark"] .cal-popup           { background: var(--color-card); }
+
+[data-theme="dark"] .modal-header,
+[data-theme="dark"] .modal-header.sticky { background: var(--color-card); border-color: var(--color-border); }
+
+[data-theme="dark"] .foods-toolbar       { background: var(--color-card); border-color: var(--color-border); }
+
 [data-theme="dark"] .btn-outline          { background: #2C2C2E; color: var(--color-text); border-color: var(--color-border); }
 [data-theme="dark"] .btn-outline:active   { background: #3A3A3C; }
+
 [data-theme="dark"] input[type=text],
 [data-theme="dark"] input[type=number],
 [data-theme="dark"] input[type=password],
@@ -51,26 +67,35 @@
 [data-theme="dark"] input[type=date],
 [data-theme="dark"] select,
 [data-theme="dark"] textarea              { background: #2C2C2E; color: var(--color-text); border-color: var(--color-border); }
-[data-theme="dark"] .modal-box           { background: #1C1C1E; }
-[data-theme="dark"] .modal-header        { border-color: var(--color-border); }
-[data-theme="dark"] .modal-footer        { border-color: var(--color-border); }
-[data-theme="dark"] .search-result-item  { border-color: var(--color-border); }
-[data-theme="dark"] .search-result-item:active { background: #2C2C2E; }
-[data-theme="dark"] .recent-food-item    { border-color: var(--color-border); }
-[data-theme="dark"] .recent-food-item:active   { background: #2C2C2E; }
-[data-theme="dark"] .entry-row           { border-color: var(--color-border); }
-[data-theme="dark"] .qty-tab             { background: #2C2C2E; color: var(--color-text-secondary); }
-[data-theme="dark"] .qty-tab.active      { background: var(--color-primary); color: #fff; }
+
+[data-theme="dark"] .qty-tab,
+[data-theme="dark"] .off-tab             { background: #2C2C2E; color: var(--color-text-secondary); }
+[data-theme="dark"] .qty-tab.active,
+[data-theme="dark"] .off-tab.active      { background: var(--color-primary); color: #fff; }
+
+[data-theme="dark"] .search-result-item:active,
+[data-theme="dark"] .recent-food-item:active,
+[data-theme="dark"] .meal-header:active,
+[data-theme="dark"] .cal-cell:active     { background: #2C2C2E; }
+
+[data-theme="dark"] .entry-row,
+[data-theme="dark"] .search-result-item,
+[data-theme="dark"] .recent-food-item,
+[data-theme="dark"] .plan-item           { border-color: var(--color-border); }
+
 [data-theme="dark"] .sri-placeholder,
 [data-theme="dark"] .entry-food-img-placeholder { background: #2C2C2E; }
-[data-theme="dark"] .meal-header         { background: var(--color-card); }
-[data-theme="dark"] .meal-header:active  { background: #2C2C2E; }
-[data-theme="dark"] .cal-popup           { background: #1C1C1E; }
+
 [data-theme="dark"] .cal-cell            { color: var(--color-text); }
-[data-theme="dark"] .cal-cell:active     { background: #2C2C2E; }
 [data-theme="dark"] .cal-future          { opacity: 0.35; }
-[data-theme="dark"] .plan-item           { border-color: var(--color-border); }
-[data-theme="dark"] .confirm-box         { background: #1C1C1E; }
+
+[data-theme="dark"] .msg.success         { background: #1B3A1F; color: #81C784; }
+[data-theme="dark"] .msg.error           { background: #3B1515; color: #EF9A9A; }
+
+[data-theme="dark"] .off-result-item     { background: #2C2C2E; }
+
+[data-theme="dark"] .diary-day-pct       { background: #1B3A1F; color: #81C784; }
+[data-theme="dark"] .diary-day-pct.over  { background: #3B1515; color: #EF9A9A; }
 
 /* Transizione fluida al cambio tema */
 body, .tab-bar, .modal-box, .card, input, select, textarea, .btn-outline {
