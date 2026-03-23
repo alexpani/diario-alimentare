@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="theme-color" content="#4CAF50">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>FoodDiary</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<!-- LOGIN OVERLAY -->
+<div id="login-screen" class="login-screen hidden">
+  <div class="login-card">
+    <div class="login-logo">
+      <span class="logo-icon">🥗</span>
+      <h1>FoodDiary</h1>
+      <p>Il tuo diario alimentare personale</p>
+    </div>
+    <form id="login-form">
+      <div class="form-group">
+        <label for="login-user">Username</label>
+        <input type="text" id="login-user" autocomplete="username" placeholder="admin">
+      </div>
+      <div class="form-group">
+        <label for="login-pass">Password</label>
+        <input type="password" id="login-pass" autocomplete="current-password" placeholder="••••••••">
+      </div>
+      <div id="login-error" class="error-msg hidden"></div>
+      <button type="submit" class="btn btn-primary btn-full">Accedi</button>
+    </form>
+  </div>
+</div>
+
+<!-- APP SHELL -->
+<div id="app" class="app hidden">
+
+  <!-- HEADER -->
+  <header class="app-header">
+    <h1 id="header-title">FoodDiary</h1>
+    <button id="btn-logout" class="btn-icon" title="Logout">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    </button>
+  </header>
+
+  <!-- TAB CONTENT -->
+  <main class="tab-content">
+
+    <!-- TAB: HOME -->
+    <section id="tab-home" class="tab-pane active">
+      <!-- Date navigation -->
+      <div class="date-nav">
+        <button id="prev-day" class="btn-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" width="24" height="24"><polyline points="15,18 9,12 15,6"/></svg>
+        </button>
+        <button id="current-date-btn" class="date-label">
+          <span id="current-date-text">Oggi</span>
+        </button>
+        <button id="next-day" class="btn-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" width="24" height="24"><polyline points="9,18 15,12 9,6"/></svg>
+        </button>
+      </div>
+
+      <!-- Calendario custom -->
+      <div id="cal-overlay" class="cal-overlay hidden">
+        <div id="cal-popup" class="cal-popup">
+          <div class="cal-header">
+            <button id="cal-prev-month" class="cal-nav-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:18px;height:18px"><polyline points="15,18 9,12 15,6"/></svg>
+            </button>
+            <span id="cal-month-label" class="cal-month-label"></span>
+            <button id="cal-next-month" class="cal-nav-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:18px;height:18px"><polyline points="9,18 15,12 9,6"/></svg>
+            </button>
+          </div>
+          <div class="cal-weekdays">
+            <span>L</span><span>M</span><span>M</span><span>G</span><span>V</span><span>S</span><span>D</span>
+          </div>
+          <div id="cal-grid" class="cal-grid"></div>
+        </div>
+      </div>
+
+      <!-- Riepilogo giornaliero -->
+      <div id="daily-summary" class="daily-summary">
+        <!-- Riga gauge -->
+        <div class="ds-gauge-row">
+          <div class="ds-side">
+            <div class="ds-side-value" id="total-kcal">0</div>
+            <div class="ds-side-label">Assunte</div>
+          </div>
+          <div class="ds-gauge-wrap">
+            <svg class="ds-gauge-svg" viewBox="0 0 200 200">
+              <circle class="ds-gauge-bg"   cx="100" cy="100" r="80"/>
+              <circle class="ds-gauge-fill" cx="100" cy="100" r="80" id="ds-gauge-fill"/>
+            </svg>
+            <div class="ds-gauge-inner">
+              <div class="ds-remaining-label">Rimanenti</div>
+              <div class="ds-remaining" id="ds-remaining">0</div>
+              <div class="ds-target">Obiettivo <span id="target-kcal">2000</span> kcal</div>
+            </div>
+          </div>
+          <div class="ds-side">
+            <div class="ds-plan-name" id="active-plan-name"></div>
+          </div>
+        </div>
+        <!-- Schede macro -->
+        <div class="ds-macro-cards">
+          <div class="ds-macro-card">
+            <div class="ds-mc-title">Carboidrati</div>
+            <div class="ds-mc-values"><span id="total-carbs">0</span>/<span id="target-carbs">0</span>g</div>
+            <div class="ds-mc-bar-wrap"><div class="ds-mc-bar carbs-bar" id="bar-carbs"></div></div>
+          </div>
+          <div class="ds-macro-card">
+            <div class="ds-mc-title">Proteine</div>
+            <div class="ds-mc-values"><span id="total-protein">0</span>/<span id="target-protein">0</span>g</div>
+            <div class="ds-mc-bar-wrap"><div class="ds-mc-bar protein-bar" id="bar-protein"></div></div>
+          </div>
+          <div class="ds-macro-card">
+            <div class="ds-mc-title">Grassi</div>
+            <div class="ds-mc-values"><span id="total-fat">0</span>/<span id="target-fat">0</span>g</div>
+            <div class="ds-mc-bar-wrap"><div class="ds-mc-bar fat-bar" id="bar-fat"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pasti -->
+      <div id="meals-container"></div>
+    </section>
+
+    <!-- TAB: DIARIO -->
+    <section id="tab-diario" class="tab-pane">
+      <div class="charts-section">
+        <div class="chart-card">
+          <h3>Calorie ultimi 7 giorni</h3>
+          <canvas id="chart-weekly"></canvas>
+        </div>
+        <div class="chart-card">
+          <h3>Macros medi ultimi 30 giorni</h3>
+          <canvas id="chart-macros"></canvas>
+        </div>
+      </div>
+      <h3 class="section-title">Storico</h3>
+      <div id="diary-list" class="diary-list"></div>
+    </section>
+
+    <!-- TAB: ALIMENTI -->
+    <section id="tab-alimenti" class="tab-pane">
+      <div class="foods-toolbar">
+        <div class="search-wrap">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="foods-search" placeholder="Cerca alimenti..." class="search-input">
+        </div>
+        <button id="btn-new-food" class="btn btn-primary">+ Nuovo</button>
+      </div>
+      <div id="foods-list" class="foods-list"></div>
+    </section>
+
+    <!-- TAB: PIANO -->
+    <section id="tab-piano" class="tab-pane">
+      <!-- Lista piani -->
+      <div id="plans-list"></div>
+
+      <!-- Pulsante nuovo piano -->
+      <div style="padding: 0 16px 12px">
+        <button id="btn-new-plan" class="btn btn-outline btn-full">+ Nuovo piano</button>
+      </div>
+
+      <!-- Form crea/modifica piano -->
+      <div class="card" id="plan-form-card" style="display:none">
+        <h2 id="plan-form-title">Nuovo piano</h2>
+        <form id="plan-form">
+          <input type="hidden" id="plan-editing-id" value="">
+          <div class="form-group">
+            <label for="plan-name">Nome piano</label>
+            <input type="text" id="plan-name" placeholder="es. Mantenimento">
+          </div>
+          <div class="form-group">
+            <label for="plan-kcal">Calorie giornaliere target</label>
+            <div class="input-with-unit">
+              <input type="number" id="plan-kcal" min="500" max="10000" step="50">
+              <span class="input-unit">kcal</span>
+            </div>
+          </div>
+          <div class="macro-sliders">
+            <div class="form-group">
+              <label>Proteine: <strong id="protein-pct-label">30%</strong>
+                <span class="macro-grams" id="protein-grams"></span>
+              </label>
+              <input type="range" id="plan-protein" min="0" max="100" step="1" class="slider slider-protein">
+            </div>
+            <div class="form-group">
+              <label>Grassi: <strong id="fat-pct-label">30%</strong>
+                <span class="macro-grams" id="fat-grams"></span>
+              </label>
+              <input type="range" id="plan-fat" min="0" max="100" step="1" class="slider slider-fat">
+            </div>
+            <div class="form-group">
+              <label>Carboidrati: <strong id="carbs-pct-label">40%</strong>
+                <span class="macro-grams" id="carbs-grams"></span>
+              </label>
+              <input type="range" id="plan-carbs" min="0" max="100" step="1" class="slider slider-carbs">
+            </div>
+          </div>
+          <div id="plan-total-badge" class="total-badge"></div>
+          <div style="display:flex;gap:8px;margin-top:4px">
+            <button type="button" id="btn-cancel-plan" class="btn btn-outline" style="flex:1">Annulla</button>
+            <button type="submit" class="btn btn-primary" style="flex:2">Salva piano</button>
+          </div>
+        </form>
+        <div id="plan-msg" class="msg hidden"></div>
+      </div>
+    </section>
+
+    <!-- TAB: IMPOSTAZIONI -->
+    <section id="tab-impostazioni" class="tab-pane">
+      <div class="card" style="margin-bottom:12px">
+        <h2>Strumenti</h2>
+        <a href="/foods-table.html" target="_blank" class="btn btn-outline btn-full mt-8" style="display:block;text-align:center;text-decoration:none;padding:10px">
+          📊 Gestione alimenti (foglio di calcolo)
+        </a>
+      </div>
+      <div class="card">
+        <h2>Cambia password</h2>
+        <form id="password-form">
+          <div class="form-group">
+            <label for="curr-pass">Password attuale</label>
+            <input type="password" id="curr-pass" autocomplete="current-password">
+          </div>
+          <div class="form-group">
+            <label for="new-pass">Nuova password</label>
+            <input type="password" id="new-pass" autocomplete="new-password">
+          </div>
+          <div class="form-group">
+            <label for="confirm-pass">Conferma nuova password</label>
+            <input type="password" id="confirm-pass" autocomplete="new-password">
+          </div>
+          <div id="pass-msg" class="msg hidden"></div>
+          <button type="submit" class="btn btn-primary btn-full">Aggiorna password</button>
+        </form>
+      </div>
+      <div class="card" id="app-info-card">
+        <h2>Informazioni</h2>
+        <div id="app-info"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- BOTTOM TAB BAR -->
+  <nav class="tab-bar">
+    <button class="tab-btn active" data-tab="home">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Home</span>
+    </button>
+    <button class="tab-btn" data-tab="diario">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span>Diario</span>
+    </button>
+    <button class="tab-btn" data-tab="alimenti">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+      <span>Alimenti</span>
+    </button>
+    <button class="tab-btn" data-tab="piano">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      <span>Piano</span>
+    </button>
+    <button class="tab-btn" data-tab="impostazioni">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span>Impost.</span>
+    </button>
+  </nav>
+
+</div><!-- /#app -->
+
+<!-- MODAL: Aggiungi alimento al diario -->
+<div id="modal-add-food" class="modal hidden">
+  <div class="modal-backdrop" id="modal-add-food-backdrop"></div>
+  <div class="modal-sheet">
+    <div class="modal-header">
+      <h2 id="modal-meal-title">Aggiungi alimento</h2>
+      <button class="btn-icon modal-close" id="modal-add-food-close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <!-- Step 1: Ricerca -->
+      <div id="modal-step-search">
+        <div style="display:flex;gap:8px;align-items:center">
+          <div class="search-wrap" style="flex:1">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="modal-food-search" placeholder="Cerca nel database..." class="search-input" autocomplete="off">
+          </div>
+          <button id="btn-quick-new-food" class="btn btn-primary btn-sm" style="white-space:nowrap">+ Nuovo</button>
+        </div>
+        <button id="btn-open-quick-entry" class="btn btn-outline btn-full mt-8" style="border-color:var(--color-primary);color:var(--color-primary)">
+          ⚡ Voce rapida (stima calorie)
+        </button>
+        <button id="btn-scan-barcode" class="btn btn-outline btn-full mt-8">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;vertical-align:middle;margin-right:6px"><rect x="3" y="3" width="6" height="18"/><rect x="13" y="3" width="2" height="18"/><rect x="17" y="3" width="4" height="18"/></svg>
+          Scansiona con fotocamera
+        </button>
+        <input type="file" id="barcode-file-input" accept="image/*" capture="environment" style="display:none">
+        <button id="btn-scan-barcode-file" class="btn btn-outline btn-full mt-8 hidden">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;vertical-align:middle;margin-right:6px"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          Fotografa barcode (iOS)
+        </button>
+        <div id="barcode-scanner-wrap" class="hidden">
+          <div id="barcode-reader"></div>
+          <button id="btn-stop-scan" class="btn btn-outline btn-full mt-8">Ferma scanner</button>
+        </div>
+        <div id="modal-recent-section" class="hidden">
+          <div class="recent-label">Usati di recente per questo pasto</div>
+          <div id="modal-recent-foods" class="recent-foods-list"></div>
+        </div>
+        <div id="modal-search-results" class="search-results"></div>
+      </div>
+
+      <!-- Step 2: Quantità -->
+      <div id="modal-step-qty" class="hidden">
+        <div class="selected-food-preview" id="selected-food-preview"></div>
+        <div class="qty-tabs">
+          <button class="qty-tab active" data-mode="grams">Grammi</button>
+          <button class="qty-tab" data-mode="portions" id="qty-tab-portions">Porzioni</button>
+        </div>
+        <div id="qty-grams-panel">
+          <div class="form-group">
+            <label>Quantità (g)</label>
+            <input type="number" id="qty-grams" min="1" max="9999" step="1" value="100" class="input-large">
+          </div>
+        </div>
+        <div id="qty-portions-panel" class="hidden">
+          <div class="form-group">
+            <label>Tipo di porzione</label>
+            <select id="qty-portion-select" class="select-input"></select>
+          </div>
+          <div class="form-group">
+            <label>Numero di porzioni</label>
+            <input type="number" id="qty-portion-count" min="0.25" max="99" step="0.25" value="1" class="input-large">
+          </div>
+          <p class="qty-calculated">= <strong id="qty-calculated-g">0</strong> g</p>
+        </div>
+        <div class="kcal-preview" id="kcal-preview">~0 kcal</div>
+        <div class="modal-actions">
+          <button id="btn-back-search" class="btn btn-outline">Indietro</button>
+          <button id="btn-confirm-add" class="btn btn-primary">Aggiungi</button>
+        </div>
+      </div>
+
+      <!-- Step 3: Voce rapida -->
+      <div id="modal-step-quick" class="hidden">
+        <p class="quick-entry-hint">Inserisci una stima per questo pasto. La voce non verrà salvata in libreria.</p>
+        <div class="form-group">
+          <label>Descrizione <span style="font-weight:400;color:var(--color-text-secondary)">(opzionale)</span></label>
+          <input type="text" id="quick-desc" class="form-input" placeholder="es. Pranzo al ristorante" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label>Calorie totali (kcal)</label>
+          <input type="number" id="quick-kcal" class="input-large" min="0" max="9999" step="1" placeholder="0">
+        </div>
+        <div class="quick-macro-row">
+          <div class="form-group" style="flex:1">
+            <label>% Proteine</label>
+            <input type="number" id="quick-protein-pct" class="form-input" min="0" max="100" step="1" value="20">
+          </div>
+          <div class="form-group" style="flex:1">
+            <label>% Grassi</label>
+            <input type="number" id="quick-fat-pct" class="form-input" min="0" max="100" step="1" value="30">
+          </div>
+          <div class="form-group" style="flex:1">
+            <label>% Carbo</label>
+            <input type="number" id="quick-carbs-pct" class="form-input" min="0" max="100" step="1" value="50">
+          </div>
+        </div>
+        <div id="quick-macro-preview" class="quick-macro-preview"></div>
+        <div class="modal-actions">
+          <button id="btn-quick-back" class="btn btn-outline">Indietro</button>
+          <button id="btn-quick-confirm" class="btn btn-primary">Aggiungi al pasto</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- MODAL: Crop immagine -->
+<div id="modal-crop" class="modal hidden">
+  <div class="modal-backdrop"></div>
+  <div class="modal-sheet modal-sheet-crop">
+    <div class="modal-header">
+      <h2>Ritaglia immagine</h2>
+    </div>
+    <div class="modal-body" style="padding:0;overflow:hidden">
+      <div id="crop-container" style="max-height:60vh;overflow:hidden;background:#000">
+        <img id="crop-image" src="" alt="" style="display:block;max-width:100%">
+      </div>
+    </div>
+    <div class="modal-actions" style="padding:16px">
+      <button id="btn-crop-cancel" class="btn btn-outline">Annulla</button>
+      <button id="btn-crop-confirm" class="btn btn-primary">Usa foto</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Alimento form (nuovo/modifica) -->
+<div id="modal-food-form" class="modal hidden">
+  <div class="modal-backdrop" id="modal-food-form-backdrop"></div>
+  <div class="modal-sheet modal-sheet-full">
+    <div class="modal-header">
+      <h2 id="food-form-title">Nuovo alimento</h2>
+      <button class="btn-icon modal-close" id="modal-food-form-close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form id="food-form" enctype="multipart/form-data">
+        <input type="hidden" id="food-form-id">
+        <div class="form-row">
+          <div class="form-group flex-2">
+            <label>Nome *</label>
+            <input type="text" id="ff-name" required>
+          </div>
+          <div class="form-group flex-1">
+            <label>Brand</label>
+            <input type="text" id="ff-brand">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Barcode</label>
+          <input type="text" id="ff-barcode">
+          <button type="button" id="btn-ff-scan-barcode" class="btn btn-outline btn-full mt-8">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;vertical-align:middle;margin-right:6px"><rect x="3" y="3" width="6" height="18"/><rect x="13" y="3" width="2" height="18"/><rect x="17" y="3" width="4" height="18"/></svg>
+            Scansiona con fotocamera
+          </button>
+          <button type="button" id="btn-ff-scan-barcode-file" class="btn btn-outline btn-full mt-8 hidden">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;vertical-align:middle;margin-right:6px"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            Fotografa barcode
+          </button>
+          <input type="file" id="ff-barcode-file-input" accept="image/*" capture="environment" style="display:none">
+          <div id="ff-barcode-scanner-wrap" class="hidden" style="margin-top:8px">
+            <div id="ff-barcode-reader"></div>
+            <button type="button" id="btn-ff-stop-scan" class="btn btn-outline btn-full mt-8">Ferma scanner</button>
+          </div>
+        </div>
+        <!-- Toggle ricetta -->
+        <div style="display:flex;align-items:center;gap:10px;margin:14px 0 6px">
+          <label class="toggle-switch">
+            <input type="checkbox" id="ff-recipe-toggle">
+            <span class="toggle-slider"></span>
+          </label>
+          <span style="font-size:0.9rem;font-weight:500">Alimento composto (ricetta)</span>
+        </div>
+
+        <!-- Sezione ricetta -->
+        <div id="ff-recipe-section" class="hidden">
+          <div style="background:var(--color-bg);border-radius:12px;padding:14px;margin-bottom:12px">
+            <!-- Ricerca ingrediente -->
+            <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:10px">
+              <div class="form-group" style="flex:1;margin:0">
+                <label>Cerca ingrediente</label>
+                <div class="search-wrap" style="margin-top:4px">
+                  <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  <input type="text" id="ff-ing-search" class="search-input" placeholder="Nome alimento..." autocomplete="off">
+                </div>
+                <div id="ff-ing-results" class="search-results" style="max-height:160px"></div>
+              </div>
+              <div class="form-group" style="width:90px;margin:0">
+                <label>Grammi</label>
+                <input type="number" id="ff-ing-qty" class="form-control" min="1" step="1" value="100" style="margin-top:4px">
+              </div>
+            </div>
+
+            <!-- Lista ingredienti -->
+            <div id="ff-ingredients-list" style="margin-bottom:10px"></div>
+
+            <!-- Totali ricetta -->
+            <div id="ff-recipe-totals" class="hidden" style="border-top:1px solid var(--color-border);padding-top:10px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                <span style="font-size:0.82rem;font-weight:600;color:var(--color-text-secondary);text-transform:uppercase">Totali ricetta</span>
+                <span id="ff-recipe-total-weight" style="font-size:0.85rem;color:var(--color-text-secondary)"></span>
+              </div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap">
+                <span class="recipe-macro-badge" id="rt-kcal"></span>
+                <span class="recipe-macro-badge" id="rt-protein"></span>
+                <span class="recipe-macro-badge" id="rt-fat"></span>
+                <span class="recipe-macro-badge" id="rt-carbs"></span>
+              </div>
+              <div class="form-group" style="margin-top:10px">
+                <label style="font-size:0.82rem">Peso finale ricetta (g) <span style="font-weight:400;color:var(--color-text-secondary)">— lascia vuoto per usare la somma degli ingredienti</span></label>
+                <input type="number" id="ff-recipe-yield" class="form-control" min="1" step="1" placeholder="Es. 400">
+              </div>
+              <div style="font-size:0.8rem;color:var(--color-text-secondary);margin-top:6px">
+                Valori per 100g calcolati automaticamente: <strong id="rt-per100g"></strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h4 class="form-section-title" id="ff-nutrition-title">Valori nutrizionali per 100g</h4>
+        <div class="form-row" id="ff-nutrition-fields">
+          <div class="form-group">
+            <label>Kcal</label>
+            <input type="number" id="ff-kcal" min="0" step="0.1" value="0">
+          </div>
+          <div class="form-group">
+            <label>Proteine (g)</label>
+            <input type="number" id="ff-protein" min="0" step="0.1" value="0">
+          </div>
+          <div class="form-group">
+            <label>Grassi (g)</label>
+            <input type="number" id="ff-fat" min="0" step="0.1" value="0">
+          </div>
+          <div class="form-group">
+            <label>Carbs (g)</label>
+            <input type="number" id="ff-carbs" min="0" step="0.1" value="0">
+          </div>
+        </div>
+
+        <!-- Valori per porzione (dinamici) -->
+        <div id="ff-portions-nutrition" class="hidden">
+          <h4 class="form-section-title">Valori nutrizionali per porzione</h4>
+          <div id="ff-portions-nutrition-list"></div>
+        </div>
+
+        <h4 class="form-section-title">Porzioni</h4>
+        <div id="portions-list"></div>
+        <button type="button" id="btn-add-portion" class="btn btn-outline btn-sm">+ Aggiungi porzione</button>
+
+        <h4 class="form-section-title">Foto</h4>
+        <div class="form-group">
+          <input type="file" id="ff-image" accept="image/*">
+          <div id="ff-image-preview" class="image-preview hidden">
+            <img id="ff-preview-img" src="" alt="anteprima">
+            <button type="button" id="btn-remove-image" class="btn btn-outline btn-sm btn-remove-image">✕ Rimuovi foto</button>
+          </div>
+        </div>
+        <input type="hidden" id="ff-image-url">
+
+        <div id="food-form-msg" class="msg hidden"></div>
+        <button type="submit" class="btn btn-primary btn-full mt-16">Salva alimento</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Import OpenFoodFacts -->
+<div id="modal-off" class="modal hidden">
+  <div class="modal-backdrop" id="modal-off-backdrop"></div>
+  <div class="modal-sheet">
+    <div class="modal-header">
+      <h2>Importa da OpenFoodFacts</h2>
+      <button class="btn-icon modal-close" id="modal-off-close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="off-tabs">
+        <button class="off-tab active" data-mode="name">Per nome</button>
+        <button class="off-tab" data-mode="barcode">Per barcode</button>
+      </div>
+      <div class="form-group mt-8">
+        <input type="text" id="off-query" placeholder="Nome prodotto o barcode..." class="search-input">
+      </div>
+      <button id="btn-off-scan" class="btn btn-outline btn-full hidden" style="margin-bottom:8px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;vertical-align:middle;margin-right:6px"><rect x="3" y="3" width="6" height="18"/><rect x="13" y="3" width="2" height="18"/><rect x="17" y="3" width="4" height="18"/></svg>
+        Scansiona con fotocamera
+      </button>
+      <input type="file" id="off-barcode-file-input" accept="image/*" capture="environment" style="display:none">
+      <button id="btn-off-scan-file" class="btn btn-outline btn-full hidden" style="margin-bottom:8px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;vertical-align:middle;margin-right:6px"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        Fotografa barcode (iOS)
+      </button>
+      <div id="off-barcode-wrap" class="hidden" style="margin-bottom:8px">
+        <div id="off-barcode-reader"></div>
+        <button id="btn-off-stop-scan" class="btn btn-outline btn-full mt-8">Ferma scanner</button>
+      </div>
+      <button id="btn-off-search" class="btn btn-primary btn-full">Cerca su OpenFoodFacts</button>
+      <div id="off-results" class="off-results"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Import AlimentiNutrizione.it (INRAN/CREA) -->
+<div id="modal-anf" class="modal hidden">
+  <div class="modal-backdrop" id="modal-anf-backdrop"></div>
+  <div class="modal-sheet">
+    <div class="modal-header">
+      <h2>Importa da AlimentiNutrizione.it</h2>
+      <button class="btn-icon modal-close" id="modal-anf-close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:0.82rem;color:var(--color-text-secondary);margin:0 0 12px">
+        Database CREA/INRAN — ~2000 alimenti italiani con valori nutrizionali ufficiali
+      </p>
+      <div class="form-group">
+        <input type="text" id="anf-query" placeholder="Cerca alimento (es. pasta, pollo, mela)..." class="search-input" autocomplete="off">
+      </div>
+      <button id="btn-anf-search" class="btn btn-primary btn-full">Cerca</button>
+      <div id="anf-results" class="off-results"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Conferma eliminazione -->
+<div id="modal-confirm" class="modal hidden">
+  <div class="modal-backdrop" id="modal-confirm-backdrop"></div>
+  <div class="modal-dialog">
+    <h3 id="confirm-title">Conferma</h3>
+    <p id="confirm-message"></p>
+    <div class="modal-actions">
+      <button id="confirm-cancel" class="btn btn-outline">Annulla</button>
+      <button id="confirm-ok" class="btn btn-danger">Elimina</button>
+    </div>
+  </div>
+</div>
+
+<!-- CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.1/dist/cropper.min.css">
+<script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.1/dist/cropper.min.js"></script>
+
+
+<!-- App JS -->
+<script src="/js/app.js?v=3"></script>
+<script src="/js/scanner-config.js?v=2"></script>
+<script src="/js/barcode.js?v=2"></script>
+<script src="/js/foods.js?v=2"></script>
+<script src="/js/diary.js?v=2"></script>
+<script src="/js/diarylog.js?v=2"></script>
+<script src="/js/plan.js?v=3"></script>
+<script src="/js/settings.js?v=2"></script>
+
+</body>
+</html>

@@ -1,0 +1,61 @@
+const path = require('path');
+const sqlite3 = require('sqlite3');
+const { open } = require('sqlite');
+
+const DB_PATH = path.join(__dirname, 'food_diary.sqlite');
+
+let _db = null;
+
+async function getDb() {
+  if (!_db) {
+    _db = await open({
+      filename: DB_PATH,
+      driver: sqlite3.Database
+    });
+    await _db.run('PRAGMA foreign_keys = ON');
+    // Migrazione: aggiungi colonne se non esistono
+    const cols = await _db.all("PRAGMA table_info(foods)");
+    const colNames = cols.map(c => c.name);
+    if (!colNames.includes('components'))
+      await _db.run("ALTER TABLE foods ADD COLUMN components TEXT NOT NULL DEFAULT '[]'");
+    if (!colNames.includes('recipe_yield_g'))
+      await _db.run("ALTER TABLE foods ADD COLUMN recipe_yield_g REAL");
+    if (!colNames.includes('deleted_at'))
+      await _db.run("ALTER TABLE foods ADD COLUMN deleted_at TEXT");
+    if (!colNames.includes('is_quick'))
+      await _db.run("ALTER TABLE foods ADD COLUMN is_quick INTEGER NOT NULL DEFAULT 0");
+
+    // Migrazione tabella plans (multi-piano)
+    const tables = (await _db.all("SELECT name FROM sqlite_master WHERE type='table'")).map(t => t.name);
+    if (!tables.includes('plans')) {
+      await _db.run(`CREATE TABLE plans (
+        id          INTEGER PRIMARY KEY AUTOINCREMENT,
+        name        TEXT NOT NULL DEFAULT 'Piano',
+        kcal_target REAL NOT NULL DEFAULT 2000,
+        protein_pct REAL NOT NULL DEFAULT 30,
+        fat_pct     REAL NOT NULL DEFAULT 30,
+        carbs_pct   REAL NOT NULL DEFAULT 40,
+        is_active   INTEGER NOT NULL DEFAULT 0,
+        created_at  TEXT DEFAULT (datetime('now')),
+        updated_at  TEXT DEFAULT (datetime('now'))
+      )`);
+      // Migra piano esistente
+      const old = await _db.get('SELECT * FROM plan WHERE id = 1');
+      if (old) {
+        await _db.run(
+          `INSERT INTO plans (name, kcal_target, protein_pct, fat_pct, carbs_pct, is_active)
+           VALUES ('Piano principale', ?, ?, ?, ?, 1)`,
+          old.kcal_target, old.protein_pct, old.fat_pct, old.carbs_pct
+        );
+      } else {
+        await _db.run(
+          `INSERT INTO plans (name, kcal_target, protein_pct, fat_pct, carbs_pct, is_active)
+           VALUES ('Piano principale', 2000, 30, 30, 40, 1)`
+        );
+      }
+    }
+  }
+  return _db;
+}
+
+module.exports = { getDb };

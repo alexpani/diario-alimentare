@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FoodDiary — Gestione Alimenti</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 13px;
+      background: #f5f5f5;
+      color: #1a1a1a;
+    }
+
+    /* ── Header ── */
+    .page-header {
+      background: linear-gradient(135deg, #388E3C, #4CAF50);
+      color: white;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    .page-header h1 { font-size: 16px; font-weight: 700; }
+    .page-header a { color: rgba(255,255,255,0.85); text-decoration: none; font-size: 13px; }
+    .page-header a:hover { color: white; }
+
+    /* ── Toolbar ── */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      background: white;
+      border-bottom: 1px solid #e0e0e0;
+      flex-wrap: wrap;
+    }
+    .toolbar input[type=text] {
+      flex: 1; min-width: 180px; max-width: 320px;
+      padding: 7px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px;
+    }
+    .toolbar input[type=text]:focus { outline: none; border-color: #4CAF50; }
+
+    .btn { padding: 7px 14px; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; font-weight: 500; transition: background .15s; }
+    .btn-primary { background: #4CAF50; color: white; }
+    .btn-primary:hover { background: #43a047; }
+    .btn-outline { background: white; border: 1px solid #ccc; color: #333; }
+    .btn-outline:hover { background: #f5f5f5; }
+    .btn-save-row { background: #e8f5e9; border: 1px solid #4CAF50; color: #2e7d32; padding: 4px 8px; font-size: 12px; border-radius: 4px; cursor: pointer; }
+    .btn-save-row:hover { background: #c8e6c9; }
+
+    #status { margin-left: auto; font-size: 12px; color: #666; min-width: 140px; text-align: right; }
+    #status.saving { color: #f57c00; }
+    #status.saved  { color: #2e7d32; }
+    #status.error  { color: #c62828; }
+
+    /* ── Table wrapper ── */
+    .table-wrap { overflow-x: auto; padding: 16px; }
+
+    table {
+      width: 100%; border-collapse: collapse;
+      background: white; border-radius: 8px; overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1); min-width: 1000px;
+    }
+    thead tr { background: #f9fbe7; }
+    th {
+      padding: 10px 8px; text-align: left; font-size: 11px;
+      font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+      color: #555; border-bottom: 2px solid #e0e0e0;
+      white-space: nowrap; user-select: none;
+    }
+    th.sortable { cursor: pointer; }
+    th.sortable:hover { color: #2e7d32; }
+    th.sort-asc::after  { content: ' ▲'; font-size: 10px; color: #4CAF50; }
+    th.sort-desc::after { content: ' ▼'; font-size: 10px; color: #4CAF50; }
+
+    tbody tr { border-bottom: 1px solid #f0f0f0; transition: background .1s; }
+    tbody tr:hover { background: #fafafa; }
+    tbody tr.dirty { background: #fff8e1; }
+    tbody tr.dirty:hover { background: #fff3cd; }
+
+    td { padding: 3px 4px; vertical-align: middle; }
+    td.td-id { color: #999; font-size: 11px; padding-left: 12px; width: 44px; }
+
+    /* ── Cell inputs ── */
+    td input[type=text], td input[type=number] {
+      width: 100%; padding: 5px 7px;
+      border: 1px solid transparent; border-radius: 4px;
+      font-size: 13px; background: transparent;
+      transition: border-color .15s, background .15s;
+    }
+    td input:hover { border-color: #ccc; }
+    td input:focus {
+      outline: none; border-color: #4CAF50;
+      background: white; box-shadow: 0 0 0 2px rgba(76,175,80,.15);
+    }
+
+    .col-name    { min-width: 170px; }
+    .col-brand   { min-width: 110px; }
+    .col-num     { width: 76px; }
+    .col-barcode { min-width: 120px; }
+    .col-portions{ min-width: 150px; }
+    .col-actions { width: 80px; text-align: center; white-space: nowrap; }
+
+    /* ── Portions cell ── */
+    .portions-summary {
+      display: flex; align-items: center; gap: 6px;
+      padding: 4px 6px; cursor: pointer; border-radius: 4px;
+      transition: background .15s; min-height: 28px;
+    }
+    .portions-summary:hover { background: #e8f5e9; }
+    .portions-text { font-size: 12px; color: #555; flex: 1; }
+    .portions-text.empty { color: #bbb; font-style: italic; }
+    .portions-toggle {
+      font-size: 11px; color: #4CAF50; font-weight: 600;
+      background: none; border: none; cursor: pointer; padding: 2px 4px;
+      border-radius: 3px; white-space: nowrap;
+    }
+    .portions-toggle:hover { background: #c8e6c9; }
+
+    /* ── Portions sub-row ── */
+    tr.portions-editor-row td {
+      padding: 0; border-bottom: 2px solid #a5d6a7;
+    }
+    .portions-editor {
+      background: #f1f8e9; padding: 12px 16px 14px;
+      border-top: 1px solid #c8e6c9;
+    }
+    .portions-editor h4 {
+      font-size: 12px; font-weight: 700; color: #2e7d32;
+      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;
+    }
+    .portions-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+    .portion-row {
+      display: flex; align-items: center; gap: 8px;
+    }
+    .portion-row input[type=text] {
+      flex: 1; padding: 5px 8px; border: 1px solid #ccc;
+      border-radius: 4px; font-size: 13px; background: white;
+    }
+    .portion-row input[type=number] {
+      width: 80px; padding: 5px 8px; border: 1px solid #ccc;
+      border-radius: 4px; font-size: 13px; background: white;
+    }
+    .portion-row input:focus { outline: none; border-color: #4CAF50; box-shadow: 0 0 0 2px rgba(76,175,80,.15); }
+    .portion-row label { font-size: 11px; color: #777; white-space: nowrap; }
+    .btn-del-portion {
+      background: none; border: none; color: #bbb; cursor: pointer;
+      font-size: 15px; padding: 2px 5px; border-radius: 3px; line-height: 1;
+    }
+    .btn-del-portion:hover { color: #e53935; background: #fce4e4; }
+    .portions-editor-footer {
+      display: flex; align-items: center; gap: 8px; margin-top: 4px;
+    }
+    .btn-add-portion {
+      background: none; border: 1px dashed #81c784; color: #388e3c;
+      padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;
+    }
+    .btn-add-portion:hover { background: #e8f5e9; }
+    .btn-save-portions {
+      background: #4CAF50; color: white; border: none;
+      padding: 5px 14px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;
+    }
+    .btn-save-portions:hover { background: #43a047; }
+    .btn-close-portions {
+      background: none; border: 1px solid #ccc; color: #666;
+      padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;
+    }
+    .btn-close-portions:hover { background: #f5f5f5; }
+
+    /* ── Delete button ── */
+    .btn-del-row {
+      background: none; border: none; color: #bbb; cursor: pointer;
+      padding: 4px 6px; border-radius: 4px; font-size: 16px; line-height: 1;
+    }
+    .btn-del-row:hover { color: #e53935; background: #fce4e4; }
+
+    /* ── Empty / loading ── */
+    .empty-row td { text-align: center; padding: 40px; color: #999; font-size: 14px; }
+
+    /* ── Pagination ── */
+    .pagination {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 12px 16px; background: white; border-top: 1px solid #e0e0e0;
+      font-size: 13px; color: #555;
+    }
+    .pagination button {
+      padding: 5px 12px; border: 1px solid #ccc; border-radius: 4px;
+      background: white; cursor: pointer; font-size: 13px;
+    }
+    .pagination button:hover:not(:disabled) { background: #f5f5f5; }
+    .pagination button:disabled { opacity: 0.4; cursor: default; }
+    .pagination .page-info { min-width: 120px; text-align: center; }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: #323232; color: white; padding: 10px 18px;
+      border-radius: 8px; font-size: 13px; opacity: 0;
+      transform: translateY(10px); transition: opacity .25s, transform .25s;
+      pointer-events: none; z-index: 999;
+    }
+    #toast.show { opacity: 1; transform: translateY(0); }
+    #toast.success { background: #2e7d32; }
+    #toast.error   { background: #c62828; }
+  </style>
+</head>
+<body>
+
+<div class="page-header">
+  <a href="/">← App</a>
+  <h1>Gestione Alimenti</h1>
+</div>
+
+<div class="toolbar">
+  <input type="text" id="search" placeholder="🔍 Filtra per nome, brand, barcode…" autocomplete="off">
+  <button class="btn btn-primary" id="btn-add">+ Nuovo alimento</button>
+  <button class="btn btn-outline" id="btn-save-all" style="display:none">💾 Salva tutti</button>
+  <span id="status"></span>
+</div>
+
+<div class="table-wrap">
+  <table id="foods-table">
+    <thead>
+      <tr>
+        <th class="td-id">#</th>
+        <th class="sortable col-name"    data-col="name">Nome</th>
+        <th class="sortable col-brand"   data-col="brand">Brand</th>
+        <th class="sortable col-num"     data-col="kcal_100g">Kcal</th>
+        <th class="sortable col-num"     data-col="protein_100g">Prot.</th>
+        <th class="sortable col-num"     data-col="fat_100g">Grassi</th>
+        <th class="sortable col-num"     data-col="carbs_100g">Carbo</th>
+        <th class="col-barcode"          data-col="barcode">Barcode</th>
+        <th class="col-portions">Porzioni</th>
+        <th class="col-actions">Azioni</th>
+      </tr>
+    </thead>
+    <tbody id="foods-tbody">
+      <tr class="empty-row"><td colspan="10">Caricamento…</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="pagination">
+  <button id="btn-prev">◀ Prec.</button>
+  <span class="page-info" id="page-info"></span>
+  <button id="btn-next">Succ. ▶</button>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ── State ── */
+let allFoods    = [];
+let filtered    = [];
+let sortCol     = 'name';
+let sortDir     = 'asc';
+let page        = 0;
+const PAGE_SIZE = 200;
+let dirtyRows   = new Map();
+let saveTimer   = null;
+let openPortionsId = null; // id alimento con editor porzioni aperto
+
+/* ── Fetch ── */
+async function loadFoods() {
+  setStatus('Caricamento…', '');
+  try {
+    const res = await fetch('/api/foods?limit=9999');
+    allFoods = await res.json();
+    applyFilterSort();
+    setStatus(`${allFoods.length} alimenti`, '');
+  } catch(e) {
+    setStatus('Errore caricamento', 'error');
+  }
+}
+
+/* ── Filter + Sort ── */
+function applyFilterSort() {
+  const q = document.getElementById('search').value.toLowerCase();
+  filtered = allFoods.filter(f =>
+    !q ||
+    (f.name   || '').toLowerCase().includes(q) ||
+    (f.brand  || '').toLowerCase().includes(q) ||
+    (f.barcode|| '').toLowerCase().includes(q)
+  );
+  filtered.sort((a, b) => {
+    let va = a[sortCol] ?? '';
+    let vb = b[sortCol] ?? '';
+    if (typeof va === 'string') va = va.toLowerCase();
+    if (typeof vb === 'string') vb = vb.toLowerCase();
+    if (va < vb) return sortDir === 'asc' ? -1 : 1;
+    if (va > vb) return sortDir === 'asc' ?  1 : -1;
+    return 0;
+  });
+  page = 0;
+  openPortionsId = null;
+  renderTable();
+}
+
+/* ── Portions helpers ── */
+function parsePotions(f) {
+  if (Array.isArray(f.portions)) return f.portions;
+  try { return JSON.parse(f.portions || '[]'); } catch { return []; }
+}
+
+function portionsSummary(portions) {
+  if (!portions.length) return '';
+  if (portions.length <= 2) return portions.map(p => `${p.name} ${p.grams}g`).join(' · ');
+  return `${portions.length} porzioni`;
+}
+
+/* ── Render ── */
+function renderTable() {
+  const tbody = document.getElementById('foods-tbody');
+  const start = page * PAGE_SIZE;
+  const slice = filtered.slice(start, start + PAGE_SIZE);
+
+  if (slice.length === 0) {
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="10">Nessun alimento trovato.</td></tr>`;
+    updatePagination();
+    return;
+  }
+
+  tbody.innerHTML = '';
+  slice.forEach(f => {
+    // Riga principale
+    const tr = document.createElement('tr');
+    tr.dataset.id = f.id;
+    if (dirtyRows.has(f.id)) tr.classList.add('dirty');
+    tr.innerHTML = rowHTML(f);
+    tbody.appendChild(tr);
+
+    // Riga editor porzioni (se aperta)
+    if (openPortionsId === f.id) {
+      const editorTr = document.createElement('tr');
+      editorTr.classList.add('portions-editor-row');
+      editorTr.dataset.portionsFor = f.id;
+      editorTr.innerHTML = `<td colspan="10">${portionsEditorHTML(parsePotions(f))}</td>`;
+      tbody.appendChild(editorTr);
+      attachPortionsEditorListeners(editorTr, f);
+    }
+
+    attachRowListeners(tr, f);
+  });
+
+  // Aggiorna headers sort
+  document.querySelectorAll('th.sortable').forEach(th => {
+    th.classList.remove('sort-asc', 'sort-desc');
+    if (th.dataset.col === sortCol) th.classList.add(sortDir === 'asc' ? 'sort-asc' : 'sort-desc');
+  });
+
+  updatePagination();
+}
+
+function rowHTML(f) {
+  const isDirty = dirtyRows.has(f.id);
+  const portions = parsePotions(f);
+  const summary  = portionsSummary(portions);
+  const isOpen   = openPortionsId === f.id;
+  return `
+    <td class="td-id">${f.id}</td>
+    <td class="col-name">   <input type="text"   data-field="name"         value="${esc(f.name         || '')}" placeholder="Nome"></td>
+    <td class="col-brand">  <input type="text"   data-field="brand"        value="${esc(f.brand        || '')}" placeholder="—"></td>
+    <td class="col-num">    <input type="number" data-field="kcal_100g"    value="${fmt(f.kcal_100g)}"    step="0.1" min="0"></td>
+    <td class="col-num">    <input type="number" data-field="protein_100g" value="${fmt(f.protein_100g)}" step="0.1" min="0"></td>
+    <td class="col-num">    <input type="number" data-field="fat_100g"     value="${fmt(f.fat_100g)}"     step="0.1" min="0"></td>
+    <td class="col-num">    <input type="number" data-field="carbs_100g"   value="${fmt(f.carbs_100g)}"   step="0.1" min="0"></td>
+    <td class="col-barcode"><input type="text"   data-field="barcode"      value="${esc(f.barcode      || '')}" placeholder="—"></td>
+    <td class="col-portions">
+      <div class="portions-summary" data-portions-btn="${f.id}">
+        <span class="portions-text ${summary ? '' : 'empty'}">${summary || 'Nessuna porzione'}</span>
+        <button class="portions-toggle">${isOpen ? '▲ Chiudi' : '▼ Modifica'}</button>
+      </div>
+    </td>
+    <td class="col-actions">
+      ${isDirty ? `<button class="btn-save-row" title="Salva">💾</button>` : ''}
+      <button class="btn-del-row" title="Elimina">🗑</button>
+    </td>`;
+}
+
+function portionsEditorHTML(portions) {
+  const rows = portions.map((p, i) => `
+    <div class="portion-row" data-idx="${i}">
+      <label>Nome</label>
+      <input type="text"   class="p-name"  value="${esc(p.name || '')}" placeholder="es. fetta">
+      <label>Grammi</label>
+      <input type="number" class="p-grams" value="${p.grams || ''}" min="0.1" step="0.1" placeholder="30">
+      <button class="btn-del-portion" title="Rimuovi">✕</button>
+    </div>`).join('');
+  return `<div class="portions-editor">
+    <h4>✂ Porzioni</h4>
+    <div class="portions-list">${rows}</div>
+    <div class="portions-editor-footer">
+      <button class="btn-add-portion">+ Aggiungi porzione</button>
+      <button class="btn-save-portions">💾 Salva porzioni</button>
+      <button class="btn-close-portions">Chiudi</button>
+    </div>
+  </div>`;
+}
+
+/* ── Listeners ── */
+function attachRowListeners(row, f) {
+  row.querySelectorAll('input[data-field]').forEach(inp => {
+    inp.addEventListener('input',   () => markDirty(f.id, row));
+    inp.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); saveRow(f.id, row); }
+      if (e.key === 'Tab')   { scheduleAutoSave(f.id, row); }
+    });
+    inp.addEventListener('blur', () => scheduleAutoSave(f.id, row));
+  });
+
+  row.querySelector('.btn-save-row')?.addEventListener('click', () => saveRow(f.id, row));
+  row.querySelector('.btn-del-row')?.addEventListener('click',  () => deleteRow(f.id, f.name));
+
+  row.querySelector('[data-portions-btn]')?.addEventListener('click', () => togglePortionsEditor(f.id));
+}
+
+function attachPortionsEditorListeners(editorTr, f) {
+  const container = editorTr.querySelector('.portions-list');
+
+  // Rimuovi porzione
+  editorTr.addEventListener('click', e => {
+    if (e.target.closest('.btn-del-portion')) {
+      e.target.closest('.portion-row').remove();
+    }
+  });
+
+  // Aggiungi porzione
+  editorTr.querySelector('.btn-add-portion').addEventListener('click', () => {
+    const div = document.createElement('div');
+    div.className = 'portion-row';
+    div.innerHTML = `
+      <label>Nome</label>
+      <input type="text"   class="p-name"  placeholder="es. fetta">
+      <label>Grammi</label>
+      <input type="number" class="p-grams" min="0.1" step="0.1" placeholder="30">
+      <button class="btn-del-portion" title="Rimuovi">✕</button>`;
+    container.appendChild(div);
+    div.querySelector('.p-name').focus();
+  });
+
+  // Salva porzioni
+  editorTr.querySelector('.btn-save-portions').addEventListener('click', () => savePortions(f.id, editorTr));
+
+  // Chiudi
+  editorTr.querySelector('.btn-close-portions').addEventListener('click', () => {
+    openPortionsId = null;
+    renderTable();
+  });
+}
+
+/* ── Toggle portions editor ── */
+function togglePortionsEditor(id) {
+  openPortionsId = openPortionsId === id ? null : id;
+  renderTable();
+  if (openPortionsId) {
+    // Scroll alla riga
+    setTimeout(() => {
+      const editorTr = document.querySelector(`tr[data-portions-for="${id}"]`);
+      editorTr?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 50);
+  }
+}
+
+/* ── Save portions ── */
+async function savePortions(id, editorTr) {
+  const rows = editorTr.querySelectorAll('.portion-row');
+  const portions = [];
+  let valid = true;
+  rows.forEach(row => {
+    const name  = row.querySelector('.p-name')?.value.trim();
+    const grams = parseFloat(row.querySelector('.p-grams')?.value);
+    if (name && grams > 0) portions.push({ name, grams });
+    else if (name || (row.querySelector('.p-grams')?.value)) valid = false;
+  });
+  if (!valid) { showToast('Compila nome e grammi per ogni porzione', 'error'); return; }
+
+  const btn = editorTr.querySelector('.btn-save-portions');
+  btn.disabled = true;
+  btn.textContent = '…';
+
+  try {
+    const res = await fetch(`/api/foods/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ portions })
+    });
+    if (!res.ok) throw new Error();
+    const updated = await res.json();
+    const idx = allFoods.findIndex(f => f.id === id);
+    if (idx >= 0) allFoods[idx] = { ...allFoods[idx], ...updated };
+    openPortionsId = null;
+    applyFilterSort();
+    showToast('Porzioni salvate', 'success');
+  } catch(e) {
+    showToast('Errore salvataggio porzioni', 'error');
+    btn.disabled = false;
+    btn.textContent = '💾 Salva porzioni';
+  }
+}
+
+/* ── Dirty tracking ── */
+function markDirty(id, row) {
+  row.classList.add('dirty');
+  const actions = row.querySelector('.col-actions');
+  if (!actions.querySelector('.btn-save-row')) {
+    const btn = document.createElement('button');
+    btn.className = 'btn-save-row';
+    btn.title = 'Salva riga';
+    btn.textContent = '💾';
+    btn.addEventListener('click', () => saveRow(id, row));
+    actions.insertBefore(btn, actions.firstChild);
+  }
+  if (!dirtyRows.has(id)) dirtyRows.set(id, {});
+  document.getElementById('btn-save-all').style.display = dirtyRows.size > 1 ? '' : 'none';
+}
+
+function scheduleAutoSave(id, row) {
+  if (!row.classList.contains('dirty')) return;
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => saveRow(id, row), 800);
+}
+
+/* ── Save single row ── */
+async function saveRow(id, row) {
+  clearTimeout(saveTimer);
+  const body = {};
+  row.querySelectorAll('input[data-field]').forEach(inp => {
+    body[inp.dataset.field] = inp.type === 'number' ? parseFloat(inp.value) || 0 : inp.value;
+  });
+
+  setStatus('Salvataggio…', 'saving');
+  try {
+    const res = await fetch(`/api/foods/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!res.ok) throw new Error(await res.text());
+    const updated = await res.json();
+    const idx = allFoods.findIndex(f => f.id === id);
+    if (idx >= 0) allFoods[idx] = { ...allFoods[idx], ...updated };
+    row.classList.remove('dirty');
+    dirtyRows.delete(id);
+    row.querySelector('.btn-save-row')?.remove();
+    document.getElementById('btn-save-all').style.display = dirtyRows.size > 1 ? '' : 'none';
+    showToast('Salvato', 'success');
+    setStatus(`${allFoods.length} alimenti`, '');
+  } catch(e) {
+    showToast('Errore nel salvataggio', 'error');
+    setStatus('Errore', 'error');
+  }
+}
+
+/* ── Save all dirty ── */
+async function saveAll() {
+  for (const row of document.querySelectorAll('tbody tr.dirty[data-id]')) {
+    await saveRow(parseInt(row.dataset.id), row);
+  }
+}
+
+/* ── Delete ── */
+async function deleteRow(id, name) {
+  if (!confirm(`Eliminare "${name}"?`)) return;
+  try {
+    const res = await fetch(`/api/foods/${id}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error();
+    allFoods = allFoods.filter(f => f.id !== id);
+    dirtyRows.delete(id);
+    if (openPortionsId === id) openPortionsId = null;
+    applyFilterSort();
+    showToast('Alimento eliminato');
+  } catch(e) {
+    showToast('Errore eliminazione', 'error');
+  }
+}
+
+/* ── Add new row ── */
+async function addRow() {
+  const name = prompt('Nome del nuovo alimento:');
+  if (!name?.trim()) return;
+  try {
+    const res = await fetch('/api/foods', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: name.trim(), kcal_100g: 0, protein_100g: 0, fat_100g: 0, carbs_100g: 0 })
+    });
+    if (!res.ok) throw new Error();
+    const food = await res.json();
+    allFoods.unshift(food);
+    applyFilterSort();
+    showToast('Alimento aggiunto', 'success');
+    setTimeout(() => {
+      document.querySelector('#foods-tbody tr[data-id]')
+        ?.querySelector('input[data-field="name"]')?.focus();
+    }, 50);
+  } catch(e) {
+    showToast('Errore creazione', 'error');
+  }
+}
+
+/* ── Pagination ── */
+function updatePagination() {
+  const total = filtered.length;
+  const pages = Math.ceil(total / PAGE_SIZE);
+  const start = page * PAGE_SIZE + 1;
+  const end   = Math.min((page + 1) * PAGE_SIZE, total);
+  document.getElementById('page-info').textContent =
+    total === 0 ? 'Nessun risultato' : `${start}–${end} di ${total}`;
+  document.getElementById('btn-prev').disabled = page === 0;
+  document.getElementById('btn-next').disabled = page >= pages - 1;
+}
+
+/* ── Utils ── */
+function esc(s) { return String(s).replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
+function fmt(n) { return n != null ? parseFloat(n) : 0; }
+function setStatus(msg, cls) {
+  const el = document.getElementById('status');
+  el.textContent = msg; el.className = cls;
+}
+let toastTimer;
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = `show ${type}`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.className = '', 2500);
+}
+
+/* ── Events ── */
+document.getElementById('search').addEventListener('input', () => applyFilterSort());
+document.getElementById('btn-add').addEventListener('click', addRow);
+document.getElementById('btn-save-all').addEventListener('click', saveAll);
+document.getElementById('btn-prev').addEventListener('click', () => { page--; renderTable(); });
+document.getElementById('btn-next').addEventListener('click', () => { page++; renderTable(); });
+
+document.querySelectorAll('th.sortable').forEach(th => {
+  th.addEventListener('click', () => {
+    sortCol = th.dataset.col;
+    sortDir = sortCol === th.dataset.col && sortDir === 'asc' ? 'desc' : 'asc';
+    // fix: toggle corretto
+    if (th.classList.contains('sort-asc')) sortDir = 'desc';
+    else if (th.classList.contains('sort-desc')) sortDir = 'asc';
+    else sortDir = 'asc';
+    sortCol = th.dataset.col;
+    applyFilterSort();
+  });
+});
+
+/* ── Init ── */
+loadFoods();
+</script>
+</body>
+</html>

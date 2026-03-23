@@ -1,0 +1,33 @@
+# Dipendenze
+node_modules/
+
+# Ambiente e segreti
+.env
+.env.*
+!.env.example
+
+# Database (dati personali)
+database/*.sqlite
+database/*.sqlite-journal
+database/*.sqlite-wal
+database/*.sqlite-shm
+
+# Upload utente (foto)
+uploads/*
+!uploads/.gitkeep
+
+# Script di importazione one-shot
+import_csv.js
+import_plans.js
+update_plans_kcal.js
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+
+# Claude Code
+.claude/

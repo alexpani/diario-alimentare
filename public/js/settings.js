@@ -1,0 +1,63 @@
+/* ==========================================
+   settings.js — Tab Impostazioni
+   ========================================== */
+
+window.SettingsTab = (() => {
+  async function refresh() {
+    const info = await apiGet('/api/settings/info');
+    if (info) {
+      document.getElementById('app-info').innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;justify-content:space-between">
+            <span style="color:var(--color-text-secondary);font-size:14px">Versione</span>
+            <span style="font-weight:600;font-size:14px">v${info.version}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between">
+            <span style="color:var(--color-text-secondary);font-size:14px">Node.js</span>
+            <span style="font-weight:600;font-size:14px">${info.node}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between">
+            <span style="color:var(--color-text-secondary);font-size:14px">App</span>
+            <span style="font-weight:600;font-size:14px">${info.name}</span>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  document.getElementById('password-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const msgEl = document.getElementById('pass-msg');
+    msgEl.classList.add('hidden');
+
+    const current = document.getElementById('curr-pass').value;
+    const newPass = document.getElementById('new-pass').value;
+    const confirm = document.getElementById('confirm-pass').value;
+
+    if (newPass !== confirm) {
+      showMsg(msgEl, 'Le password non coincidono', 'error');
+      return;
+    }
+    if (newPass.length < 6) {
+      showMsg(msgEl, 'La password deve essere di almeno 6 caratteri', 'error');
+      return;
+    }
+
+    const res = await apiPatch('/api/settings/password', {
+      current_password: current,
+      new_password: newPass
+    });
+
+    if (res && !res.error) {
+      showMsg(msgEl, 'Password aggiornata. Effettua di nuovo il login.', 'success');
+      document.getElementById('password-form').reset();
+      setTimeout(() => {
+        showLogin();
+      }, 2000);
+    } else {
+      showMsg(msgEl, res?.error || 'Errore durante l\'aggiornamento', 'error');
+    }
+  });
+
+  return { refresh };
+})();
