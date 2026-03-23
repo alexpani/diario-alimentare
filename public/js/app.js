@@ -321,5 +321,55 @@ const Cal = (() => {
   return { open, close, refresh: () => { daysWithEntries.clear(); loadDaysWithEntries(viewYear, viewMonth).then(render); } };
 })();
 
+// ── Theme ──────────────────────────────────
+const Theme = (() => {
+  const STORAGE_KEY = 'fd-theme'; // 'auto' | 'light' | 'dark'
+  let _mq = null;
+
+  function apply(mode) {
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const dark = mode === 'dark' || (mode === 'auto' && prefersDark);
+    document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+    // Aggiorna meta theme-color
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.content = dark ? '#1C1C1E' : '#4CAF50';
+  }
+
+  function set(mode) {
+    localStorage.setItem(STORAGE_KEY, mode);
+    apply(mode);
+    updateButtons(mode);
+    // Listener sistema (solo in auto)
+    if (_mq) { _mq.removeEventListener('change', _onSystemChange); _mq = null; }
+    if (mode === 'auto') {
+      _mq = window.matchMedia('(prefers-color-scheme: dark)');
+      _mq.addEventListener('change', _onSystemChange);
+    }
+  }
+
+  function _onSystemChange() { apply('auto'); }
+
+  function init() {
+    const saved = localStorage.getItem(STORAGE_KEY) || 'auto';
+    set(saved);
+  }
+
+  function updateButtons(mode) {
+    document.querySelectorAll('.theme-btn').forEach(btn => {
+      const active = btn.dataset.themeVal === mode;
+      btn.classList.toggle('btn-primary', active);
+      btn.classList.toggle('btn-outline', !active);
+    });
+  }
+
+  document.querySelectorAll('.theme-btn').forEach(btn => {
+    btn.addEventListener('click', () => set(btn.dataset.themeVal));
+  });
+
+  return { init, set };
+})();
+
+Theme.init();
+
 // ── Start ─────────────────────────────────
 checkAuth();
