@@ -12,6 +12,9 @@ const settingsRoutes = require('./routes/settings');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Fidati del reverse proxy (Nginx Proxy Manager) per X-Forwarded-* headers
+app.set('trust proxy', 1);
+
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -21,7 +24,7 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: false,
+    secure: process.env.NODE_ENV === 'production', // true in prod (HTTPS), false in locale
     httpOnly: true,
     maxAge: 30 * 24 * 60 * 60 * 1000 // 30 giorni
   }
