@@ -284,6 +284,27 @@ window.DiaryTab = (() => {
     editingEntryId = null;
   }
 
+  function showAddedToast(name) {
+    let toast = document.getElementById('diary-added-toast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'diary-added-toast';
+      toast.style.cssText = `
+        position:absolute; top:12px; left:50%; transform:translateX(-50%);
+        background:var(--color-primary); color:#fff;
+        padding:6px 16px; border-radius:20px; font-size:13px; font-weight:600;
+        white-space:nowrap; pointer-events:none; z-index:10;
+        opacity:0; transition:opacity .2s;
+      `;
+      document.getElementById('modal-add-food').style.position = 'relative';
+      document.getElementById('modal-add-food').appendChild(toast);
+    }
+    toast.textContent = `✓ ${name} aggiunto`;
+    toast.style.opacity = '1';
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => { toast.style.opacity = '0'; }, 1800);
+  }
+
   document.getElementById('modal-add-food-close').addEventListener('click', closeAddModal);
   document.getElementById('modal-add-food-backdrop').addEventListener('click', closeAddModal);
 
