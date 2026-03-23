@@ -25,6 +25,58 @@
   --shadow-lg: 0 4px 20px rgba(0,0,0,0.12);
 }
 
+/* =========================================
+   DARK THEME
+   ========================================= */
+[data-theme="dark"] {
+  --color-bg:               #0F0F0F;
+  --color-card:             #1C1C1E;
+  --color-text:             #F2F2F7;
+  --color-text-secondary:   #8E8E93;
+  --color-border:           #38383A;
+  --color-primary-light:    #1B3A1F;
+  --shadow:                 0 2px 8px rgba(0,0,0,0.45);
+  --shadow-lg:              0 4px 20px rgba(0,0,0,0.55);
+}
+
+/* Elementi con colori hardcoded */
+[data-theme="dark"] .login-card           { background: #1C1C1E; }
+[data-theme="dark"] .tab-bar              { background: #1C1C1E; }
+[data-theme="dark"] .btn-outline          { background: #2C2C2E; color: var(--color-text); border-color: var(--color-border); }
+[data-theme="dark"] .btn-outline:active   { background: #3A3A3C; }
+[data-theme="dark"] input[type=text],
+[data-theme="dark"] input[type=number],
+[data-theme="dark"] input[type=password],
+[data-theme="dark"] input[type=email],
+[data-theme="dark"] input[type=date],
+[data-theme="dark"] select,
+[data-theme="dark"] textarea              { background: #2C2C2E; color: var(--color-text); border-color: var(--color-border); }
+[data-theme="dark"] .modal-box           { background: #1C1C1E; }
+[data-theme="dark"] .modal-header        { border-color: var(--color-border); }
+[data-theme="dark"] .modal-footer        { border-color: var(--color-border); }
+[data-theme="dark"] .search-result-item  { border-color: var(--color-border); }
+[data-theme="dark"] .search-result-item:active { background: #2C2C2E; }
+[data-theme="dark"] .recent-food-item    { border-color: var(--color-border); }
+[data-theme="dark"] .recent-food-item:active   { background: #2C2C2E; }
+[data-theme="dark"] .entry-row           { border-color: var(--color-border); }
+[data-theme="dark"] .qty-tab             { background: #2C2C2E; color: var(--color-text-secondary); }
+[data-theme="dark"] .qty-tab.active      { background: var(--color-primary); color: #fff; }
+[data-theme="dark"] .sri-placeholder,
+[data-theme="dark"] .entry-food-img-placeholder { background: #2C2C2E; }
+[data-theme="dark"] .meal-header         { background: var(--color-card); }
+[data-theme="dark"] .meal-header:active  { background: #2C2C2E; }
+[data-theme="dark"] .cal-popup           { background: #1C1C1E; }
+[data-theme="dark"] .cal-cell            { color: var(--color-text); }
+[data-theme="dark"] .cal-cell:active     { background: #2C2C2E; }
+[data-theme="dark"] .cal-future          { opacity: 0.35; }
+[data-theme="dark"] .plan-item           { border-color: var(--color-border); }
+[data-theme="dark"] .confirm-box         { background: #1C1C1E; }
+
+/* Transizione fluida al cambio tema */
+body, .tab-bar, .modal-box, .card, input, select, textarea, .btn-outline {
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+}
+
 html { font-size: 16px; -webkit-tap-highlight-color: transparent; }
 
 body {
