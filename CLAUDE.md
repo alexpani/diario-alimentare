@@ -124,6 +124,46 @@ La GET foods filtra anche `is_quick = 0`.
 Session-based (express-session, 30 giorni).
 `isAuth` middleware in `routes/auth.js` — usa `req.originalUrl` (non `req.path`) per rilevare route API e restituire 401 JSON invece di redirect.
 
+## Produzione — LXC Proxmox
+
+### Infrastruttura
+- **Proxmox**: server di virtualizzazione locale
+- **LXC**: Debian 12, IP `192.168.68.173`, porta `3000`
+- **Nginx Proxy Manager**: reverse proxy HTTPS con Let's Encrypt
+- **Dominio**: configurato su NPM con SSL automatico
+- **Process manager**: PM2, utente di sistema `fooddiary`
+- **App dir**: `/opt/diario-alimentare`
+- **DB**: `/opt/diario-alimentare/database/food_diary.sqlite`
+
+### Workflow aggiornamento
+```
+Mac (sviluppo) → commit+push automatico → GitHub
+                                              ↓
+                                    LXC: bash /opt/diario-alimentare/update.sh
+```
+
+### Comandi utili sull'LXC
+```bash
+su -s /bin/bash fooddiary -c "pm2 logs food-diary --lines 50"   # log
+su -s /bin/bash fooddiary -c "pm2 restart food-diary"           # riavvio
+su -s /bin/bash fooddiary -c "pm2 status"                       # stato
+bash /opt/diario-alimentare/update.sh                           # deploy aggiornamento
+```
+
+### Copia DB da Mac a LXC
+```bash
+scp "/Users/alessandro/Claude Code/diario alimentare/database/food_diary.sqlite" \
+    root@192.168.68.173:/opt/diario-alimentare/database/food_diary.sqlite
+ssh root@192.168.68.173 "chown fooddiary:fooddiary /opt/diario-alimentare/database/food_diary.sqlite \
+    && su -s /bin/bash fooddiary -c 'pm2 restart food-diary'"
+```
+
+### Note SSH
+- Login root abilitato (`PermitRootLogin yes` in `/etc/ssh/sshd_config`)
+- Git richiede: `git config --global --add safe.directory /opt/diario-alimentare`
+
+---
+
 ## Piano nutrizionale attivo — calcolo personale
 - **Utente**: maschio, 56 anni (nato giugno 1969), 180 cm, 80 kg, sedentario
 - **BMR** (Mifflin-St Jeor): 1.650 kcal
