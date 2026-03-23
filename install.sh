@@ -134,7 +134,6 @@ module.exports = {
     name: 'food-diary',
     script: 'server.js',
     cwd: '${APP_DIR}',
-    user: '${APP_USER}',
     env: { NODE_ENV: 'production' },
     restart_delay: 3000,
     max_restarts: 10,
@@ -144,14 +143,13 @@ module.exports = {
 EOF
 
 # Avvia come utente app
-su -s /bin/bash "$APP_USER" -c "
-  cd '${APP_DIR}'
-  pm2 start ecosystem.config.js
-  pm2 save
-"
+su -s /bin/bash "$APP_USER" -c "cd '${APP_DIR}' && pm2 start ecosystem.config.js && pm2 save"
 
-# Startup automatico al boot (come root)
-env PATH=$PATH:/usr/bin pm2 startup systemd -u "$APP_USER" --hp "/home/${APP_USER}" | tail -1 | bash
+# Startup automatico al boot
+STARTUP_CMD=$(su -s /bin/bash "$APP_USER" -c "pm2 startup systemd -u '${APP_USER}' --hp '/home/${APP_USER}'" 2>&1 | grep "sudo env")
+if [[ -n "$STARTUP_CMD" ]]; then
+  eval "$STARTUP_CMD"
+fi
 ok "PM2 configurato e avviato"
 
 # ── Firewall (ufw opzionale) ─────────────────────────────────
