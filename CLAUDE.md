@@ -150,6 +150,12 @@ su -s /bin/bash fooddiary -c "pm2 status"                       # stato
 bash /opt/diario-alimentare/update.sh                           # deploy aggiornamento
 ```
 
+### Copia DB da LXC a Mac (backup locale)
+```bash
+scp root@192.168.68.173:/opt/diario-alimentare/database/food_diary.sqlite \
+    "/Users/alessandro/Claude Code/diario alimentare/database/food_diary.sqlite"
+```
+
 ### Copia DB da Mac a LXC
 ```bash
 scp "/Users/alessandro/Claude Code/diario alimentare/database/food_diary.sqlite" \
