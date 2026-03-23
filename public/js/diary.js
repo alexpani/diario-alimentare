@@ -130,6 +130,19 @@ window.DiaryTab = (() => {
       });
     });
 
+    // Click su nome/dettaglio → modifica diretta
+    container.querySelectorAll('.entry-info').forEach(info => {
+      info.style.cursor = 'pointer';
+      info.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        const row = info.closest('[data-entry-id]');
+        if (!row) return;
+        const id = parseInt(row.dataset.entryId);
+        const entry = entries.find(e => e.id === id);
+        if (entry) openEditModal(entry);
+      });
+    });
+
     // Accordion: un solo pasto aperto alla volta
     container.querySelectorAll('.meal-header').forEach(h => {
       h.addEventListener('click', () => {
