@@ -208,7 +208,15 @@ function switchTab(tab) {
     window.FoodsTab?.refresh();
   }
   if (tab === 'piano') window.PlanTab?.refresh();
-  if (tab === 'impostazioni') window.SettingsTab?.refresh();
+  if (tab === 'impostazioni') {
+    window.SettingsTab?.refresh();
+    const saved = localStorage.getItem('fd-theme') || 'auto';
+    document.querySelectorAll('.theme-btn').forEach(btn => {
+      const active = btn.dataset.themeVal === saved;
+      btn.classList.toggle('btn-primary', active);
+      btn.classList.toggle('btn-outline', !active);
+    });
+  }
 }
 
 // ── Init ──────────────────────────────────
