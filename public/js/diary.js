@@ -575,7 +575,14 @@ window.DiaryTab = (() => {
 
     btn.disabled = false;
     if (res && !res.error) {
-      closeAddModal();
+      // Torna alla ricerca
+      document.getElementById('modal-step-quick').classList.add('hidden');
+      document.getElementById('modal-step-search').classList.remove('hidden');
+      document.getElementById('modal-food-search').value = '';
+      document.getElementById('modal-search-results').innerHTML = '';
+      loadRecentFoods(selectedMeal);
+      showAddedToast(description || `${Math.round(kcal)} kcal`);
+      setTimeout(() => document.getElementById('modal-food-search').focus(), 100);
       await refresh();
     }
   });
