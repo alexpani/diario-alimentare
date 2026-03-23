@@ -251,6 +251,12 @@ window.DiaryTab = (() => {
     document.getElementById('modal-step-qty').classList.remove('hidden');
     document.getElementById('modal-add-food').classList.remove('hidden');
 
+    // Porta il modal in cima per renderlo subito visibile
+    requestAnimationFrame(() => {
+      const sheet = document.querySelector('#modal-add-food .modal-sheet');
+      if (sheet) sheet.scrollTop = 0;
+    });
+
     selectFood(entry.food);
 
     // Pre-riempie con la quantità attuale
