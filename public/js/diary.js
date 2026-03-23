@@ -200,6 +200,7 @@ window.DiaryTab = (() => {
   // ── Add modal ───────────────────────────
   function openAddModal(meal) {
     selectedMeal = meal;
+    openMealId = meal;
     selectedFood = null;
     editingEntryId = null;
 
