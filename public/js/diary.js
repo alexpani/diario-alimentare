@@ -79,6 +79,8 @@ window.DiaryTab = (() => {
     setMacro('total-fat',     'target-fat',     'bar-fat',     totalFat,     targetFat);
   }
 
+  let openMealId = null;
+
   function renderMeals() {
     const container = document.getElementById('meals-container');
     container.innerHTML = '';
@@ -86,6 +88,7 @@ window.DiaryTab = (() => {
     for (const meal of MEALS) {
       const mealEntries = entries.filter(e => e.meal_type === meal.id);
       const mealKcal = mealEntries.reduce((s, e) => s + e.kcal, 0);
+      const isOpen = openMealId === meal.id;
 
       const section = document.createElement('div');
       section.className = 'meal-section';
@@ -96,9 +99,9 @@ window.DiaryTab = (() => {
             <span class="meal-name">${meal.label}</span>
             ${mealKcal > 0 ? `<span class="meal-kcal-badge">${Math.round(mealKcal)} kcal</span>` : ''}
           </div>
-          <svg class="meal-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:16px;height:16px;color:var(--color-text-secondary);transition:transform .2s"><polyline points="6 9 12 15 18 9"/></svg>
+          <svg class="meal-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:16px;height:16px;color:var(--color-text-secondary);transition:transform .2s;${isOpen ? 'transform:rotate(180deg)' : ''}"><polyline points="6 9 12 15 18 9"/></svg>
         </div>
-        <div class="meal-body" id="meal-body-${meal.id}" style="display:none">
+        <div class="meal-body" id="meal-body-${meal.id}" style="${isOpen ? '' : 'display:none'}">
           ${mealEntries.map(e => renderEntryRow(e)).join('')}
           <button class="btn-add-to-meal" data-meal="${meal.id}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:18px;height:18px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
@@ -138,10 +141,12 @@ window.DiaryTab = (() => {
         container.querySelectorAll('.meal-body').forEach(b => { b.style.display = 'none'; });
         container.querySelectorAll('.meal-chevron').forEach(c => { c.style.transform = ''; });
 
-        // Apri quello cliccato solo se era chiuso
         if (!isOpen) {
           body.style.display = '';
           h.querySelector('.meal-chevron').style.transform = 'rotate(180deg)';
+          openMealId = mealId;
+        } else {
+          openMealId = null;
         }
       });
     });
