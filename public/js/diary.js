@@ -327,7 +327,24 @@ window.DiaryTab = (() => {
     toast._t = setTimeout(() => { toast.style.opacity = '0'; }, 1800);
   }
 
-  document.getElementById('modal-add-food-close').addEventListener('click', closeAddModal);
+  document.getElementById('modal-add-food-close').addEventListener('click', () => {
+    if (editingEntryId) {
+      // Modalità modifica → chiude direttamente
+      closeAddModal();
+    } else {
+      const stepQty   = document.getElementById('modal-step-qty');
+      const stepQuick = document.getElementById('modal-step-quick');
+      if (!stepQty.classList.contains('hidden') || !stepQuick.classList.contains('hidden')) {
+        // Modalità aggiunta, step 2/3 → torna alla ricerca
+        stepQty.classList.add('hidden');
+        stepQuick.classList.add('hidden');
+        document.getElementById('modal-step-search').classList.remove('hidden');
+      } else {
+        // Step 1 → chiude
+        closeAddModal();
+      }
+    }
+  });
 
   // Search
   document.getElementById('modal-food-search').addEventListener('input', (e) => {
