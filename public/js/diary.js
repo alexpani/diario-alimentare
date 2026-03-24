@@ -577,8 +577,6 @@ window.DiaryTab = (() => {
   }
 
   document.getElementById('btn-open-quick-entry').addEventListener('click', showQuickEntryStep);
-  document.getElementById('btn-quick-back').addEventListener('click', hideQuickEntryStep);
-
   ['quick-kcal','quick-protein-pct','quick-fat-pct','quick-carbs-pct'].forEach(id => {
     document.getElementById(id).addEventListener('input', updateQuickPreview);
   });
