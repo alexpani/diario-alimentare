@@ -243,7 +243,6 @@ window.DiaryTab = (() => {
     selectedMeal = entry.meal_type;
 
     document.getElementById('modal-meal-title').textContent = 'Modifica quantità';
-    document.getElementById('btn-back-search').textContent = 'Annulla';
     document.getElementById('btn-confirm-add').textContent = 'Aggiorna';
 
     document.getElementById('modal-step-search').classList.add('hidden');
