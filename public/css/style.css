@@ -803,11 +803,11 @@ input:focus, select:focus, textarea:focus {
 }
 .plan-macro {
   font-size: 12px; font-weight: 600;
-  padding: 3px 8px; border-radius: 20px;
+  padding: 3px 8px;
 }
-.plan-macro-p { background: #E3F2FD; color: #1565C0; }
-.plan-macro-f { background: #FFF3E0; color: #E65100; }
-.plan-macro-c { background: #F3E5F5; color: #6A1B9A; }
+.plan-macro-p { color: #1565C0; }
+.plan-macro-f { color: #E65100; }
+.plan-macro-c { color: #6A1B9A; }
 
 /* Active plan name — right side of gauge, symmetric to "Assunte" */
 .ds-plan-name {
