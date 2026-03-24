@@ -321,7 +321,6 @@ window.DiaryTab = (() => {
         white-space:nowrap; pointer-events:none; z-index:10;
         opacity:0; transition:opacity .2s;
       `;
-      document.getElementById('modal-add-food').style.position = 'relative';
       document.getElementById('modal-add-food').appendChild(toast);
     }
     toast.textContent = `✓ ${name} aggiunto`;
