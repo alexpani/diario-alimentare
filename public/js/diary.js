@@ -494,12 +494,6 @@ window.DiaryTab = (() => {
     }
   }
 
-  document.getElementById('btn-back-search').addEventListener('click', () => {
-    document.getElementById('modal-step-search').classList.remove('hidden');
-    document.getElementById('modal-step-qty').classList.add('hidden');
-    selectedFood = null;
-  });
-
   document.getElementById('btn-confirm-add').addEventListener('click', async () => {
     if (!selectedFood) return;
     const { quantity_g, label } = getQuantity();
