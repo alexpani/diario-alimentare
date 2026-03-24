@@ -331,7 +331,6 @@ window.DiaryTab = (() => {
   }
 
   document.getElementById('modal-add-food-close').addEventListener('click', closeAddModal);
-  document.getElementById('modal-add-food-backdrop').addEventListener('click', closeAddModal);
 
   // Search
   document.getElementById('modal-food-search').addEventListener('input', (e) => {
