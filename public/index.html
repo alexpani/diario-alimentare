@@ -286,104 +286,105 @@
 <div id="modal-add-food" class="modal-fullscreen hidden">
   <div class="modal-fullscreen-header">
     <h2 id="modal-meal-title">Aggiungi alimento</h2>
-    <button class="btn-annulla" id="modal-add-food-close">Annulla</button>
   </div>
   <div class="modal-fullscreen-body">
-      <!-- Step 1: Ricerca -->
-      <div id="modal-step-search">
-        <div style="display:flex;gap:8px;align-items:center">
-          <div class="search-wrap" style="flex:1">
-            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="text" id="modal-food-search" placeholder="Cerca nel database..." class="search-input" autocomplete="off">
-          </div>
-          <button id="btn-quick-new-food" class="btn btn-primary btn-sm" style="white-space:nowrap">+ Nuovo</button>
-        </div>
-        <button id="btn-open-quick-entry" class="btn btn-outline btn-full mt-8" style="border-color:var(--color-primary);color:var(--color-primary)">
-          ⚡ Voce rapida (stima calorie)
-        </button>
-        <button id="btn-scan-barcode" class="btn btn-outline btn-full mt-8">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;vertical-align:middle;margin-right:6px"><rect x="3" y="3" width="6" height="18"/><rect x="13" y="3" width="2" height="18"/><rect x="17" y="3" width="4" height="18"/></svg>
-          Scansiona con fotocamera
-        </button>
-        <input type="file" id="barcode-file-input" accept="image/*" capture="environment" style="display:none">
-        <button id="btn-scan-barcode-file" class="btn btn-outline btn-full mt-8 hidden">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;vertical-align:middle;margin-right:6px"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-          Fotografa barcode (iOS)
-        </button>
-        <div id="barcode-scanner-wrap" class="hidden">
-          <div id="barcode-reader"></div>
-          <button id="btn-stop-scan" class="btn btn-outline btn-full mt-8">Ferma scanner</button>
-        </div>
-        <div id="modal-recent-section" class="hidden">
-          <div class="recent-label">Usati di recente per questo pasto</div>
-          <div id="modal-recent-foods" class="recent-foods-list"></div>
-        </div>
-        <div id="modal-search-results" class="search-results"></div>
-      </div>
 
-      <!-- Step 2: Quantità -->
-      <div id="modal-step-qty" class="hidden">
-        <div class="selected-food-preview" id="selected-food-preview"></div>
-        <div class="qty-tabs">
-          <button class="qty-tab active" data-mode="grams">Grammi</button>
-          <button class="qty-tab" data-mode="portions" id="qty-tab-portions">Porzioni</button>
+    <!-- Step 1: Ricerca -->
+    <div id="modal-step-search">
+      <div style="display:flex;gap:8px;align-items:center">
+        <div class="search-wrap" style="flex:1">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="modal-food-search" placeholder="Cerca nel database..." class="search-input" autocomplete="off">
         </div>
-        <div id="qty-grams-panel">
-          <div class="form-group">
-            <label>Quantità (g)</label>
-            <input type="number" id="qty-grams" min="1" max="9999" step="1" value="100" class="input-large">
-          </div>
-        </div>
-        <div id="qty-portions-panel" class="hidden">
-          <div class="form-group">
-            <label>Tipo di porzione</label>
-            <select id="qty-portion-select" class="select-input"></select>
-          </div>
-          <div class="form-group">
-            <label>Numero di porzioni</label>
-            <input type="number" id="qty-portion-count" min="0.25" max="99" step="0.25" value="1" class="input-large">
-          </div>
-          <p class="qty-calculated">= <strong id="qty-calculated-g">0</strong> g</p>
-        </div>
-        <div class="kcal-preview" id="kcal-preview">~0 kcal</div>
-        <div class="modal-actions">
-          <button id="btn-back-search" class="btn btn-outline">Indietro</button>
-          <button id="btn-confirm-add" class="btn btn-primary">Aggiungi</button>
-        </div>
+        <button id="btn-quick-new-food" class="btn btn-primary btn-sm" style="white-space:nowrap">+ Nuovo</button>
       </div>
+      <button id="btn-open-quick-entry" class="btn btn-outline btn-full mt-8" style="border-color:var(--color-primary);color:var(--color-primary)">
+        ⚡ Voce rapida (stima calorie)
+      </button>
+      <button id="btn-scan-barcode" class="btn btn-outline btn-full mt-8">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;vertical-align:middle;margin-right:6px"><rect x="3" y="3" width="6" height="18"/><rect x="13" y="3" width="2" height="18"/><rect x="17" y="3" width="4" height="18"/></svg>
+        Scansiona con fotocamera
+      </button>
+      <input type="file" id="barcode-file-input" accept="image/*" capture="environment" style="display:none">
+      <button id="btn-scan-barcode-file" class="btn btn-outline btn-full mt-8 hidden">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;vertical-align:middle;margin-right:6px"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        Fotografa barcode (iOS)
+      </button>
+      <div id="barcode-scanner-wrap" class="hidden">
+        <div id="barcode-reader"></div>
+        <button id="btn-stop-scan" class="btn btn-outline btn-full mt-8">Ferma scanner</button>
+      </div>
+      <div id="modal-recent-section" class="hidden">
+        <div class="recent-label">Usati di recente per questo pasto</div>
+        <div id="modal-recent-foods" class="recent-foods-list"></div>
+      </div>
+      <div id="modal-search-results" class="search-results"></div>
+    </div>
 
-      <!-- Step 3: Voce rapida -->
-      <div id="modal-step-quick" class="hidden">
-        <p class="quick-entry-hint">Inserisci una stima per questo pasto. La voce non verrà salvata in libreria.</p>
+    <!-- Step 2: Quantità -->
+    <div id="modal-step-qty" class="hidden">
+      <div class="selected-food-preview" id="selected-food-preview"></div>
+      <div class="qty-tabs">
+        <button class="qty-tab active" data-mode="grams">Grammi</button>
+        <button class="qty-tab" data-mode="portions" id="qty-tab-portions">Porzioni</button>
+      </div>
+      <div id="qty-grams-panel">
         <div class="form-group">
-          <label>Descrizione <span style="font-weight:400;color:var(--color-text-secondary)">(opzionale)</span></label>
-          <input type="text" id="quick-desc" class="form-input" placeholder="es. Pranzo al ristorante" autocomplete="off">
+          <label>Quantità (g)</label>
+          <input type="number" id="qty-grams" min="1" max="9999" step="1" value="100" class="input-large">
+        </div>
+      </div>
+      <div id="qty-portions-panel" class="hidden">
+        <div class="form-group">
+          <label>Tipo di porzione</label>
+          <select id="qty-portion-select" class="select-input"></select>
         </div>
         <div class="form-group">
-          <label>Calorie totali (kcal)</label>
-          <input type="number" id="quick-kcal" class="input-large" min="0" max="9999" step="1" placeholder="0">
+          <label>Numero di porzioni</label>
+          <input type="number" id="qty-portion-count" min="0.25" max="99" step="0.25" value="1" class="input-large">
         </div>
-        <div class="quick-macro-row">
-          <div class="form-group" style="flex:1">
-            <label>% Proteine</label>
-            <input type="number" id="quick-protein-pct" class="form-input" min="0" max="100" step="1" value="20">
-          </div>
-          <div class="form-group" style="flex:1">
-            <label>% Grassi</label>
-            <input type="number" id="quick-fat-pct" class="form-input" min="0" max="100" step="1" value="30">
-          </div>
-          <div class="form-group" style="flex:1">
-            <label>% Carbo</label>
-            <input type="number" id="quick-carbs-pct" class="form-input" min="0" max="100" step="1" value="50">
-          </div>
+        <p class="qty-calculated">= <strong id="qty-calculated-g">0</strong> g</p>
+      </div>
+      <div class="kcal-preview" id="kcal-preview">~0 kcal</div>
+      <div class="modal-actions">
+        <button id="btn-confirm-add" class="btn btn-primary btn-full">Aggiungi</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Voce rapida -->
+    <div id="modal-step-quick" class="hidden">
+      <p class="quick-entry-hint">Inserisci una stima per questo pasto. La voce non verrà salvata in libreria.</p>
+      <div class="form-group">
+        <label>Descrizione <span style="font-weight:400;color:var(--color-text-secondary)">(opzionale)</span></label>
+        <input type="text" id="quick-desc" class="form-input" placeholder="es. Pranzo al ristorante" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label>Calorie totali (kcal)</label>
+        <input type="number" id="quick-kcal" class="input-large" min="0" max="9999" step="1" placeholder="0">
+      </div>
+      <div class="quick-macro-row">
+        <div class="form-group" style="flex:1">
+          <label>% Proteine</label>
+          <input type="number" id="quick-protein-pct" class="form-input" min="0" max="100" step="1" value="20">
         </div>
-        <div id="quick-macro-preview" class="quick-macro-preview"></div>
-        <div class="modal-actions">
-          <button id="btn-quick-back" class="btn btn-outline">Indietro</button>
-          <button id="btn-quick-confirm" class="btn btn-primary">Aggiungi al pasto</button>
+        <div class="form-group" style="flex:1">
+          <label>% Grassi</label>
+          <input type="number" id="quick-fat-pct" class="form-input" min="0" max="100" step="1" value="30">
+        </div>
+        <div class="form-group" style="flex:1">
+          <label>% Carbo</label>
+          <input type="number" id="quick-carbs-pct" class="form-input" min="0" max="100" step="1" value="50">
         </div>
       </div>
+      <div id="quick-macro-preview" class="quick-macro-preview"></div>
+      <div class="modal-actions">
+        <button id="btn-quick-confirm" class="btn btn-primary btn-full">Aggiungi al pasto</button>
+      </div>
+    </div>
 
+  </div>
+  <div class="modal-fullscreen-footer">
+    <button id="modal-add-food-close" class="btn btn-outline btn-full">Annulla</button>
   </div>
 </div>
 
