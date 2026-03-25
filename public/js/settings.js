@@ -66,5 +66,22 @@ window.SettingsTab = (() => {
     }
   });
 
+  // OFF credentials form
+  document.getElementById('off-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const msgEl = document.getElementById('off-msg');
+    msgEl.classList.add('hidden');
+
+    const user = document.getElementById('off-user').value.trim();
+    const pass = document.getElementById('off-pass').value;
+
+    const res = await apiPut('/api/settings/off', { user, pass });
+    if (res && !res.error) {
+      showMsg(msgEl, 'Credenziali OFF salvate', 'success');
+    } else {
+      showMsg(msgEl, res?.error || 'Errore nel salvataggio', 'error');
+    }
+  });
+
   return { refresh };
 })();
