@@ -516,7 +516,10 @@ window.DiaryTab = (() => {
 
     let res;
     if (editingEntryId) {
-      res = await apiPut(`/api/diary/${editingEntryId}`, { quantity_g, quantity_label: label });
+      const moveTo = document.getElementById('edit-meal-move-select').value;
+      const body = { quantity_g, quantity_label: label };
+      if (moveTo) body.meal_type = moveTo;
+      res = await apiPut(`/api/diary/${editingEntryId}`, body);
     } else {
       res = await apiPost('/api/diary', {
         date: currentDate,
