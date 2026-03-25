@@ -23,6 +23,13 @@ window.SettingsTab = (() => {
         </div>
       `;
     }
+
+    // Carica credenziali OFF
+    const off = await apiGet('/api/settings/off');
+    if (off) {
+      document.getElementById('off-user').value = off.user || '';
+      document.getElementById('off-pass').value = off.pass || '';
+    }
   }
 
   document.getElementById('password-form').addEventListener('submit', async (e) => {
