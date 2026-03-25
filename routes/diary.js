@@ -232,7 +232,7 @@ router.put('/:id', async (req, res) => {
     const { quantity_g, quantity_label, meal_type } = req.body;
     const entry = await db.get('SELECT * FROM diary_entries WHERE id = ?', req.params.id);
     if (!entry) return res.status(404).json({ error: 'Voce non trovata' });
-    const validMeals = ['colazione','pranzo','cena','snack'];
+    const validMeals = ['colazione','spuntino_mattino','pranzo','spuntino_pomeriggio','cena','extra'];
     const newMeal = meal_type && validMeals.includes(meal_type) ? meal_type : entry.meal_type;
     await db.run(
       'UPDATE diary_entries SET quantity_g = ?, quantity_label = ?, meal_type = ? WHERE id = ?',
