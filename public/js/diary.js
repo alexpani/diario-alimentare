@@ -247,13 +247,12 @@ window.DiaryTab = (() => {
     document.getElementById('btn-confirm-add').textContent = 'Aggiorna';
 
     // Mostra dropdown cambio pasto (escludi il pasto corrente)
-    const mealLabels = { colazione:'Colazione', pranzo:'Pranzo', cena:'Cena', snack:'Snack' };
     const sel = document.getElementById('edit-meal-move-select');
     sel.innerHTML = '<option value="">Cambia pasto…</option>';
-    Object.entries(mealLabels).forEach(([val, label]) => {
-      if (val !== entry.meal_type) {
+    MEALS.forEach(m => {
+      if (m.id !== entry.meal_type) {
         const opt = document.createElement('option');
-        opt.value = val; opt.textContent = label;
+        opt.value = m.id; opt.textContent = m.label;
         sel.appendChild(opt);
       }
     });
