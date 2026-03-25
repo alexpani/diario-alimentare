@@ -66,6 +66,17 @@ window.SettingsTab = (() => {
     }
   });
 
+  // Clear cache
+  document.getElementById('btn-clear-cache').addEventListener('click', async () => {
+    const msgEl = document.getElementById('clear-cache-msg');
+    const res = await apiPost('/api/foods/clear-cache', {});
+    if (res && !res.error) {
+      showMsg(msgEl, 'Cache azzerate', 'success');
+    } else {
+      showMsg(msgEl, res?.error || 'Errore', 'error');
+    }
+  });
+
   // OFF credentials form
   document.getElementById('off-form').addEventListener('submit', async (e) => {
     e.preventDefault();
