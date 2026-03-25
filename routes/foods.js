@@ -430,6 +430,10 @@ router.post('/import-off', async (req, res) => {
   try {
     const fetch = (await import('node-fetch')).default;
     const OFF_UA = 'FoodDiary/1.0 (rich.chair7884@activecloud.it)';
+    const offHeaders = { 'User-Agent': OFF_UA };
+    if (process.env.OFF_USER && process.env.OFF_PASS) {
+      offHeaders['Authorization'] = 'Basic ' + Buffer.from(`${process.env.OFF_USER}:${process.env.OFF_PASS}`).toString('base64');
+    }
     let products = [];
 
     if (barcode) {
@@ -438,7 +442,7 @@ router.post('/import-off', async (req, res) => {
       if (cached) return res.json(cached);
 
       const url = `https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(barcode)}?fields=product_name,brands,nutriments,image_url,code,_id`;
-      const resp = await fetch(url, { headers: { 'User-Agent': OFF_UA } });
+      const resp = await fetch(url, { headers: offHeaders });
       if (!resp.ok || !(resp.headers.get('content-type') || '').includes('json')) {
         return res.status(502).json({ error: 'OpenFoodFacts non disponibile al momento' });
       }
@@ -451,7 +455,7 @@ router.post('/import-off', async (req, res) => {
       if (cached) return res.json(cached);
 
       const url = `https://world.openfoodfacts.org/api/v2/search?search_terms=${encodeURIComponent(query)}&page_size=50&fields=product_name,brands,nutriments,image_url,code,_id`;
-      const resp = await fetch(url, { headers: { 'User-Agent': OFF_UA } });
+      const resp = await fetch(url, { headers: offHeaders });
       if (!resp.ok || !(resp.headers.get('content-type') || '').includes('json')) {
         return res.status(502).json({ error: 'OpenFoodFacts non disponibile al momento' });
       }
