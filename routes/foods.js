@@ -454,7 +454,7 @@ router.post('/import-off', async (req, res) => {
       const cached = offCacheGet(cacheKey);
       if (cached) return res.json(cached);
 
-      const url = `https://world.openfoodfacts.org/api/v2/search?search_terms=${encodeURIComponent(query)}&page_size=50&fields=product_name,brands,nutriments,image_url,code,_id`;
+      const url = `https://world.openfoodfacts.org/api/v2/search?search_terms=${encodeURIComponent(query)}&page_size=50&fields=product_name,brands,nutriments,image_url,code,_id${offAuth}`;
       const resp = await fetch(url, { headers: offHeaders });
       if (!resp.ok || !(resp.headers.get('content-type') || '').includes('json')) {
         return res.status(502).json({ error: 'OpenFoodFacts non disponibile al momento' });
