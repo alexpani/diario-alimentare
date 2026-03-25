@@ -490,4 +490,12 @@ router.post('/import-off', async (req, res) => {
   }
 });
 
+// POST /api/foods/clear-cache
+router.post('/clear-cache', async (req, res) => {
+  offSearchCache.clear();
+  anfFoodsCache = null;
+  anfCacheTimestamp = 0;
+  res.json({ ok: true, message: 'Cache OFF e INRAN azzerate' });
+});
+
 module.exports = router;
