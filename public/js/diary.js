@@ -220,6 +220,7 @@ window.DiaryTab = (() => {
     const mealLabel = MEALS.find(m => m.id === meal)?.label || meal;
     document.getElementById('modal-meal-title').textContent = `Aggiungi a ${mealLabel}`;
     document.getElementById('btn-confirm-add').textContent = 'Aggiungi';
+    document.getElementById('edit-meal-move-wrap').classList.add('hidden');
 
     // Reset steps
     document.getElementById('modal-step-search').classList.remove('hidden');
