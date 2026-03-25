@@ -353,7 +353,7 @@ window.FoodsTab = (() => {
     div.className = 'portion-row';
     div.innerHTML = `
       <input type="text" placeholder="Nome (es. cucchiaio)" value="${name}" class="portion-name">
-      <input type="number" placeholder="Grammi" value="${grams}" min="1" step="0.5" class="portion-grams" style="max-width:90px">
+      <input type="number" placeholder="Grammi" value="${grams}" min="0.1" step="0.1" class="portion-grams" style="max-width:90px">
       <button type="button" class="btn-remove-portion">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
