@@ -429,6 +429,7 @@ router.post('/import-off', async (req, res) => {
   const { query, barcode } = req.body;
   try {
     const fetch = (await import('node-fetch')).default;
+    const OFF_UA = 'FoodDiary/1.0 (rich.chair7884@activecloud.it)';
     let products = [];
 
     if (barcode) {
@@ -436,20 +437,21 @@ router.post('/import-off', async (req, res) => {
       const cached = offCacheGet(cacheKey);
       if (cached) return res.json(cached);
 
-      const url = `https://world.openfoodfacts.org/api/v0/product/${encodeURIComponent(barcode)}.json`;
-      const resp = await fetch(url, { headers: { 'User-Agent': 'FoodDiary/1.0' } });
+      const url = `https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(barcode)}?fields=product_name,brands,nutriments,image_url,code,_id`;
+      const resp = await fetch(url, { headers: { 'User-Agent': OFF_UA } });
       if (!resp.ok || !(resp.headers.get('content-type') || '').includes('json')) {
         return res.status(502).json({ error: 'OpenFoodFacts non disponibile al momento' });
       }
       const data = await resp.json();
-      if (data.status === 1 && data.product) products = [data.product];
+      if (data.status === 'success' && data.product) products = [data.product];
+      else if (data.status === 1 && data.product) products = [data.product];
     } else if (query) {
       const cacheKey = `query:${query.toLowerCase().trim()}`;
       const cached = offCacheGet(cacheKey);
       if (cached) return res.json(cached);
 
-      const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&json=1&page_size=50&fields=id,product_name,brands,nutriments,image_url,code`;
-      const resp = await fetch(url, { headers: { 'User-Agent': 'FoodDiary/1.0' } });
+      const url = `https://world.openfoodfacts.org/api/v2/search?search_terms=${encodeURIComponent(query)}&page_size=50&fields=product_name,brands,nutriments,image_url,code,_id`;
+      const resp = await fetch(url, { headers: { 'User-Agent': OFF_UA } });
       if (!resp.ok || !(resp.headers.get('content-type') || '').includes('json')) {
         return res.status(502).json({ error: 'OpenFoodFacts non disponibile al momento' });
       }
