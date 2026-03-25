@@ -656,7 +656,9 @@ window.FoodsTab = (() => {
 
     const res = await fetch(`/api/foods/import-anf/search?q=${encodeURIComponent(q)}`);
     if (!res.ok) {
-      resultsEl.innerHTML = '<div class="empty-state"><p>Errore nella ricerca.</p></div>';
+      const err = await res.json().catch(() => null);
+      const msg = err?.error || 'Errore nella ricerca.';
+      resultsEl.innerHTML = `<div class="empty-state"><p>${msg}</p></div>`;
       return;
     }
 
@@ -839,7 +841,9 @@ window.FoodsTab = (() => {
     });
 
     if (!res.ok) {
-      resultsEl.innerHTML = '<div class="empty-state"><p>Errore nella ricerca.</p></div>';
+      const err = await res.json().catch(() => null);
+      const msg = err?.error || 'Errore nella ricerca.';
+      resultsEl.innerHTML = `<div class="empty-state"><p>${msg}</p></div>`;
       return;
     }
 
