@@ -431,9 +431,9 @@ router.post('/import-off', async (req, res) => {
     const fetch = (await import('node-fetch')).default;
     const OFF_UA = 'FoodDiary/1.0 (rich.chair7884@activecloud.it)';
     const offHeaders = { 'User-Agent': OFF_UA };
-    if (process.env.OFF_USER && process.env.OFF_PASS) {
-      offHeaders['Authorization'] = 'Basic ' + Buffer.from(`${process.env.OFF_USER}:${process.env.OFF_PASS}`).toString('base64');
-    }
+    const offAuth = process.env.OFF_USER && process.env.OFF_PASS
+      ? `&user_id=${encodeURIComponent(process.env.OFF_USER)}&password=${encodeURIComponent(process.env.OFF_PASS)}`
+      : '';
     let products = [];
 
     if (barcode) {
