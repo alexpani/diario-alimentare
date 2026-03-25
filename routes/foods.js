@@ -438,6 +438,9 @@ router.post('/import-off', async (req, res) => {
 
       const url = `https://world.openfoodfacts.org/api/v0/product/${encodeURIComponent(barcode)}.json`;
       const resp = await fetch(url, { headers: { 'User-Agent': 'FoodDiary/1.0' } });
+      if (!resp.ok || !(resp.headers.get('content-type') || '').includes('json')) {
+        return res.status(502).json({ error: 'OpenFoodFacts non disponibile al momento' });
+      }
       const data = await resp.json();
       if (data.status === 1 && data.product) products = [data.product];
     } else if (query) {
@@ -447,6 +450,9 @@ router.post('/import-off', async (req, res) => {
 
       const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&json=1&page_size=50&fields=id,product_name,brands,nutriments,image_url,code`;
       const resp = await fetch(url, { headers: { 'User-Agent': 'FoodDiary/1.0' } });
+      if (!resp.ok || !(resp.headers.get('content-type') || '').includes('json')) {
+        return res.status(502).json({ error: 'OpenFoodFacts non disponibile al momento' });
+      }
       const data = await resp.json();
       products = data.products || [];
     } else {
