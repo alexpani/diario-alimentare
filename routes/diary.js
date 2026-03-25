@@ -229,12 +229,14 @@ router.get('/recent', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const db = await getDb();
-    const { quantity_g, quantity_label } = req.body;
+    const { quantity_g, quantity_label, meal_type } = req.body;
     const entry = await db.get('SELECT * FROM diary_entries WHERE id = ?', req.params.id);
     if (!entry) return res.status(404).json({ error: 'Voce non trovata' });
+    const validMeals = ['colazione','pranzo','cena','snack'];
+    const newMeal = meal_type && validMeals.includes(meal_type) ? meal_type : entry.meal_type;
     await db.run(
-      'UPDATE diary_entries SET quantity_g = ?, quantity_label = ? WHERE id = ?',
-      parseFloat(quantity_g), quantity_label || null, req.params.id
+      'UPDATE diary_entries SET quantity_g = ?, quantity_label = ?, meal_type = ? WHERE id = ?',
+      parseFloat(quantity_g), quantity_label || null, newMeal, req.params.id
     );
     res.json({ ok: true });
   } catch (err) {
