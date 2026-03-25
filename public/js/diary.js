@@ -245,6 +245,20 @@ window.DiaryTab = (() => {
     document.getElementById('modal-meal-title').textContent = 'Modifica quantità';
     document.getElementById('btn-confirm-add').textContent = 'Aggiorna';
 
+    // Mostra dropdown cambio pasto (escludi il pasto corrente)
+    const mealLabels = { colazione:'Colazione', pranzo:'Pranzo', cena:'Cena', snack:'Snack' };
+    const sel = document.getElementById('edit-meal-move-select');
+    sel.innerHTML = '<option value="">Cambia pasto…</option>';
+    Object.entries(mealLabels).forEach(([val, label]) => {
+      if (val !== entry.meal_type) {
+        const opt = document.createElement('option');
+        opt.value = val; opt.textContent = label;
+        sel.appendChild(opt);
+      }
+    });
+    sel.value = '';
+    document.getElementById('edit-meal-move-wrap').classList.remove('hidden');
+
     document.getElementById('modal-step-search').classList.add('hidden');
     document.getElementById('modal-step-qty').classList.remove('hidden');
     document.getElementById('modal-add-food').classList.remove('hidden');
