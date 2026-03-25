@@ -161,6 +161,7 @@ window.FoodsTab = (() => {
 
   document.getElementById('modal-food-form-close').addEventListener('click', closeFoodForm);
   document.getElementById('modal-food-form-backdrop').addEventListener('click', closeFoodForm);
+  document.getElementById('btn-cancel-food').addEventListener('click', closeFoodForm);
   document.getElementById('btn-new-food').addEventListener('click', () => openFoodForm());
 
   // ── Scanner barcode nel form alimento ────────────────────────────────────
