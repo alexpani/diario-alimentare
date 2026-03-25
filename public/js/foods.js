@@ -48,11 +48,19 @@ window.FoodsTab = (() => {
     `).join('');
 
     container.querySelectorAll('.btn-edit-food').forEach(btn => {
-      btn.addEventListener('click', () => openFoodForm(parseInt(btn.dataset.id)));
+      btn.addEventListener('click', (e) => { e.stopPropagation(); openFoodForm(parseInt(btn.dataset.id)); });
     });
 
     container.querySelectorAll('.btn-del-food').forEach(btn => {
-      btn.addEventListener('click', () => deleteFood(parseInt(btn.dataset.id), btn.dataset.name));
+      btn.addEventListener('click', (e) => { e.stopPropagation(); deleteFood(parseInt(btn.dataset.id), btn.dataset.name); });
+    });
+
+    container.querySelectorAll('.food-card').forEach(card => {
+      card.style.cursor = 'pointer';
+      card.addEventListener('click', () => {
+        const editBtn = card.querySelector('.btn-edit-food');
+        if (editBtn) openFoodForm(parseInt(editBtn.dataset.id));
+      });
     });
   }
 
