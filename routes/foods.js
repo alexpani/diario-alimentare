@@ -424,6 +424,69 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+// ── Import da Catalogo locale (food-tracker) ────────────────────────────────
+const CATALOG_BASE = process.env.CATALOG_URL || 'http://192.168.68.153:3001';
+
+// POST /api/foods/import-catalog
+router.post('/import-catalog', async (req, res) => {
+  const { query, barcode } = req.body;
+  if (!query && !barcode) return res.status(400).json({ error: 'Fornisci query o barcode' });
+
+  try {
+    const fetch = (await import('node-fetch')).default;
+    let url;
+
+    if (barcode) {
+      url = `${CATALOG_BASE}/product/${encodeURIComponent(barcode)}`;
+    } else {
+      url = `${CATALOG_BASE}/search?q=${encodeURIComponent(query)}&limit=50`;
+    }
+
+    const resp = await fetch(url, { timeout: 10000 });
+
+    if (barcode) {
+      // /product/{barcode} restituisce un singolo oggetto (o 404)
+      if (resp.status === 404) return res.json([]);
+      if (!resp.ok) return res.status(502).json({ error: 'Catalogo non raggiungibile' });
+      const product = await resp.json();
+      const mapped = mapCatalogProduct(product);
+      return res.json(mapped ? [mapped] : []);
+    }
+
+    // /search restituisce { results: [...], total, ... }
+    if (!resp.ok) return res.status(502).json({ error: 'Catalogo non raggiungibile' });
+    const data = await resp.json();
+    const products = (data.results || []).filter(p => p.product_name);
+    const mapped = products.map(mapCatalogProduct).filter(Boolean);
+    res.json(mapped);
+  } catch (err) {
+    console.error('Catalog search error:', err);
+    res.status(500).json({ error: 'Errore nella ricerca sul catalogo locale' });
+  }
+});
+
+function mapCatalogProduct(p) {
+  if (!p || !p.product_name) return null;
+  // L'immagine può essere un path locale del food-tracker o un URL completo
+  let imageUrl = p.image_url || '';
+  if (imageUrl && !imageUrl.startsWith('http')) {
+    // Path relativo (es. /images/8000300379402.jpg) — aggiungi base URL
+    imageUrl = CATALOG_BASE + imageUrl;
+  }
+  return {
+    name:         p.product_name,
+    brand:        p.brands || '',
+    barcode:      p.external_id || '',
+    kcal_100g:    p.energy_kcal || 0,
+    protein_100g: p.proteins_100g || 0,
+    fat_100g:     p.fat_100g || 0,
+    carbs_100g:   p.carbohydrates_100g || 0,
+    image_url:    imageUrl,
+    source:       p.source || '',
+    nutriscore:   p.nutrition_grades || '',
+  };
+}
+
 // POST /api/foods/import-off
 router.post('/import-off', async (req, res) => {
   const { query, barcode } = req.body;

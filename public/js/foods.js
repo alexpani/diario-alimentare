@@ -614,9 +614,87 @@ window.FoodsTab = (() => {
     }
   });
 
+  // ── Import Catalogo locale (food-tracker) ──────────────────────────────────
+  const toolbar = document.querySelector('.foods-toolbar');
+
+  const catalogBtn = document.createElement('button');
+  catalogBtn.id = 'btn-import-catalog';
+  catalogBtn.className = 'btn btn-outline btn-sm';
+  catalogBtn.title = 'Cerca nel catalogo locale (265K+ prodotti)';
+  catalogBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;vertical-align:-2px"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> Catalogo`;
+  toolbar.insertBefore(catalogBtn, document.getElementById('btn-new-food'));
+
+  catalogBtn.addEventListener('click', () => {
+    document.getElementById('catalog-query').value = '';
+    document.getElementById('catalog-results').innerHTML = '';
+    document.getElementById('modal-catalog').classList.remove('hidden');
+    setTimeout(() => document.getElementById('catalog-query').focus(), 100);
+  });
+
+  const closeCatalogModal = () => {
+    document.getElementById('modal-catalog').classList.add('hidden');
+  };
+  document.getElementById('modal-catalog-close').addEventListener('click', closeCatalogModal);
+  document.getElementById('modal-catalog-backdrop').addEventListener('click', closeCatalogModal);
+
+  document.getElementById('btn-catalog-search').addEventListener('click', searchCatalog);
+  document.getElementById('catalog-query').addEventListener('keydown', e => { if (e.key === 'Enter') searchCatalog(); });
+
+  async function searchCatalog() {
+    const q = document.getElementById('catalog-query').value.trim();
+    if (!q) return;
+
+    const resultsEl = document.getElementById('catalog-results');
+    resultsEl.innerHTML = '<div class="spinner"></div>';
+
+    // Determina se è un barcode
+    const isBarcode = /^\d{8,14}$/.test(q);
+    const body = isBarcode ? { barcode: q } : { query: q };
+
+    const res = await fetch('/api/foods/import-catalog', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => null);
+      resultsEl.innerHTML = `<div class="empty-state"><p>${err?.error || 'Errore nella ricerca.'}</p></div>`;
+      return;
+    }
+
+    const products = await res.json();
+    if (!products.length) {
+      resultsEl.innerHTML = '<div class="empty-state"><p>Nessun prodotto trovato nel catalogo.</p></div>';
+      return;
+    }
+
+    resultsEl.innerHTML = products.map((p, i) => `
+      <div class="off-result-item">
+        ${p.image_url ? `<img src="${p.image_url}" alt="" loading="lazy">` : '<div style="width:50px;height:50px;border-radius:8px;background:var(--color-border);flex-shrink:0"></div>'}
+        <div class="off-result-info">
+          <div class="off-result-name">${p.name}</div>
+          ${p.brand ? `<div class="off-result-brand">${p.brand}</div>` : ''}
+          <div class="off-result-macros">${Math.round(p.kcal_100g)} kcal · P:${fmt(p.protein_100g)}g G:${fmt(p.fat_100g)}g C:${fmt(p.carbs_100g)}g</div>
+          <div style="font-size:0.7rem;color:var(--color-text-secondary);margin-top:2px">
+            ${p.source === 'crea' ? 'CREA' : 'OFF'}${p.barcode ? ' · ' + p.barcode : ''}${p.nutriscore ? ' · Nutriscore ' + p.nutriscore.toUpperCase() : ''}
+          </div>
+        </div>
+        <button class="btn btn-primary btn-sm btn-catalog-import" data-idx="${i}">Importa</button>
+      </div>
+    `).join('');
+
+    resultsEl.querySelectorAll('.btn-catalog-import').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const product = products[parseInt(btn.dataset.idx)];
+        closeCatalogModal();
+        openFoodFormWithData(product);
+      });
+    });
+  }
+
   // ── Import AlimentiNutrizione.it (INRAN/CREA) ────────────────────────────
   // Bottone nella toolbar
-  const toolbar = document.querySelector('.foods-toolbar');
   const anfBtn = document.createElement('button');
   anfBtn.id = 'btn-import-anf';
   anfBtn.className = 'btn btn-outline btn-sm';
