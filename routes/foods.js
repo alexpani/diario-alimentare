@@ -470,8 +470,11 @@ function mapCatalogProduct(p) {
   // L'immagine può essere un path locale del food-tracker o un URL completo
   let imageUrl = p.image_url || '';
   if (imageUrl && !imageUrl.startsWith('http')) {
-    // Path relativo (es. /images/8000300379402.jpg) — aggiungi base URL
     imageUrl = CATALOG_BASE + imageUrl;
+  }
+  // Proxy attraverso Food Diary per evitare problemi di rete locale su mobile
+  if (imageUrl) {
+    imageUrl = `/api/foods/proxy-image?url=${encodeURIComponent(imageUrl)}`;
   }
   return {
     name:         p.product_name,
@@ -486,6 +489,23 @@ function mapCatalogProduct(p) {
     nutriscore:   p.nutrition_grades || '',
   };
 }
+
+// GET /api/foods/proxy-image?url=...
+router.get('/proxy-image', async (req, res) => {
+  const { url } = req.query;
+  if (!url) return res.status(400).send('Missing url');
+  try {
+    const fetch = (await import('node-fetch')).default;
+    const resp = await fetch(url, { timeout: 8000 });
+    if (!resp.ok) return res.status(resp.status).send('Image not found');
+    const contentType = resp.headers.get('content-type') || 'image/jpeg';
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    resp.body.pipe(res);
+  } catch (err) {
+    res.status(502).send('Proxy error');
+  }
+});
 
 // POST /api/foods/import-off
 router.post('/import-off', async (req, res) => {
