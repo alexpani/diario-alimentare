@@ -71,7 +71,7 @@
 [data-theme="dark"] .qty-tab,
 [data-theme="dark"] .catalog-tab            { background: #2C2C2E; color: var(--color-text-secondary); }
 [data-theme="dark"] .qty-tab.active,
-[data-theme="dark"] .off-tab.active      { background: var(--color-primary); color: #fff; }
+[data-theme="dark"] .catalog-tab.active      { background: var(--color-primary); color: #fff; }
 
 [data-theme="dark"] .search-result-item:active,
 [data-theme="dark"] .recent-food-item:active,
