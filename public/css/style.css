@@ -1024,7 +1024,7 @@ input:focus, select:focus, textarea:focus {
 /* =========================================
    CATALOG MODAL
    ========================================= */
-.off-tabs {
+.catalog-tabs {
   display: flex; gap: 0;
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-sm);
