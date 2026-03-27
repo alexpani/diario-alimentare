@@ -1,5 +1,5 @@
 /* ==========================================
-   foods.js — Tab Alimenti: CRUD + import OFF
+   foods.js — Tab Alimenti: CRUD + import catalogo Food Tracker
    ========================================== */
 
 window.FoodsTab = (() => {
