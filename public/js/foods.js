@@ -711,5 +711,93 @@ window.FoodsTab = (() => {
     }
   }
 
+  // ── Barcode scanner (tab Alimenti) ───────────────────────────────────────
+  let _foodsScanner = null;
+  let _foodsScannerRunning = false;
+
+  document.getElementById('btn-scan-barcode-foods').addEventListener('click', () => {
+    if (_foodsScannerRunning) return;
+    const wrap = document.getElementById('barcode-scanner-foods-wrap');
+    const readerEl = document.getElementById('barcode-reader-foods');
+    readerEl.innerHTML = '';
+    wrap.classList.remove('hidden');
+
+    _foodsScanner = new Html5Qrcode('barcode-reader-foods');
+    _foodsScannerRunning = true;
+
+    _foodsScanner.start(
+      window.ScannerConfig.CAMERA_CONSTRAINTS,
+      window.ScannerConfig.SCAN_CONFIG,
+      async (barcode) => {
+        _foodsScannerRunning = false;
+        wrap.classList.add('hidden');
+        _foodsScanner.stop().catch(() => {}).finally(() => { _foodsScanner = null; });
+        await _handleFoodBarcode(barcode);
+      },
+      () => {}
+    ).catch(err => {
+      _foodsScannerRunning = false;
+      _foodsScanner = null;
+      wrap.classList.add('hidden');
+      console.warn('Webcam non disponibile, uso fallback file:', err);
+      document.getElementById('barcode-file-input-foods').click();
+    });
+  });
+
+  document.getElementById('btn-stop-scan-foods').addEventListener('click', () => {
+    if (_foodsScanner && _foodsScannerRunning) {
+      _foodsScannerRunning = false;
+      _foodsScanner.stop().catch(() => {}).finally(() => {
+        _foodsScanner = null;
+        document.getElementById('barcode-scanner-foods-wrap').classList.add('hidden');
+      });
+    }
+  });
+
+  document.getElementById('barcode-file-input-foods').addEventListener('change', async () => {
+    const input = document.getElementById('barcode-file-input-foods');
+    const file = input.files[0];
+    if (!file) return;
+    input.value = '';
+    try {
+      const qr = new Html5Qrcode('barcode-reader-foods', { verbose: false });
+      const result = await qr.scanFile(file, false);
+      await _handleFoodBarcode(result);
+    } catch (e) {
+      alert('Barcode non riconosciuto nell\'immagine. Riprova con una foto più nitida.');
+    }
+  });
+
+  async function _handleFoodBarcode(barcode) {
+    // 1. Cerca nel DB locale (esclude is_quick)
+    const local = await apiGet(`/api/foods?barcode=${encodeURIComponent(barcode)}`);
+    if (local && local.length > 0) {
+      openFoodForm(local[0].id);
+      return;
+    }
+
+    // 2. Cerca nel catalogo Food Tracker
+    try {
+      const res = await fetch('/api/foods/import-catalog', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ barcode })
+      });
+      if (res.ok) {
+        const products = await res.json();
+        if (products.length > 0) {
+          openFoodFormWithData(products[0]);
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn('Catalog lookup error:', e);
+    }
+
+    // 3. Non trovato
+    const container = document.getElementById('foods-list');
+    container.innerHTML = `<div class="empty-state"><p>Barcode <strong>${barcode}</strong> non trovato nel catalogo.</p></div>`;
+  }
+
   return { refresh, openFoodForm, openFoodFormWithData };
 })();
