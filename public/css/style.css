@@ -92,7 +92,7 @@
 [data-theme="dark"] .msg.success         { background: #1B3A1F; color: #81C784; }
 [data-theme="dark"] .msg.error           { background: #3B1515; color: #EF9A9A; }
 
-[data-theme="dark"] .off-result-item     { background: #2C2C2E; }
+[data-theme="dark"] .catalog-result-item     { background: #2C2C2E; }
 
 [data-theme="dark"] .diary-day-pct       { background: #1B3A1F; color: #81C784; }
 [data-theme="dark"] .diary-day-pct.over  { background: #3B1515; color: #EF9A9A; }
