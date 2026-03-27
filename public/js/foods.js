@@ -694,8 +694,8 @@ window.FoodsTab = (() => {
   }
 
 
-  function openFoodFormWithData(product) {
-    openFoodForm(null);
+  function openFoodFormWithData(product, { onSaved = null } = {}) {
+    openFoodForm(null, { onSaved });
     document.getElementById('ff-name').value = product.name || '';
     document.getElementById('ff-brand').value = product.brand || '';
     document.getElementById('ff-barcode').value = product.barcode || '';
@@ -711,5 +711,5 @@ window.FoodsTab = (() => {
     }
   }
 
-  return { refresh, openFoodForm };
+  return { refresh, openFoodForm, openFoodFormWithData };
 })();
