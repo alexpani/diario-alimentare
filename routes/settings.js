@@ -3,6 +3,7 @@ const router = express.Router();
 const fs = require('fs');
 const path = require('path');
 const { isAuth } = require('./auth');
+const { getDb } = require('../database/db');
 
 router.use(isAuth);
 
