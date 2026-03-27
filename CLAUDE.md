@@ -34,9 +34,9 @@ node update_plans_kcal.js  # aggiorna kcal piani su TDEE personale
 ├── routes/
 │   ├── auth.js            # Login / logout (session-based)
 │   ├── diary.js           # /api/diary — voci diario
-│   ├── foods.js           # /api/foods — libreria alimenti
+│   ├── foods.js           # /api/foods — libreria alimenti + integrazione Food Tracker
 │   ├── plan.js            # /api/plan, /api/plans — piani nutrizionali
-│   └── settings.js        # /api/settings — cambio password
+│   └── settings.js        # /api/settings — password, sync Food Tracker
 ├── public/
 │   ├── index.html         # Shell SPA (tab: home, diario, alimenti, piano, impostazioni)
 │   ├── foods-table.html   # Spreadsheet alimenti (standalone)
@@ -44,9 +44,9 @@ node update_plans_kcal.js  # aggiorna kcal piani su TDEE personale
 │       ├── app.js         # Core: tab switching, sessione, utility globali
 │       ├── diary.js       # Tab Home — diario del giorno
 │       ├── diarylog.js    # Tab Diario — storico e grafici
-│       ├── foods.js       # Tab Alimenti — CRUD alimenti, foto, barcode
+│       ├── foods.js       # Tab Alimenti — CRUD alimenti, foto, barcode, catalogo
 │       ├── plan.js        # Tab Piano — multi-piano nutrizionale
-│       ├── settings.js    # Tab Impostazioni
+│       ├── settings.js    # Tab Impostazioni (sync Food Tracker)
 │       └── barcode.js     # Scanner barcode (html5-qrcode)
 └── uploads/               # Foto alimenti (non in git)
 ```
@@ -65,15 +65,18 @@ node update_plans_kcal.js  # aggiorna kcal piani su TDEE personale
 
 ### Alimenti `/api/foods`
 - `GET /api/foods?q=<query>` — ricerca fuzzy multi-token (filtra `deleted_at IS NULL`, `is_quick=0`)
-- `GET /api/foods?barcode=<ean>` — match esatto barcode
+- `GET /api/foods?barcode=<ean>` — match esatto barcode (solo `is_quick=0`)
+- `GET /api/foods?barcode=<ean>&include_quick=1` — match barcode inclusi i quick (usato nel tab Alimenti)
 - `POST /api/foods` — crea alimento (multipart, supporta foto)
 - `PUT /api/foods/:id` — modifica; `remove_image=1` per cancellare foto
 - `DELETE /api/foods/:id` — soft-delete (imposta `deleted_at`)
+- `POST /api/foods/import-catalog` — importa da Food Tracker: body `{ query }` o `{ barcode }`
+- `GET /api/foods/proxy-image?url=<url>` — proxy immagini (pubblica, no auth)
 
 ### Diario `/api/diary`
 - `GET /api/diary?date=YYYY-MM-DD` — voci del giorno
 - `POST /api/diary` — aggiunge voce
-- `PUT /api/diary/:id` — modifica quantità
+- `PUT /api/diary/:id` — modifica quantità e/o pasto (`meal_type`)
 - `DELETE /api/diary/:id` — rimuove voce
 - `POST /api/diary/quick` — crea alimento `is_quick=1` + voce diario atomicamente
 - `GET /api/diary/recent?meal=<meal>` — ultimi alimenti usati per quel pasto
@@ -86,6 +89,32 @@ node update_plans_kcal.js  # aggiorna kcal piani su TDEE personale
 - `PUT /api/plans/:id` — modifica piano
 - `POST /api/plans/:id/activate` — attiva piano (disattiva gli altri)
 - `DELETE /api/plans/:id` — elimina (non il piano attivo)
+
+### Impostazioni `/api/settings`
+- `GET /api/settings` — recupera impostazioni (password mascherata)
+- `PUT /api/settings/password` — cambia password
+- `POST /api/settings/sync-to-tracker` — sincronizza alimenti locali verso Food Tracker
+  - Invia tutti i foods (`is_quick=0`, non eliminati) tramite `POST /product` di Food Tracker
+  - Foods senza barcode usano `external_id = app_<id>` per evitare duplicati
+  - Source: `app` per prodotti creati nell'app, altrimenti eredita dalla fonte originale
+
+## Flusso barcode
+
+### Tab Home (aggiunta a un pasto)
+1. Scansione barcode
+2. Cerca nel DB locale (`is_quick=0`) per barcode
+3. Se trovato → selezione quantità diretta
+4. Se non trovato → cerca in Food Tracker via `import-catalog`
+5. Se trovato nel catalogo → apre form alimento pre-compilato per modifica/salvataggio
+6. Se salvato → selezione quantità → aggiunta al pasto
+7. Se non trovato → messaggio "non trovato nel catalogo"
+
+### Tab Alimenti (gestione libreria)
+1. Scansione barcode
+2. Cerca nel DB locale (inclusi `is_quick=1`) per barcode
+3. Se trovato → apre form di modifica (anche per promuovere `is_quick=1` a normale)
+4. Se non trovato → cerca in Food Tracker via `import-catalog`
+5. Se trovato → apre form pre-compilato per modifica/salvataggio nella libreria
 
 ## Gotcha importanti
 
@@ -119,6 +148,7 @@ La GET foods filtra sempre `deleted_at IS NULL`.
 ### Voce rapida (`is_quick`)
 `POST /api/diary/quick` crea un alimento con `is_quick=1` (non appare in libreria) e la relativa voce diario.
 La GET foods filtra anche `is_quick = 0`.
+Il barcode lookup nel tab Alimenti usa `&include_quick=1` per trovare anche questi.
 
 ### Autenticazione
 Session-based (express-session, 30 giorni).
@@ -127,8 +157,8 @@ Session-based (express-session, 30 giorni).
 
 ## Integrazione Food Tracker (catalogo locale)
 
-Food Diary può cercare prodotti in un catalogo locale di 210.000+ prodotti italiani
-(Open Food Facts + CREA) servito da un'istanza **food-tracker** separata.
+Food Diary usa **Food Tracker** come unica fonte dati esterna (niente OFF/INRAN diretti).
+Food Tracker serve ~210.000+ prodotti italiani (OFF + CREA + APP).
 
 ### Configurazione
 ```bash
@@ -136,13 +166,10 @@ Food Diary può cercare prodotti in un catalogo locale di 210.000+ prodotti ital
 CATALOG_URL=http://192.168.68.153:3001   # default se non impostato
 ```
 
-### Endpoint food-tracker usati
-- `GET /search?q=<query>&limit=50` — ricerca testuale (FTS5)
+### Endpoint food-tracker usati da Food Diary
+- `GET /search?q=<query>&limit=50` — ricerca testuale (FTS5 + brand LIKE)
 - `GET /product/<barcode>` — lookup per barcode (con auto-enrichment OFF)
-
-### Route Food Diary
-- `POST /api/foods/import-catalog` — body: `{ query }` o `{ barcode }`
-- `GET /api/foods/proxy-image?url=<url>` — proxy immagini (pubblica, no auth)
+- `POST /product` — upsert prodotto (usato dalla sync)
 
 ### Proxy immagini
 Le immagini del catalogo sono servite localmente da food-tracker (`/images/<barcode>.jpg`).
@@ -150,11 +177,29 @@ Vengono proxiate attraverso `/api/foods/proxy-image` per funzionare anche su mob
 fuori dalla rete LAN. La route è registrata **prima** di `router.use(isAuth)`.
 
 ### Food Tracker — infrastruttura
+- **Repo locale**: `/Users/alessandro/food-tracker/`
 - **LXC**: Debian 13, IP `192.168.68.153`, porta `3001`
 - **Docker**: container `food-tracker`, immagine python:3.12-slim, FastAPI + SQLite
 - **DB**: `/data/foods.db` (volume Docker `food-tracker_food-data`)
 - **Immagini**: `/data/images/<barcode>.jpg` (~200K immagini scaricate da OFF)
-- **Aggiornamento**: `scp` file → `docker cp` → `docker restart food-tracker`
+- **Source files sul LXC**: `/opt/food-tracker/app/`
+- **Repo GitHub**: privato — usa tar+scp per il deploy
+
+### Aggiornamento Food Tracker (dal Mac)
+```bash
+# 1. Crea tarball e invia al LXC
+cd /Users/alessandro/food-tracker && \
+tar czf /tmp/ft_app.tar.gz app/ && \
+scp /tmp/ft_app.tar.gz root@192.168.68.153:/tmp/
+
+# 2. Sul LXC food-tracker (192.168.68.153):
+cd /tmp && tar xzf ft_app.tar.gz && \
+docker cp app/main.py food-tracker:/app/app/main.py && \
+docker cp app/models.py food-tracker:/app/app/models.py && \
+docker cp app/database.py food-tracker:/app/app/database.py && \
+docker cp app/static/index.html food-tracker:/app/app/static/index.html && \
+docker restart food-tracker
+```
 
 ---
 
