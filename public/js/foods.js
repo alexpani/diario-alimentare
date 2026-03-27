@@ -769,10 +769,11 @@ window.FoodsTab = (() => {
   });
 
   async function _handleFoodBarcode(barcode) {
-    // 1. Cerca nel DB locale (esclude is_quick)
-    const local = await apiGet(`/api/foods?barcode=${encodeURIComponent(barcode)}`);
+    // 1. Cerca nel DB locale (include anche is_quick — il PUT promuoverà a food reale)
+    const local = await apiGet(`/api/foods?barcode=${encodeURIComponent(barcode)}&include_quick=1`);
     if (local && local.length > 0) {
       openFoodForm(local[0].id);
+      fillFoodForm(local[0]); // garantisce i campi anche se allFoods è vuoto
       return;
     }
 
