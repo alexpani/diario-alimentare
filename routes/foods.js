@@ -499,10 +499,12 @@ router.get('/proxy-image', async (req, res) => {
     const resp = await fetch(url, { timeout: 8000 });
     if (!resp.ok) return res.status(resp.status).send('Image not found');
     const contentType = resp.headers.get('content-type') || 'image/jpeg';
+    const buffer = await resp.arrayBuffer();
     res.setHeader('Content-Type', contentType);
     res.setHeader('Cache-Control', 'public, max-age=86400');
-    resp.body.pipe(res);
+    res.send(Buffer.from(buffer));
   } catch (err) {
+    console.error('proxy-image error:', err.message);
     res.status(502).send('Proxy error');
   }
 });
