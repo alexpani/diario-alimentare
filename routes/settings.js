@@ -93,7 +93,21 @@ router.post('/sync-tracker', async (req, res) => {
         // - prodotto esistente in tracker → mantieni source originale
         const source = existingInTracker ? originalSource : 'app';
 
-        // Controlla se le macro sono cambiate (skip se identico)
+        // Risolvi URL immagine accessibile da Food Tracker
+        let imageUrl = null;
+        if (food.image_path) {
+          if (food.image_path.startsWith('http')) {
+            imageUrl = food.image_path;
+          } else if (food.image_path.includes('/proxy-image?url=')) {
+            const match = food.image_path.match(/[?&]url=([^&]+)/);
+            if (match) imageUrl = decodeURIComponent(match[1]);
+          } else if (food.image_path.startsWith('/uploads/')) {
+            const base = process.env.FOOD_DIARY_URL || 'http://192.168.68.173:3000';
+            imageUrl = base + food.image_path;
+          }
+        }
+
+        // Controlla se tutto è identico (macro + immagine) — skip se nulla è cambiato
         if (existingInTracker) {
           const same =
             Math.abs((existingInTracker.energy_kcal || 0) - (food.kcal_100g || 0)) < 0.5 &&
@@ -101,27 +115,11 @@ router.post('/sync-tracker', async (req, res) => {
             Math.abs((existingInTracker.fat_100g || 0) - (food.fat_100g || 0)) < 0.5 &&
             Math.abs((existingInTracker.carbohydrates_100g || 0) - (food.carbs_100g || 0)) < 0.5 &&
             (existingInTracker.product_name || '') === (food.name || '') &&
-            (existingInTracker.brands || '') === (food.brand || '');
+            (existingInTracker.brands || '') === (food.brand || '') &&
+            (existingInTracker.image_url || '') === (imageUrl || '');
           if (same) {
             skipped++;
             continue;
-          }
-        }
-
-        // Risolvi URL immagine accessibile da Food Tracker
-        let imageUrl = null;
-        if (food.image_path) {
-          if (food.image_path.startsWith('http')) {
-            // URL esterno — usalo direttamente
-            imageUrl = food.image_path;
-          } else if (food.image_path.includes('/proxy-image?url=')) {
-            // Immagine proxiata da catalogo — estrai URL originale
-            const match = food.image_path.match(/[?&]url=([^&]+)/);
-            if (match) imageUrl = decodeURIComponent(match[1]);
-          } else if (food.image_path.startsWith('/uploads/')) {
-            // Upload locale — costruisci URL assoluto usando FOOD_DIARY_URL
-            const base = process.env.FOOD_DIARY_URL || 'http://192.168.68.173:3000';
-            imageUrl = base + food.image_path;
           }
         }
 
