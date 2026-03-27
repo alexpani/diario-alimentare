@@ -49,49 +49,6 @@ router.patch('/password', (req, res) => {
   }
 });
 
-// GET /api/settings/off
-router.get('/off', (req, res) => {
-  res.json({
-    user: process.env.OFF_USER || '',
-    pass: process.env.OFF_PASS ? '••••••••' : ''
-  });
-});
-
-// PUT /api/settings/off
-router.put('/off', (req, res) => {
-  const { user, pass } = req.body;
-  const envPath = path.join(__dirname, '..', '.env');
-
-  try {
-    let envContent = fs.existsSync(envPath) ? fs.readFileSync(envPath, 'utf8') : '';
-
-    // Aggiorna o aggiungi OFF_USER
-    if (envContent.includes('OFF_USER=')) {
-      envContent = envContent.replace(/^OFF_USER=.*/m, `OFF_USER=${user || ''}`);
-    } else {
-      envContent += `\nOFF_USER=${user || ''}`;
-    }
-
-    // Aggiorna o aggiungi OFF_PASS (solo se fornita, non il placeholder)
-    if (pass && pass !== '••••••••') {
-      if (envContent.includes('OFF_PASS=')) {
-        envContent = envContent.replace(/^OFF_PASS=.*/m, `OFF_PASS=${pass}`);
-      } else {
-        envContent += `\nOFF_PASS=${pass}`;
-      }
-      process.env.OFF_PASS = pass;
-    }
-
-    fs.writeFileSync(envPath, envContent, 'utf8');
-    process.env.OFF_USER = user || '';
-
-    res.json({ ok: true });
-  } catch (err) {
-    console.error('Errore aggiornamento OFF:', err);
-    res.status(500).json({ error: 'Impossibile aggiornare le credenziali' });
-  }
-});
-
 // GET /api/settings/info
 router.get('/info', (req, res) => {
   const pkg = require('../package.json');
