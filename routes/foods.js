@@ -231,7 +231,7 @@ router.put('/:id', upload.single('image'), async (req, res) => {
     await db.run(
       `UPDATE foods SET name=?, brand=?, kcal_100g=?, protein_100g=?, fat_100g=?, carbs_100g=?,
        portions=?, barcode=?, openfoodfacts_id=?, image_path=?,
-       components=?, recipe_yield_g=?, updated_at=datetime('now') WHERE id=?`,
+       components=?, recipe_yield_g=?, is_quick=0, updated_at=datetime('now') WHERE id=?`,
       name || existing.name,
       brand !== undefined ? brand : existing.brand,
       macros.kcal_100g, macros.protein_100g, macros.fat_100g, macros.carbs_100g,
