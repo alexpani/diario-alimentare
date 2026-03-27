@@ -60,5 +60,38 @@ window.SettingsTab = (() => {
     }
   });
 
+  // ── Sync verso Food Tracker ─────────────────────────────────────────────
+  document.getElementById('btn-sync-tracker').addEventListener('click', async () => {
+    const btn = document.getElementById('btn-sync-tracker');
+    const resultEl = document.getElementById('sync-tracker-result');
+    btn.disabled = true;
+    btn.textContent = '⏳ Sincronizzazione in corso…';
+    resultEl.classList.add('hidden');
+
+    try {
+      const res = await fetch('/api/settings/sync-tracker', { method: 'POST' });
+      const data = await res.json();
+
+      if (!res.ok) {
+        showMsg(resultEl, data.error || 'Errore durante la sincronizzazione', 'error');
+      } else {
+        const { total, created, updated, skipped, errors } = data;
+        const lines = [
+          `Totale alimenti: ${total}`,
+          created  ? `✓ Creati: ${created}`    : '',
+          updated  ? `✓ Aggiornati: ${updated}` : '',
+          skipped  ? `— Invariati: ${skipped}`  : '',
+          errors   ? `✗ Errori: ${errors}`      : '',
+        ].filter(Boolean).join('<br>');
+        showMsg(resultEl, lines, errors ? 'error' : 'success');
+      }
+    } catch (e) {
+      showMsg(resultEl, 'Impossibile raggiungere il server', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '↑ Sincronizza verso Food Tracker';
+    }
+  });
+
   return { refresh };
 })();
