@@ -6,6 +6,25 @@ const multer = require('multer');
 const { getDb } = require('../database/db');
 const { isAuth } = require('./auth');
 
+// GET /api/foods/proxy-image?url=... (pubblica, non richiede autenticazione)
+router.get('/proxy-image', async (req, res) => {
+  const { url } = req.query;
+  if (!url) return res.status(400).send('Missing url');
+  try {
+    const fetch = (await import('node-fetch')).default;
+    const resp = await fetch(url, { timeout: 8000 });
+    if (!resp.ok) return res.status(resp.status).send('Image not found');
+    const contentType = resp.headers.get('content-type') || 'image/jpeg';
+    const buffer = await resp.arrayBuffer();
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    res.send(Buffer.from(buffer));
+  } catch (err) {
+    console.error('proxy-image error:', err.message);
+    res.status(502).send('Proxy error');
+  }
+});
+
 router.use(isAuth);
 
 // Configurazione multer
@@ -489,25 +508,6 @@ function mapCatalogProduct(p) {
     nutriscore:   p.nutrition_grades || '',
   };
 }
-
-// GET /api/foods/proxy-image?url=...
-router.get('/proxy-image', async (req, res) => {
-  const { url } = req.query;
-  if (!url) return res.status(400).send('Missing url');
-  try {
-    const fetch = (await import('node-fetch')).default;
-    const resp = await fetch(url, { timeout: 8000 });
-    if (!resp.ok) return res.status(resp.status).send('Image not found');
-    const contentType = resp.headers.get('content-type') || 'image/jpeg';
-    const buffer = await resp.arrayBuffer();
-    res.setHeader('Content-Type', contentType);
-    res.setHeader('Cache-Control', 'public, max-age=86400');
-    res.send(Buffer.from(buffer));
-  } catch (err) {
-    console.error('proxy-image error:', err.message);
-    res.status(502).send('Proxy error');
-  }
-});
 
 // POST /api/foods/import-off
 router.post('/import-off', async (req, res) => {
