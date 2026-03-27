@@ -1022,7 +1022,7 @@ input:focus, select:focus, textarea:focus {
 .cropper-view-box { outline-color: rgba(76,175,80,.85); }
 
 /* =========================================
-   OFF MODAL
+   CATALOG MODAL
    ========================================= */
 .off-tabs {
   display: flex; gap: 0;
