@@ -35,7 +35,7 @@ window.ScannerConfig = (() => {
    * Su iOS il controllo torch è ignorato silenziosamente — nessun pulsante viene mostrato.
    *
    * @param {Html5Qrcode} scannerInstance  — istanza Html5Qrcode già avviata
-   * @param {HTMLElement} containerEl      — il div wrapper dello scanner (barcode-scanner-wrap o off-barcode-wrap)
+   * @param {HTMLElement} containerEl      — il div wrapper dello scanner (barcode-scanner-wrap o catalog-barcode-wrap)
    */
   function initTorch(scannerInstance, containerEl) {
     try {
