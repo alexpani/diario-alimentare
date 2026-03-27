@@ -85,7 +85,7 @@ router.get('/', async (req, res) => {
     // Ricerca per barcode esatto (ha priorità su q)
     if (req.query.barcode) {
       const food = await db.get(
-        'SELECT * FROM foods WHERE barcode = ?',
+        'SELECT * FROM foods WHERE barcode = ? AND is_quick = 0 AND deleted_at IS NULL',
         req.query.barcode.trim()
       );
       return res.json(food ? [deserializeFood(food)] : []);
