@@ -123,6 +123,40 @@ La GET foods filtra anche `is_quick = 0`.
 ### Autenticazione
 Session-based (express-session, 30 giorni).
 `isAuth` middleware in `routes/auth.js` — usa `req.originalUrl` (non `req.path`) per rilevare route API e restituire 401 JSON invece di redirect.
+⚠️ `router.use(isAuth)` è applicato globalmente in `routes/foods.js`. Le route pubbliche (es. `/proxy-image`) vanno definite **prima** di questa riga.
+
+## Integrazione Food Tracker (catalogo locale)
+
+Food Diary può cercare prodotti in un catalogo locale di 210.000+ prodotti italiani
+(Open Food Facts + CREA) servito da un'istanza **food-tracker** separata.
+
+### Configurazione
+```bash
+# In .env
+CATALOG_URL=http://192.168.68.153:3001   # default se non impostato
+```
+
+### Endpoint food-tracker usati
+- `GET /search?q=<query>&limit=50` — ricerca testuale (FTS5)
+- `GET /product/<barcode>` — lookup per barcode (con auto-enrichment OFF)
+
+### Route Food Diary
+- `POST /api/foods/import-catalog` — body: `{ query }` o `{ barcode }`
+- `GET /api/foods/proxy-image?url=<url>` — proxy immagini (pubblica, no auth)
+
+### Proxy immagini
+Le immagini del catalogo sono servite localmente da food-tracker (`/images/<barcode>.jpg`).
+Vengono proxiate attraverso `/api/foods/proxy-image` per funzionare anche su mobile
+fuori dalla rete LAN. La route è registrata **prima** di `router.use(isAuth)`.
+
+### Food Tracker — infrastruttura
+- **LXC**: Debian 13, IP `192.168.68.153`, porta `3001`
+- **Docker**: container `food-tracker`, immagine python:3.12-slim, FastAPI + SQLite
+- **DB**: `/data/foods.db` (volume Docker `food-tracker_food-data`)
+- **Immagini**: `/data/images/<barcode>.jpg` (~200K immagini scaricate da OFF)
+- **Aggiornamento**: `scp` file → `docker cp` → `docker restart food-tracker`
+
+---
 
 ## Produzione — LXC Proxmox
 
