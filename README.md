@@ -1,4 +1,4 @@
-# FoodDiary
+# Food Diary
 
 Diario alimentare personale — web app locale in Node.js + SQLite.
 
