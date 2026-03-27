@@ -150,8 +150,16 @@
           <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <input type="text" id="foods-search" placeholder="Cerca alimenti..." class="search-input">
         </div>
+        <button id="btn-scan-barcode-foods" class="btn-icon" title="Scansiona barcode" style="color:var(--color-primary)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><rect x="3" y="3" width="6" height="18"/><rect x="13" y="3" width="2" height="18"/><rect x="17" y="3" width="4" height="18"/></svg>
+        </button>
         <button id="btn-new-food" class="btn btn-primary">+ Nuovo</button>
       </div>
+      <div id="barcode-scanner-foods-wrap" class="hidden" style="padding:12px">
+        <div id="barcode-reader-foods"></div>
+        <button id="btn-stop-scan-foods" class="btn btn-outline btn-full mt-8">Ferma scanner</button>
+      </div>
+      <input type="file" id="barcode-file-input-foods" accept="image/*" capture="environment" style="display:none">
       <div id="foods-list" class="foods-list"></div>
     </section>
 
