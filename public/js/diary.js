@@ -659,23 +659,16 @@ window.DiaryTab = (() => {
           const products = await catalogRes.json();
           if (products.length > 0) {
             const p = products[0];
-            // Importa automaticamente nel DB locale e seleziona
-            const fd = new FormData();
-            fd.append('name', p.name);
-            fd.append('brand', p.brand || '');
-            fd.append('barcode', p.barcode || barcode);
-            fd.append('kcal_100g', p.kcal_100g || 0);
-            fd.append('protein_100g', p.protein_100g || 0);
-            fd.append('fat_100g', p.fat_100g || 0);
-            fd.append('carbs_100g', p.carbs_100g || 0);
-            if (p.image_url) fd.append('image_url', p.image_url);
-            const saveRes = await fetch('/api/foods', { method: 'POST', body: fd });
-            if (saveRes.ok) {
-              const saved = await saveRes.json();
-              resultsEl.innerHTML = '';
-              selectFood(saved);
-              return;
-            }
+            // Apri il form alimento pre-compilato: l'utente può modificare, aggiungere porzioni e salvare
+            resultsEl.innerHTML = '';
+            document.getElementById('modal-add-food').classList.add('hidden');
+            FoodsTab.openFoodFormWithData(p, {
+              onSaved: (newFood) => {
+                document.getElementById('modal-add-food').classList.remove('hidden');
+                selectFood(newFood);
+              }
+            });
+            return;
           }
         }
       } catch (e) {
