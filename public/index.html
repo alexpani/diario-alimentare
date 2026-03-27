@@ -556,66 +556,6 @@
   </div>
 </div>
 
-<!-- MODAL: Import OpenFoodFacts -->
-<div id="modal-off" class="modal hidden">
-  <div class="modal-backdrop" id="modal-off-backdrop"></div>
-  <div class="modal-sheet">
-    <div class="modal-header">
-      <h2>Importa da OpenFoodFacts</h2>
-      <button class="btn-icon modal-close" id="modal-off-close">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
-    <div class="modal-body">
-      <div class="off-tabs">
-        <button class="off-tab active" data-mode="name">Per nome</button>
-        <button class="off-tab" data-mode="barcode">Per barcode</button>
-      </div>
-      <div class="form-group mt-8">
-        <input type="text" id="off-query" placeholder="Nome prodotto o barcode..." class="search-input">
-      </div>
-      <button id="btn-off-scan" class="btn btn-outline btn-full hidden" style="margin-bottom:8px">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;vertical-align:middle;margin-right:6px"><rect x="3" y="3" width="6" height="18"/><rect x="13" y="3" width="2" height="18"/><rect x="17" y="3" width="4" height="18"/></svg>
-        Scansiona con fotocamera
-      </button>
-      <input type="file" id="off-barcode-file-input" accept="image/*" capture="environment" style="display:none">
-      <button id="btn-off-scan-file" class="btn btn-outline btn-full hidden" style="margin-bottom:8px">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;vertical-align:middle;margin-right:6px"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-        Fotografa barcode (iOS)
-      </button>
-      <div id="off-barcode-wrap" class="hidden" style="margin-bottom:8px">
-        <div id="off-barcode-reader"></div>
-        <button id="btn-off-stop-scan" class="btn btn-outline btn-full mt-8">Ferma scanner</button>
-      </div>
-      <button id="btn-off-search" class="btn btn-primary btn-full">Cerca su OpenFoodFacts</button>
-      <div id="off-results" class="off-results"></div>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: Import AlimentiNutrizione.it (INRAN/CREA) -->
-<div id="modal-anf" class="modal hidden">
-  <div class="modal-backdrop" id="modal-anf-backdrop"></div>
-  <div class="modal-sheet">
-    <div class="modal-header">
-      <h2>Importa da AlimentiNutrizione.it</h2>
-      <button class="btn-icon modal-close" id="modal-anf-close">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
-    <div class="modal-body">
-      <p style="font-size:0.82rem;color:var(--color-text-secondary);margin:0 0 12px">
-        Database CREA/INRAN — ~2000 alimenti italiani con valori nutrizionali ufficiali
-      </p>
-      <div class="form-group">
-        <input type="text" id="anf-query" placeholder="Cerca alimento (es. pasta, pollo, mela)..." class="search-input" autocomplete="off">
-      </div>
-      <button id="btn-anf-search" class="btn btn-primary btn-full">Cerca</button>
-      <div id="anf-results" class="off-results"></div>
-    </div>
-  </div>
-</div>
-
 <!-- MODAL: Import Catalogo locale (food-tracker) -->
 <div id="modal-catalog" class="modal hidden">
   <div class="modal-backdrop" id="modal-catalog-backdrop"></div>
