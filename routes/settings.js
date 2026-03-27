@@ -125,7 +125,7 @@ router.post('/sync-tracker', async (req, res) => {
 
         // Upsert su Food Tracker
         const payload = {
-          external_id: food.barcode || null,
+          external_id: food.barcode || `app_${food.id}`,
           product_name: food.name,
           brands: food.brand || null,
           source,
