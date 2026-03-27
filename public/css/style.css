@@ -1039,7 +1039,7 @@ input:focus, select:focus, textarea:focus {
 }
 .catalog-tab.active { background: var(--color-primary); color: white; }
 
-.off-results { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+.catalog-results { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
 .off-result-item {
   background: var(--color-bg); border-radius: var(--radius-sm);
   padding: 12px; display: flex; gap: 10px; align-items: flex-start;
