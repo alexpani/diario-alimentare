@@ -108,6 +108,23 @@ router.post('/sync-tracker', async (req, res) => {
           }
         }
 
+        // Risolvi URL immagine accessibile da Food Tracker
+        let imageUrl = null;
+        if (food.image_path) {
+          if (food.image_path.startsWith('http')) {
+            // URL esterno — usalo direttamente
+            imageUrl = food.image_path;
+          } else if (food.image_path.includes('/proxy-image?url=')) {
+            // Immagine proxiata da catalogo — estrai URL originale
+            const match = food.image_path.match(/[?&]url=([^&]+)/);
+            if (match) imageUrl = decodeURIComponent(match[1]);
+          } else if (food.image_path.startsWith('/uploads/')) {
+            // Upload locale — costruisci URL assoluto usando FOOD_DIARY_URL
+            const base = process.env.FOOD_DIARY_URL || 'http://192.168.68.173:3000';
+            imageUrl = base + food.image_path;
+          }
+        }
+
         // Upsert su Food Tracker
         const payload = {
           external_id: food.barcode || null,
@@ -118,7 +135,7 @@ router.post('/sync-tracker', async (req, res) => {
           proteins_100g: food.protein_100g || null,
           fat_100g: food.fat_100g || null,
           carbohydrates_100g: food.carbs_100g || null,
-          image_url: null  // non sincronizziamo le immagini locali
+          image_url: imageUrl
         };
 
         const upsertRes = await fetch(`${CATALOG_BASE}/product`, {
