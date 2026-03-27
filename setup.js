@@ -30,7 +30,6 @@ async function main() {
       portions TEXT NOT NULL DEFAULT '[]',
       image_path TEXT,
       barcode TEXT,
-      openfoodfacts_id TEXT,
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     )
