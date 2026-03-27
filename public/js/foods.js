@@ -678,14 +678,14 @@ window.FoodsTab = (() => {
         ? `<span style="font-size:0.75rem;color:var(--color-primary);font-weight:600;white-space:nowrap">✓ Già presente</span>`
         : `<button class="btn btn-primary btn-sm btn-catalog-import" data-idx="${i}">Importa</button>`;
       return `
-        <div class="off-result-item">
+        <div class="catalog-result-item">
           ${p.image_url ? `<img src="${p.image_url}" alt="" loading="lazy">` : '<div style="width:50px;height:50px;border-radius:8px;background:var(--color-border);flex-shrink:0"></div>'}
-          <div class="off-result-info">
-            <div class="off-result-name">${p.name}</div>
-            ${p.brand ? `<div class="off-result-brand">${p.brand}</div>` : ''}
-            <div class="off-result-macros">${Math.round(p.kcal_100g)} kcal · P:${fmt(p.protein_100g)}g G:${fmt(p.fat_100g)}g C:${fmt(p.carbs_100g)}g</div>
+          <div class="catalog-result-info">
+            <div class="catalog-result-name">${p.name}</div>
+            ${p.brand ? `<div class="catalog-result-brand">${p.brand}</div>` : ''}
+            <div class="catalog-result-macros">${Math.round(p.kcal_100g)} kcal · P:${fmt(p.protein_100g)}g G:${fmt(p.fat_100g)}g C:${fmt(p.carbs_100g)}g</div>
             <div style="font-size:0.7rem;color:var(--color-text-secondary);margin-top:2px">
-              ${p.source === 'crea' ? 'CREA' : 'OFF'}${p.barcode ? ' · ' + p.barcode : ''}${p.nutriscore ? ' · Nutriscore ' + p.nutriscore.toUpperCase() : ''}
+              ${p.source === 'crea' ? 'CREA' : 'OpenFoodFacts'}${p.barcode ? ' · ' + p.barcode : ''}${p.nutriscore ? ' · Nutriscore ' + p.nutriscore.toUpperCase() : ''}
             </div>
           </div>
           ${action}
