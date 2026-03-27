@@ -685,7 +685,7 @@ window.FoodsTab = (() => {
             ${p.brand ? `<div class="catalog-result-brand">${p.brand}</div>` : ''}
             <div class="catalog-result-macros">${Math.round(p.kcal_100g)} kcal · P:${fmt(p.protein_100g)}g G:${fmt(p.fat_100g)}g C:${fmt(p.carbs_100g)}g</div>
             <div style="font-size:0.7rem;color:var(--color-text-secondary);margin-top:2px">
-              ${p.source === 'crea' ? 'CREA' : 'OpenFoodFacts'}${p.barcode ? ' · ' + p.barcode : ''}${p.nutriscore ? ' · Nutriscore ' + p.nutriscore.toUpperCase() : ''}
+              ${p.source === 'crea' ? 'CREA' : p.source === 'app' ? 'APP' : 'OpenFoodFacts'}${p.barcode ? ' · ' + p.barcode : ''}${p.nutriscore ? ' · Nutriscore ' + p.nutriscore.toUpperCase() : ''}
             </div>
           </div>
           ${action}
