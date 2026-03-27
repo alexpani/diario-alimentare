@@ -640,7 +640,7 @@ window.DiaryTab = (() => {
       const resultsEl = document.getElementById('modal-search-results');
       resultsEl.innerHTML = '<div class="spinner"></div>';
 
-      // Cerca nel DB locale per barcode esatto
+      // 1. Cerca nel DB locale per barcode esatto
       const local = await apiGet(`/api/foods?barcode=${encodeURIComponent(barcode)}`);
       if (local && local.length > 0) {
         resultsEl.innerHTML = '';
@@ -648,7 +648,41 @@ window.DiaryTab = (() => {
         return;
       }
 
-      resultsEl.innerHTML = `<div class="empty-state"><p>Barcode <strong>${barcode}</strong> non trovato nel database locale.<br>Importa da OpenFoodFacts nella tab Alimenti.</p></div>`;
+      // 2. Non trovato in locale → cerca nel catalogo Food Tracker
+      try {
+        const catalogRes = await fetch('/api/foods/import-catalog', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ barcode })
+        });
+        if (catalogRes.ok) {
+          const products = await catalogRes.json();
+          if (products.length > 0) {
+            const p = products[0];
+            // Importa automaticamente nel DB locale e seleziona
+            const fd = new FormData();
+            fd.append('name', p.name);
+            fd.append('brand', p.brand || '');
+            fd.append('barcode', p.barcode || barcode);
+            fd.append('kcal_100g', p.kcal_100g || 0);
+            fd.append('protein_100g', p.protein_100g || 0);
+            fd.append('fat_100g', p.fat_100g || 0);
+            fd.append('carbs_100g', p.carbs_100g || 0);
+            if (p.image_url) fd.append('image_url', p.image_url);
+            const saveRes = await fetch('/api/foods', { method: 'POST', body: fd });
+            if (saveRes.ok) {
+              const saved = await saveRes.json();
+              resultsEl.innerHTML = '';
+              selectFood(saved);
+              return;
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('Catalog lookup error:', e);
+      }
+
+      resultsEl.innerHTML = `<div class="empty-state"><p>Barcode <strong>${barcode}</strong> non trovato nel catalogo.</p></div>`;
     });
   });
 
