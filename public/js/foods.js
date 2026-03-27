@@ -669,20 +669,28 @@ window.FoodsTab = (() => {
       return;
     }
 
-    resultsEl.innerHTML = products.map((p, i) => `
-      <div class="off-result-item">
-        ${p.image_url ? `<img src="${p.image_url}" alt="" loading="lazy">` : '<div style="width:50px;height:50px;border-radius:8px;background:var(--color-border);flex-shrink:0"></div>'}
-        <div class="off-result-info">
-          <div class="off-result-name">${p.name}</div>
-          ${p.brand ? `<div class="off-result-brand">${p.brand}</div>` : ''}
-          <div class="off-result-macros">${Math.round(p.kcal_100g)} kcal · P:${fmt(p.protein_100g)}g G:${fmt(p.fat_100g)}g C:${fmt(p.carbs_100g)}g</div>
-          <div style="font-size:0.7rem;color:var(--color-text-secondary);margin-top:2px">
-            ${p.source === 'crea' ? 'CREA' : 'OFF'}${p.barcode ? ' · ' + p.barcode : ''}${p.nutriscore ? ' · Nutriscore ' + p.nutriscore.toUpperCase() : ''}
+    // Barcodes già presenti nel DB locale
+    const localBarcodes = new Set(allFoods.filter(f => f.barcode).map(f => f.barcode));
+
+    resultsEl.innerHTML = products.map((p, i) => {
+      const inDb = p.barcode && localBarcodes.has(p.barcode);
+      const action = inDb
+        ? `<span style="font-size:0.75rem;color:var(--color-primary);font-weight:600;white-space:nowrap">✓ Già presente</span>`
+        : `<button class="btn btn-primary btn-sm btn-catalog-import" data-idx="${i}">Importa</button>`;
+      return `
+        <div class="off-result-item">
+          ${p.image_url ? `<img src="${p.image_url}" alt="" loading="lazy">` : '<div style="width:50px;height:50px;border-radius:8px;background:var(--color-border);flex-shrink:0"></div>'}
+          <div class="off-result-info">
+            <div class="off-result-name">${p.name}</div>
+            ${p.brand ? `<div class="off-result-brand">${p.brand}</div>` : ''}
+            <div class="off-result-macros">${Math.round(p.kcal_100g)} kcal · P:${fmt(p.protein_100g)}g G:${fmt(p.fat_100g)}g C:${fmt(p.carbs_100g)}g</div>
+            <div style="font-size:0.7rem;color:var(--color-text-secondary);margin-top:2px">
+              ${p.source === 'crea' ? 'CREA' : 'OFF'}${p.barcode ? ' · ' + p.barcode : ''}${p.nutriscore ? ' · Nutriscore ' + p.nutriscore.toUpperCase() : ''}
+            </div>
           </div>
-        </div>
-        <button class="btn btn-primary btn-sm btn-catalog-import" data-idx="${i}">Importa</button>
-      </div>
-    `).join('');
+          ${action}
+        </div>`;
+    }).join('');
 
     resultsEl.querySelectorAll('.btn-catalog-import').forEach(btn => {
       btn.addEventListener('click', () => {
