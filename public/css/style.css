@@ -1048,7 +1048,7 @@ input:focus, select:focus, textarea:focus {
 .catalog-result-info { flex: 1; min-width: 0; }
 .catalog-result-name { font-weight: 700; font-size: 14px; }
 .catalog-result-brand { font-size: 12px; color: var(--color-text-secondary); }
-.off-result-macros { font-size: 12px; margin-top: 4px; color: var(--color-text-secondary); }
+.catalog-result-macros { font-size: 12px; margin-top: 4px; color: var(--color-text-secondary); }
 .catalog-result-item .btn { align-self: center; flex-shrink: 0; }
 
 .off-duplicate-warning {
