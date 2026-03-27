@@ -1051,12 +1051,12 @@ input:focus, select:focus, textarea:focus {
 .catalog-result-macros { font-size: 12px; margin-top: 4px; color: var(--color-text-secondary); }
 .catalog-result-item .btn { align-self: center; flex-shrink: 0; }
 
-.off-duplicate-warning {
+.catalog-duplicate-warning {
   display: flex; align-items: center; gap: 8px;
   background: #fff8e1; border: 1px solid #f9a825; border-radius: var(--radius-sm);
   padding: 10px 12px; font-size: 13px; color: #5d4037;
 }
-.off-duplicate-warning svg { color: #f9a825; }
+.catalog-duplicate-warning svg { color: #f9a825; }
 .btn-link {
   background: none; border: none; padding: 0; margin-left: 4px;
   color: var(--color-primary); font-weight: 600; cursor: pointer;
