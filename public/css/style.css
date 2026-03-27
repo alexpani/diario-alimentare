@@ -1040,16 +1040,16 @@ input:focus, select:focus, textarea:focus {
 .catalog-tab.active { background: var(--color-primary); color: white; }
 
 .catalog-results { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
-.off-result-item {
+.catalog-result-item {
   background: var(--color-bg); border-radius: var(--radius-sm);
   padding: 12px; display: flex; gap: 10px; align-items: flex-start;
 }
-.off-result-item img { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
+.catalog-result-item img { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
 .off-result-info { flex: 1; min-width: 0; }
 .off-result-name { font-weight: 700; font-size: 14px; }
 .off-result-brand { font-size: 12px; color: var(--color-text-secondary); }
 .off-result-macros { font-size: 12px; margin-top: 4px; color: var(--color-text-secondary); }
-.off-result-item .btn { align-self: center; flex-shrink: 0; }
+.catalog-result-item .btn { align-self: center; flex-shrink: 0; }
 
 .off-duplicate-warning {
   display: flex; align-items: center; gap: 8px;
