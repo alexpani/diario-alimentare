@@ -617,6 +617,24 @@
   </div>
 </div>
 
+<!-- MODAL: Salva come ricetta -->
+<div id="modal-save-recipe" class="modal hidden">
+  <div class="modal-backdrop" id="modal-recipe-backdrop"></div>
+  <div class="modal-dialog" style="max-width:400px">
+    <h3>Salva come ricetta</h3>
+    <div class="form-group" style="margin:12px 0">
+      <label for="recipe-name-input">Nome ricetta</label>
+      <input type="text" id="recipe-name-input" class="form-control" placeholder="Es. Pasta al pomodoro" autocomplete="off">
+    </div>
+    <div id="recipe-ingredients-summary" style="margin-bottom:12px"></div>
+    <div id="recipe-totals-summary" style="margin-bottom:16px"></div>
+    <div class="modal-actions">
+      <button id="btn-cancel-recipe" class="btn btn-outline">Annulla</button>
+      <button id="btn-confirm-recipe" class="btn btn-primary">Salva</button>
+    </div>
+  </div>
+</div>
+
 <!-- CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
