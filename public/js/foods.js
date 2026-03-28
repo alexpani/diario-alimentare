@@ -9,7 +9,14 @@ window.FoodsTab = (() => {
 
   // ── Refresh ─────────────────────────────
   async function refresh(q = '') {
-    const url = q ? `/api/foods?q=${encodeURIComponent(q)}&limit=100` : '/api/foods?limit=100';
+    let url;
+    if (!q) {
+      url = '/api/foods?limit=100';
+    } else if (/^\d{8,14}$/.test(q)) {
+      url = `/api/foods?barcode=${encodeURIComponent(q)}&include_quick=1`;
+    } else {
+      url = `/api/foods?q=${encodeURIComponent(q)}&limit=100`;
+    }
     const foods = await apiGet(url);
     allFoods = foods || [];
     renderList(allFoods);
