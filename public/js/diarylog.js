@@ -118,7 +118,7 @@ window.DiaryLog = (() => {
             label: 'Target',
             data: targetValues,
             type: 'line',
-            borderColor: 'rgba(244, 67, 54, 0.7)',
+            borderColor: cssColor('--color-danger', 0.7),
             borderWidth: 2,
             borderDash: [5, 5],
             pointRadius: 0,
