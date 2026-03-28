@@ -752,7 +752,7 @@ input:focus, select:focus, textarea:focus {
   padding: 4px 10px; border-radius: 12px;
   background: var(--color-primary-light); color: var(--color-primary-dark);
 }
-.diary-day-pct.over { background: #FFEBEE; color: var(--color-danger); }
+.diary-day-pct.over { background: var(--color-danger-bg); color: var(--color-danger); }
 
 /* =========================================
    FOODS TAB
