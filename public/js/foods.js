@@ -201,6 +201,16 @@ window.FoodsTab = (() => {
   document.getElementById('btn-cancel-food').addEventListener('click', closeFoodForm);
   document.getElementById('btn-new-food').addEventListener('click', () => openFoodForm());
 
+  // Clona ricetta
+  document.getElementById('btn-clone-recipe').addEventListener('click', () => {
+    const nameEl = document.getElementById('ff-name');
+    nameEl.value = (nameEl.value || '') + ' (copia)';
+    document.getElementById('food-form-id').value = '';
+    editingId = null;
+    document.getElementById('food-form-title').textContent = 'Nuova ricetta (clone)';
+    document.getElementById('btn-clone-recipe').classList.add('hidden');
+  });
+
   // ── Scanner barcode nel form alimento ────────────────────────────────────
   (function initFfBarcodeScanner() {
     const scanBtn     = document.getElementById('btn-ff-scan-barcode');
