@@ -825,7 +825,7 @@ input:focus, select:focus, textarea:focus {
    MULTI-PLAN CARDS
    ========================================= */
 .plan-card { margin-bottom: 12px; }
-.plan-card-active { border-left: 4px solid var(--color-primary, #4CAF50); }
+.plan-card-active { border-left: 4px solid var(--color-primary); }
 
 .plan-card-header {
   display: flex; align-items: flex-start;
