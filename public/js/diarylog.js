@@ -157,26 +157,42 @@ window.DiaryLog = (() => {
     });
   }
 
-  // ── Grafico macros medi mensili ──────────
-  async function loadMacrosChart() {
+  // ── Grafico macros medi ─────────────────
+  let _macrosDays = 7;
+  let _rangeCache = {}; // { '7': [...], '30': [...] }
+
+  async function loadMacrosChart(days) {
+    if (days !== undefined) _macrosDays = days;
+    const numDays = _macrosDays;
+
     const to = todayStr();
     const fromDate = new Date();
-    fromDate.setDate(fromDate.getDate() - 29);
+    fromDate.setDate(fromDate.getDate() - (numDays - 1));
     const from = fromDate.toISOString().slice(0, 10);
 
-    const data = await apiGet(`/api/diary/range?from=${from}&to=${to}`);
+    // Cache per evitare chiamate duplicate
+    if (!_rangeCache[numDays]) {
+      _rangeCache[numDays] = await apiGet(`/api/diary/range?from=${from}&to=${to}`);
+    }
+    const data = _rangeCache[numDays];
 
+    const card = document.getElementById('chart-macros').parentElement;
     if (!data || data.length === 0) {
-      document.getElementById('chart-macros').parentElement.style.display = 'none';
+      card.style.display = 'none';
       return;
     }
-    document.getElementById('chart-macros').parentElement.style.display = '';
+    card.style.display = '';
+
+    // Aggiorna tab attivo
+    document.querySelectorAll('.macros-tab').forEach(t => {
+      t.classList.toggle('active', parseInt(t.dataset.macrosDays) === numDays);
+    });
 
     const avgProtein = data.reduce((s, d) => s + d.protein, 0) / data.length;
     const avgFat = data.reduce((s, d) => s + d.fat, 0) / data.length;
     const avgCarbs = data.reduce((s, d) => s + d.carbs, 0) / data.length;
 
-    // Calcola percentuali kcal dai macro
+    // Percentuali kcal dai macro
     const proteinKcal = avgProtein * 4;
     const fatKcal = avgFat * 9;
     const carbsKcal = avgCarbs * 4;
@@ -192,6 +208,24 @@ window.DiaryLog = (() => {
         <div class="macros-legend-item"><span class="macros-legend-dot" style="background:${cssColor('--color-protein')}"></span>Proteine: ${Math.round(avgProtein)}g · ${proteinPct}%</div>
         <div class="macros-legend-item"><span class="macros-legend-dot" style="background:${cssColor('--color-fat')}"></span>Grassi: ${Math.round(avgFat)}g · ${fatPct}%</div>
         <div class="macros-legend-item"><span class="macros-legend-dot" style="background:${cssColor('--color-carbs')}"></span>Carboidrati: ${Math.round(avgCarbs)}g · ${carbsPct}%</div>
+      `;
+    }
+
+    // Scostamento dal piano
+    const plan = App.plan;
+    const devEl = document.getElementById('chart-macros-deviation');
+    if (devEl && plan) {
+      const diffP = proteinPct - (plan.protein_pct || 0);
+      const diffF = fatPct - (plan.fat_pct || 0);
+      const diffC = carbsPct - (plan.carbs_pct || 0);
+      const fmtDiff = (v) => (v > 0 ? '+' : '') + v;
+      devEl.innerHTML = `
+        <div class="macros-deviation-title">Scostamento dal piano (${plan.name || 'attivo'})</div>
+        <div class="macros-deviation-row">
+          <span style="color:var(--color-protein)">P: ${fmtDiff(diffP)}%</span>
+          <span style="color:var(--color-fat)">G: ${fmtDiff(diffF)}%</span>
+          <span style="color:var(--color-carbs)">C: ${fmtDiff(diffC)}%</span>
+        </div>
       `;
     }
 
@@ -224,6 +258,11 @@ window.DiaryLog = (() => {
       }
     });
   }
+
+  // Tab listener
+  document.querySelectorAll('.macros-tab').forEach(btn => {
+    btn.addEventListener('click', () => loadMacrosChart(parseInt(btn.dataset.macrosDays)));
+  });
 
   return { refresh };
 })();
