@@ -519,11 +519,12 @@ window.DiaryTab = (() => {
       html += '<div class="recent-label" style="margin:14px 0 6px">Dal catalogo</div>';
       html += catalogProducts.map((p, i) => `
         <div class="catalog-result-item">
-          ${p.image_url ? `<img src="${p.image_url}" alt="" loading="lazy">` : '<div style="width:50px;height:50px;border-radius:8px;background:var(--color-border);flex-shrink:0"></div>'}
+          ${p.image_url ? `<img src="${p.image_url}" alt="" loading="lazy">` : '<div class="catalog-result-img-placeholder"></div>'}
           <div class="catalog-result-info">
             <div class="catalog-result-name">${p.name}</div>
             ${p.brand ? `<div class="catalog-result-brand">${p.brand}</div>` : ''}
             <div class="catalog-result-macros">${Math.round(p.kcal_100g)} kcal · P:${(p.protein_100g||0).toFixed(1)}g G:${(p.fat_100g||0).toFixed(1)}g C:${(p.carbs_100g||0).toFixed(1)}g</div>
+            <div class="catalog-result-source">${p.source === 'crea' ? 'CREA' : p.source === 'app' ? 'APP' : 'OFF'}${p.barcode ? ' · ' + p.barcode : ''}</div>
           </div>
           <button class="btn btn-primary btn-sm btn-catalog-modal-import" data-idx="${i}">Importa</button>
         </div>
