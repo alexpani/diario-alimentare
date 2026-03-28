@@ -524,7 +524,7 @@ window.DiaryTab = (() => {
     document.getElementById('btn-empty-new-food')?.addEventListener('click', showQuickNewFood);
   }
 
-  function selectFood(food) {
+  function selectFood(food, { qty_g = null, qty_label = null } = {}) {
     selectedFood = food;
 
     // Mostra anteprima
@@ -542,15 +542,39 @@ window.DiaryTab = (() => {
     const portionsPanel = document.getElementById('qty-portions-panel');
     const portions = food.portions || [];
 
+    // Determina se la quantità ricordata corrisponde a una porzione
+    let matchedPortion = false;
     if (portions.length > 0) {
       portionsTab.style.display = '';
       const select = document.getElementById('qty-portion-select');
       select.innerHTML = portions.map(p => `<option value="${p.grams}">${p.name} (${p.grams}g)</option>`).join('');
-      // Attiva di default il tab porzioni
-      document.querySelector('.qty-tab[data-mode="portions"]').classList.add('active');
-      document.querySelector('.qty-tab[data-mode="grams"]').classList.remove('active');
-      portionsPanel.classList.remove('hidden');
-      document.getElementById('qty-grams-panel').classList.add('hidden');
+
+      // Prova a matchare la quantità ricordata con una porzione
+      if (qty_g && qty_label) {
+        for (const p of portions) {
+          if (qty_g % p.grams === 0 || Math.abs(qty_g / p.grams - Math.round(qty_g / p.grams)) < 0.01) {
+            const count = Math.round(qty_g / p.grams * 4) / 4; // arrotonda a 0.25
+            if (count >= 0.25 && count <= 99) {
+              select.value = p.grams;
+              document.getElementById('qty-portion-count').value = count;
+              matchedPortion = true;
+              break;
+            }
+          }
+        }
+      }
+
+      if (matchedPortion) {
+        document.querySelector('.qty-tab[data-mode="portions"]').classList.add('active');
+        document.querySelector('.qty-tab[data-mode="grams"]').classList.remove('active');
+        portionsPanel.classList.remove('hidden');
+        document.getElementById('qty-grams-panel').classList.add('hidden');
+      } else {
+        document.querySelector('.qty-tab[data-mode="portions"]').classList.add('active');
+        document.querySelector('.qty-tab[data-mode="grams"]').classList.remove('active');
+        portionsPanel.classList.remove('hidden');
+        document.getElementById('qty-grams-panel').classList.add('hidden');
+      }
     } else {
       portionsTab.style.display = 'none';
       portionsPanel.classList.add('hidden');
@@ -559,8 +583,14 @@ window.DiaryTab = (() => {
       document.querySelector('.qty-tab[data-mode="portions"]').classList.remove('active');
     }
 
-    document.getElementById('qty-grams').value = 100;
-    document.getElementById('qty-portion-count').value = 1;
+    // Pre-imposta quantità ricordata o default
+    document.getElementById('qty-grams').value = (!matchedPortion && qty_g) ? qty_g : (matchedPortion ? 100 : (qty_g || 100));
+    if (!matchedPortion) {
+      document.getElementById('qty-portion-count').value = 1;
+      if (qty_g && portions.length === 0) {
+        document.getElementById('qty-grams').value = qty_g;
+      }
+    }
     updateKcalPreview();
 
     // Cambia step
