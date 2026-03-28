@@ -280,7 +280,7 @@ input[type=date], select, textarea {
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-sm);
   font-size: 15px;
-  background: white;
+  background: var(--color-input);
   color: var(--color-text);
   transition: border-color 0.15s;
   -webkit-appearance: none;
