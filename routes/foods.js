@@ -134,7 +134,7 @@ router.post('/', upload.single('image'), async (req, res) => {
   try {
     const db = await getDb();
     const { name, brand, kcal_100g, protein_100g, fat_100g, carbs_100g,
-            portions, barcode, components, recipe_yield_g } = req.body;
+            portions, barcode, components, recipe_yield_g, source } = req.body;
 
     if (!name) return res.status(400).json({ error: 'Il nome è obbligatorio' });
 
@@ -155,12 +155,13 @@ router.post('/', upload.single('image'), async (req, res) => {
 
     const result = await db.run(
       `INSERT INTO foods (name, brand, kcal_100g, protein_100g, fat_100g, carbs_100g,
-        portions, barcode, components, recipe_yield_g)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        portions, barcode, components, recipe_yield_g, source)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       name, brand || null,
       macros.kcal_100g, macros.protein_100g, macros.fat_100g, macros.carbs_100g,
       portionsJson, barcode || null,
-      componentsJson, parseFloat(recipe_yield_g) || null
+      componentsJson, parseFloat(recipe_yield_g) || null,
+      source || 'app'
     );
 
     const newId = result.lastID;
