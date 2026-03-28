@@ -426,7 +426,7 @@ input:focus, select:focus, textarea:focus {
   background: var(--color-primary) !important;
   border-radius: 50%;
 }
-.cal-cell.cal-selected > span { color: white !important; font-weight: 700; }
+.cal-cell.cal-selected > span { color: var(--color-text-on-primary) !important; font-weight: 700; }
 .cal-cell.cal-future { opacity: 0.35; pointer-events: none; }
 .cal-dot {
   width: 5px; height: 5px; border-radius: 50%;
