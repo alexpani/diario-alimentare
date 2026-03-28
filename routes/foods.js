@@ -45,11 +45,14 @@ const upload = multer({
 });
 
 
-// ── Helper: calcola macros da componenti ─────────────────────────────────────
+// ── Helper: calcola macros da componenti (usa snapshot se presente, fallback DB) ──
 async function calcMacrosFromComponents(db, components, recipe_yield_g) {
   let totalKcal = 0, totalProtein = 0, totalFat = 0, totalCarbs = 0, totalWeight = 0;
   for (const c of components) {
-    const f = await db.get('SELECT kcal_100g,protein_100g,fat_100g,carbs_100g FROM foods WHERE id=?', c.food_id);
+    // Usa snapshot nutrizionale se presente nel componente, altrimenti lookup DB
+    const f = (c.kcal_100g !== undefined)
+      ? c
+      : await db.get('SELECT kcal_100g,protein_100g,fat_100g,carbs_100g FROM foods WHERE id=?', c.food_id);
     if (!f) continue;
     const q = parseFloat(c.quantity_g) || 0;
     totalKcal    += (f.kcal_100g    / 100) * q;
