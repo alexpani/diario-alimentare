@@ -243,9 +243,7 @@ router.get('/frequent', async (req, res) => {
       JOIN foods f ON f.id = de.food_id
       JOIN (
         SELECT food_id, quantity_g, quantity_label
-        FROM diary_entries
-        WHERE meal_type = ?
-        AND id IN (
+        FROM diary_entries WHERE id IN (
           SELECT MAX(id) FROM diary_entries WHERE meal_type = ? GROUP BY food_id
         )
       ) latest ON latest.food_id = de.food_id
@@ -253,7 +251,7 @@ router.get('/frequent', async (req, res) => {
       GROUP BY de.food_id
       ORDER BY use_count DESC
       LIMIT ?
-    `, meal_type, meal_type, meal_type, parseInt(limit));
+    `, meal_type, meal_type, parseInt(limit));
 
     res.json(rows.map(r => ({
       ...r,
