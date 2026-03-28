@@ -125,7 +125,8 @@
 [data-theme="dark"] .entry-food-img-placeholder { background: var(--color-input); }
 
 [data-theme="dark"] .search-result-item,
-[data-theme="dark"] .catalog-result-item     { background: var(--color-input); }
+[data-theme="dark"] .catalog-result-item,
+[data-theme="dark"] .food-card               { background: var(--color-input); }
 
 [data-theme="dark"] .cal-cell            { color: var(--color-text); }
 [data-theme="dark"] .cal-future          { opacity: 0.35; }
