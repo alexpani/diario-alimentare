@@ -647,6 +647,15 @@ window.FoodsTab = (() => {
   document.getElementById('btn-catalog-search').addEventListener('click', searchCatalog);
   document.getElementById('catalog-query').addEventListener('keydown', e => { if (e.key === 'Enter') searchCatalog(); });
 
+  // Ricerca predittiva catalogo (4+ caratteri)
+  let catalogSearchTimeout = null;
+  document.getElementById('catalog-query').addEventListener('input', (e) => {
+    clearTimeout(catalogSearchTimeout);
+    const q = e.target.value.trim();
+    if (q.length < 4) return;
+    catalogSearchTimeout = setTimeout(() => searchCatalog(), 400);
+  });
+
   async function searchCatalog() {
     const q = document.getElementById('catalog-query').value.trim();
     if (!q) return;
