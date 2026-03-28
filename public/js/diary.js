@@ -226,6 +226,20 @@ window.DiaryTab = (() => {
     await refresh();
   }
 
+  // ── Copy from yesterday ─────────────────
+  async function copyFromYesterday(meal) {
+    const yesterday = shiftDate(currentDate, -1);
+    const res = await apiPost('/api/diary/copy', {
+      from_date: yesterday,
+      to_date: currentDate,
+      meal_type: meal
+    });
+    if (res && !res.error) {
+      openMealId = meal;
+      await refresh();
+    }
+  }
+
   // ── Add modal ───────────────────────────
   function openAddModal(meal) {
     selectedMeal = meal;
