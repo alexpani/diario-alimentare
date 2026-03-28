@@ -388,7 +388,7 @@ window.DiaryTab = (() => {
       toast.id = 'diary-added-toast';
       toast.style.cssText = `
         position:absolute; top:12px; left:50%; transform:translateX(-50%);
-        background:var(--color-primary); color:#fff;
+        background:var(--color-primary); color:var(--color-text-on-primary);
         padding:6px 16px; border-radius:20px; font-size:13px; font-weight:600;
         white-space:nowrap; pointer-events:none; z-index:10;
         opacity:0; transition:opacity .2s;
