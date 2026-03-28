@@ -107,6 +107,7 @@ window.FoodsTab = (() => {
     document.getElementById('food-form').reset();
     document.getElementById('food-form-id').value = '';
     document.getElementById('ff-image-url').value = '';
+    document.getElementById('ff-source').value = 'app';
     document.getElementById('ff-image-preview').classList.add('hidden');
     document.getElementById('ff-image-preview').dataset.removed = '';
     _croppedBlob = null;
