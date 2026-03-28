@@ -331,7 +331,7 @@ window.DiaryTab = (() => {
     ]);
 
     // Escludi alimenti già presenti in questo pasto oggi
-    const mealFoodIds = new Set(entries.filter(e => e.meal_type === meal).map(e => e.food_id));
+    const mealFoodIds = new Set(entries.filter(e => e.meal_type === meal).map(e => e.food?.id));
     _recentFoods = (recents || []).filter(f => !mealFoodIds.has(f.id)).slice(0, 8);
     _frequentFoods = (frequents || []).filter(f => !mealFoodIds.has(f.id)).slice(0, 8);
 
