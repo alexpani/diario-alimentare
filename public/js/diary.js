@@ -290,15 +290,10 @@ window.DiaryTab = (() => {
     updateKcalPreview();
   }
 
-  // ── Alimenti recenti ───────────────────
-  async function loadRecentFoods(meal) {
-    const recents = await apiGet(`/api/diary/recent?meal_type=${encodeURIComponent(meal)}&limit=8`);
-    if (!recents || recents.length === 0) return;
-
-    const section = document.getElementById('modal-recent-section');
+  // ── Alimenti recenti / frequenti ───────────────────
+  function renderRecentList(foods) {
     const list = document.getElementById('modal-recent-foods');
-
-    list.innerHTML = recents.map(f => `
+    list.innerHTML = foods.map(f => `
       <div class="recent-food-item" data-recent-food-id="${f.id}">
         ${f.image_path ? `<img class="sri-img" src="${f.image_path}" alt="" loading="lazy">` : `<div class="sri-placeholder">🥗</div>`}
         <div class="sri-info">
@@ -310,12 +305,42 @@ window.DiaryTab = (() => {
 
     list.querySelectorAll('.recent-food-item').forEach(item => {
       item.addEventListener('click', () => {
-        const food = recents.find(f => f.id === parseInt(item.dataset.recentFoodId));
+        const src = _currentRecentMode === 'recent' ? _recentFoods : _frequentFoods;
+        const food = src.find(f => f.id === parseInt(item.dataset.recentFoodId));
         if (food) selectFood(food);
       });
     });
+  }
 
-    section.classList.remove('hidden');
+  function switchRecentTab(mode) {
+    _currentRecentMode = mode;
+    document.querySelectorAll('#modal-recent-section .recent-tab').forEach(t => {
+      t.classList.toggle('active', t.dataset.recentMode === mode);
+    });
+    renderRecentList(mode === 'recent' ? _recentFoods : _frequentFoods);
+  }
+
+  document.querySelectorAll('#modal-recent-section .recent-tab').forEach(t => {
+    t.addEventListener('click', () => switchRecentTab(t.dataset.recentMode));
+  });
+
+  async function loadRecentFoods(meal) {
+    const mealEnc = encodeURIComponent(meal);
+    const [recents, frequents] = await Promise.all([
+      apiGet(`/api/diary/recent?meal_type=${mealEnc}&limit=8`),
+      apiGet(`/api/diary/frequent?meal_type=${mealEnc}&limit=8`)
+    ]);
+    _recentFoods = recents || [];
+    _frequentFoods = frequents || [];
+
+    if (_recentFoods.length === 0 && _frequentFoods.length === 0) return;
+
+    _currentRecentMode = 'recent';
+    document.querySelectorAll('#modal-recent-section .recent-tab').forEach(t => {
+      t.classList.toggle('active', t.dataset.recentMode === 'recent');
+    });
+    renderRecentList(_recentFoods);
+    document.getElementById('modal-recent-section').classList.remove('hidden');
   }
 
   function closeAddModal() {
