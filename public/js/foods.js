@@ -142,6 +142,7 @@ window.FoodsTab = (() => {
     document.getElementById('ff-fat').value = food.fat_100g || 0;
     document.getElementById('ff-carbs').value = food.carbs_100g || 0;
     document.getElementById('ff-image-url').value = food.image_path || '';
+    document.getElementById('ff-source').value = food.source || 'app';
 
     if (food.image_path) {
       document.getElementById('ff-preview-img').src = food.image_path;
