@@ -48,24 +48,33 @@
    DARK THEME
    ========================================= */
 [data-theme="dark"] {
-  --color-bg:               #0F0F0F;
-  --color-card:             #1C1C1E;
-  --color-text:             #F2F2F7;
-  --color-text-secondary:   #8E8E93;
-  --color-text-on-primary:  #ffffff;
-  --color-border:           #38383A;
-  --color-primary-light:    #1B3A1F;
-  --color-input:            #2C2C2E;
-  --color-elevated:         #3A3A3C;
-  --color-danger-bg:        #3B1515;
-  --color-danger-text:      #EF9A9A;
-  --color-warning-bg:       #3A2E1A;
-  --color-warning-border:   #BB8A00;
-  --color-warning-text:     #FFD54F;
-  --color-success-bg:       #1B3A1F;
-  --color-success-text:     #81C784;
-  --shadow:                 0 2px 8px rgba(0,0,0,0.45);
-  --shadow-lg:              0 4px 20px rgba(0,0,0,0.55);
+  --color-primary:            #66BB6A;
+  --color-primary-dark:       #43A047;
+  --color-primary-light:      #1B3A1F;
+  --color-primary-surface:    #388E3C;
+  --color-text-on-primary:    #000000;
+  --color-bg:                 #0F0F0F;
+  --color-card:               #1C1C1E;
+  --color-text:               #F2F2F7;
+  --color-text-secondary:     #A1A1A6;
+  --color-border:             #48484A;
+  --color-input:              #2C2C2E;
+  --color-elevated:           #3A3A3C;
+  --color-danger:             #EF5350;
+  --color-danger-bg:          #3B1515;
+  --color-danger-text:        #EF9A9A;
+  --color-warning-bg:         #3A2E1A;
+  --color-warning-border:     #F9A825;
+  --color-warning-text:       #FFD54F;
+  --color-success-bg:         #1B3A1F;
+  --color-success-text:       #81C784;
+  --color-protein:            #7986CB;
+  --color-fat:                #FFB74D;
+  --color-carbs:              #81C784;
+  --color-gauge-over:         #FFD54F;
+  --color-gauge-warning:      #A5D6A7;
+  --shadow:                   0 2px 8px rgba(0,0,0,0.45);
+  --shadow-lg:                0 4px 20px rgba(0,0,0,0.55);
 }
 
 /* Elementi che usano --color-card come sfondo */
