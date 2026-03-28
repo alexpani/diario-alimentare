@@ -142,7 +142,7 @@ window.DiaryLog = (() => {
         scales: {
           y: {
             beginAtZero: true,
-            grid: { color: 'rgba(0,0,0,0.05)' },
+            grid: { color: cssColor('--color-border', 0.5) },
             ticks: { maxTicksLimit: 5 }
           },
           x: { grid: { display: false } }
