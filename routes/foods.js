@@ -119,6 +119,76 @@ router.get('/', async (req, res) => {
   }
 });
 
+// POST /api/foods/recipe-from-meal — crea ricetta dagli alimenti di un pasto
+router.post('/recipe-from-meal', async (req, res) => {
+  try {
+    const db = await getDb();
+    const { name, date, meal_type } = req.body;
+    if (!name || !date || !meal_type) {
+      return res.status(400).json({ error: 'name, date e meal_type sono obbligatori' });
+    }
+
+    // Leggi le voci del pasto con dati alimento
+    const mealEntries = await db.all(
+      `SELECT de.id, de.quantity_g, de.quantity_label,
+              f.id AS food_id, f.name AS food_name, f.kcal_100g, f.protein_100g, f.fat_100g, f.carbs_100g
+       FROM diary_entries de
+       JOIN foods f ON f.id = de.food_id
+       WHERE de.date = ? AND de.meal_type = ?
+       ORDER BY de.created_at`,
+      date, meal_type
+    );
+
+    if (mealEntries.length < 2) {
+      return res.status(400).json({ error: 'Servono almeno 2 alimenti per creare una ricetta' });
+    }
+
+    // Crea componenti snapshot
+    const components = mealEntries.map(e => ({
+      food_id: e.food_id,
+      name: e.food_name,
+      quantity_g: e.quantity_g,
+      kcal_100g: e.kcal_100g,
+      protein_100g: e.protein_100g,
+      fat_100g: e.fat_100g,
+      carbs_100g: e.carbs_100g,
+    }));
+
+    const recipeYieldG = components.reduce((s, c) => s + c.quantity_g, 0);
+    const macros = await calcMacrosFromComponents(db, components, recipeYieldG);
+    const portionsJson = JSON.stringify([{ name: '1 porzione', grams: Math.round(recipeYieldG) }]);
+
+    // Crea il food ricetta
+    const result = await db.run(
+      `INSERT INTO foods (name, kcal_100g, protein_100g, fat_100g, carbs_100g,
+        portions, components, recipe_yield_g, source)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'app')`,
+      name,
+      macros.kcal_100g, macros.protein_100g, macros.fat_100g, macros.carbs_100g,
+      portionsJson, JSON.stringify(components), recipeYieldG
+    );
+    const foodId = result.lastID;
+
+    // Elimina le vecchie voci del pasto
+    for (const e of mealEntries) {
+      await db.run('DELETE FROM diary_entries WHERE id = ?', e.id);
+    }
+
+    // Crea nuova voce con la ricetta
+    const entryResult = await db.run(
+      `INSERT INTO diary_entries (date, meal_type, food_id, quantity_g, quantity_label)
+       VALUES (?, ?, ?, ?, ?)`,
+      date, meal_type, foodId, Math.round(recipeYieldG), '1 porzione'
+    );
+
+    const food = await db.get('SELECT * FROM foods WHERE id = ?', foodId);
+    res.json({ food: deserializeFood(food), entry_id: entryResult.lastID });
+  } catch (err) {
+    console.error('recipe-from-meal error:', err);
+    res.status(500).json({ error: 'Errore nella creazione della ricetta' });
+  }
+});
+
 // GET /api/foods/:id
 router.get('/:id', async (req, res) => {
   try {
