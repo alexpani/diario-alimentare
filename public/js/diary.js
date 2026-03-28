@@ -492,8 +492,21 @@ window.DiaryTab = (() => {
         return;
       }
 
+      // Controlla quali prodotti sono già nel DB locale (per barcode)
+      const barcodesToCheck = products.filter(p => p.barcode).map(p => p.barcode);
+      const localByBarcode = {};
+      for (const bc of barcodesToCheck) {
+        const local = await apiGet(`/api/foods?barcode=${encodeURIComponent(bc)}`);
+        if (local && local.length > 0) localByBarcode[bc] = local[0];
+      }
+
       const headerHtml = isFallback ? '<div class="recent-label" style="margin-bottom:8px">Risultati dal catalogo</div>' : '';
-      targetEl.innerHTML = headerHtml + products.map((p, i) => `
+      targetEl.innerHTML = headerHtml + products.map((p, i) => {
+        const localFood = p.barcode && localByBarcode[p.barcode];
+        const action = localFood
+          ? `<button class="btn btn-primary btn-sm btn-catalog-modal-select" data-idx="${i}">Aggiungi</button>`
+          : `<button class="btn btn-primary btn-sm btn-catalog-modal-import" data-idx="${i}">Importa</button>`;
+        return `
         <div class="catalog-result-item">
           ${p.image_url ? `<img src="${p.image_url}" alt="" loading="lazy">` : '<div style="width:50px;height:50px;border-radius:8px;background:var(--color-border);flex-shrink:0"></div>'}
           <div class="catalog-result-info">
@@ -501,15 +514,25 @@ window.DiaryTab = (() => {
             ${p.brand ? `<div class="catalog-result-brand">${p.brand}</div>` : ''}
             <div class="catalog-result-macros">${Math.round(p.kcal_100g)} kcal · P:${(p.protein_100g||0).toFixed(1)}g G:${(p.fat_100g||0).toFixed(1)}g C:${(p.carbs_100g||0).toFixed(1)}g</div>
           </div>
-          <button class="btn btn-primary btn-sm btn-catalog-modal-import" data-idx="${i}">Importa</button>
-        </div>
-      `).join('');
+          ${action}
+        </div>`;
+      }).join('');
 
       if (isFallback) {
         targetEl.innerHTML += '<div style="text-align:center;margin-top:8px"><button class="btn btn-outline btn-sm" id="btn-empty-new-food">+ Crea questo alimento</button></div>';
         document.getElementById('btn-empty-new-food')?.addEventListener('click', showQuickNewFood);
       }
 
+      // Prodotti già nel DB → seleziona direttamente il food locale
+      targetEl.querySelectorAll('.btn-catalog-modal-select').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const product = products[parseInt(btn.dataset.idx)];
+          const localFood = localByBarcode[product.barcode];
+          selectFood(localFood);
+        });
+      });
+
+      // Prodotti nuovi → importa tramite form
       targetEl.querySelectorAll('.btn-catalog-modal-import').forEach(btn => {
         btn.addEventListener('click', () => {
           const product = products[parseInt(btn.dataset.idx)];
