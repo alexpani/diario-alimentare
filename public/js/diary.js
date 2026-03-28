@@ -18,7 +18,6 @@ window.DiaryTab = (() => {
   let selectedFood = null;
   let editingEntryId = null;
   let searchTimeout = null;
-  let catalogSearchTimeout = null;
   let _recentFoods = [];
   let _frequentFoods = [];
   let _currentRecentMode = 'recent';
