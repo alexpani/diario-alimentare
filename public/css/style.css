@@ -546,9 +546,9 @@ input:focus, select:focus, textarea:focus {
   transition: width 0.5s ease;
   max-width: 100%;
 }
-.carbs-bar   { background: #bbdefb; }
-.protein-bar { background: #f48fb1; }
-.fat-bar     { background: #ce93d8; }
+.carbs-bar   { background: var(--color-carbs); }
+.protein-bar { background: var(--color-protein); }
+.fat-bar     { background: var(--color-fat); }
 
 /* Mantieni compatibilità con il vecchio .progress-bar usato altrove */
 .progress-bar-wrap {
