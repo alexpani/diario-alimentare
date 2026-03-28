@@ -311,7 +311,7 @@ router.post('/import-catalog', async (req, res) => {
     if (barcode) {
       url = `${CATALOG_BASE}/product/${encodeURIComponent(barcode)}`;
     } else {
-      url = `${CATALOG_BASE}/search?q=${encodeURIComponent(query)}&limit=50`;
+      url = `${CATALOG_BASE}/search?q=${encodeURIComponent(query)}&limit=100`;
     }
 
     const resp = await fetch(url, { timeout: 10000 });
