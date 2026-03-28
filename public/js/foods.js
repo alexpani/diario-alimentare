@@ -571,6 +571,7 @@ window.FoodsTab = (() => {
     formData.append('fat_100g', document.getElementById('ff-fat').value);
     formData.append('carbs_100g', document.getElementById('ff-carbs').value);
     formData.append('portions', JSON.stringify(portions));
+    formData.append('source', document.getElementById('ff-source').value || 'app');
 
     // Ricetta
     if (recipeToggle.checked && recipeIngredients.length > 0) {
