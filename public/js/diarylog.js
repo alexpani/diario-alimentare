@@ -179,7 +179,7 @@ window.DiaryLog = (() => {
         labels: ['Proteine', 'Grassi', 'Carboidrati'],
         datasets: [{
           data: [Math.round(avgProtein), Math.round(avgFat), Math.round(avgCarbs)],
-          backgroundColor: ['rgba(92, 107, 192, 0.8)', 'rgba(255, 167, 38, 0.8)', 'rgba(102, 187, 106, 0.8)'],
+          backgroundColor: [cssColor('--color-protein', 0.8), cssColor('--color-fat', 0.8), cssColor('--color-carbs', 0.8)],
           borderWidth: 0
         }]
       },
