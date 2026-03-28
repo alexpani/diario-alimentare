@@ -1174,7 +1174,7 @@ input:focus, select:focus, textarea:focus {
 .toggle-slider::before {
   content: ''; position: absolute;
   width: 18px; height: 18px; left: 3px; bottom: 3px;
-  background: white; border-radius: 50%;
+  background: var(--color-card); border-radius: 50%;
   transition: transform 0.2s;
   box-shadow: 0 1px 3px rgba(0,0,0,.25);
 }
