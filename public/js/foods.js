@@ -584,10 +584,14 @@ window.FoodsTab = (() => {
     formData.append('portions', JSON.stringify(portions));
     formData.append('source', document.getElementById('ff-source').value || 'app');
 
-    // Ricetta
+    // Ricetta — snapshot completo con dati nutrizionali
     if (recipeToggle.checked && recipeIngredients.length > 0) {
       formData.append('components', JSON.stringify(
-        recipeIngredients.map(i => ({ food_id: i.food_id, quantity_g: i.quantity_g }))
+        recipeIngredients.map(i => ({
+          food_id: i.food_id, name: i.name, quantity_g: i.quantity_g,
+          kcal_100g: i.kcal_100g, protein_100g: i.protein_100g,
+          fat_100g: i.fat_100g, carbs_100g: i.carbs_100g,
+        }))
       ));
       const yieldVal = document.getElementById('ff-recipe-yield').value;
       if (yieldVal) formData.append('recipe_yield_g', yieldVal);
