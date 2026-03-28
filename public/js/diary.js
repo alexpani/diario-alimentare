@@ -290,21 +290,23 @@ window.DiaryTab = (() => {
   // ── Alimenti recenti / frequenti ───────────────────
   function renderRecentList(foods) {
     const list = document.getElementById('modal-recent-foods');
-    list.innerHTML = foods.map(f => `
+    list.innerHTML = foods.map(f => {
+      const qtyInfo = f.last_qty_label || (f.last_qty_g ? `${f.last_qty_g}g` : '');
+      return `
       <div class="recent-food-item" data-recent-food-id="${f.id}">
         ${f.image_path ? `<img class="sri-img" src="${f.image_path}" alt="" loading="lazy">` : `<div class="sri-placeholder">🥗</div>`}
         <div class="sri-info">
           <div class="sri-name">${f.name}</div>
-          <div class="sri-detail">${f.brand ? f.brand + ' · ' : ''}${Math.round(f.kcal_100g)} kcal/100g</div>
+          <div class="sri-detail">${f.brand ? f.brand + ' · ' : ''}${Math.round(f.kcal_100g)} kcal/100g${qtyInfo ? ` · <span style="color:var(--color-primary)">${qtyInfo}</span>` : ''}</div>
         </div>
-      </div>
-    `).join('');
+      </div>`;
+    }).join('');
 
     list.querySelectorAll('.recent-food-item').forEach(item => {
       item.addEventListener('click', () => {
         const src = _currentRecentMode === 'recent' ? _recentFoods : _frequentFoods;
         const food = src.find(f => f.id === parseInt(item.dataset.recentFoodId));
-        if (food) selectFood(food);
+        if (food) selectFood(food, { qty_g: food.last_qty_g, qty_label: food.last_qty_label });
       });
     });
   }
