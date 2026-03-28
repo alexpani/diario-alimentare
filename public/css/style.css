@@ -240,7 +240,7 @@ body {
 .btn-primary:active { background: var(--color-primary-dark); transform: scale(0.97); }
 
 .btn-outline {
-  background: white; color: var(--color-text);
+  background: var(--color-card); color: var(--color-text);
   border: 1.5px solid var(--color-border);
 }
 .btn-outline:active { background: var(--color-bg); transform: scale(0.97); }
