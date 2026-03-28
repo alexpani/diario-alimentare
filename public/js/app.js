@@ -340,7 +340,7 @@ const Theme = (() => {
     document.documentElement.dataset.theme = dark ? 'dark' : 'light';
     // Aggiorna meta theme-color
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.content = dark ? '#1C1C1E' : '#4CAF50';
+    if (meta) meta.content = getComputedStyle(document.documentElement).getPropertyValue('--color-primary').trim() || '#4CAF50';
   }
 
   function set(mode) {
