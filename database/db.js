@@ -24,6 +24,8 @@ async function getDb() {
       await _db.run("ALTER TABLE foods ADD COLUMN deleted_at TEXT");
     if (!colNames.includes('is_quick'))
       await _db.run("ALTER TABLE foods ADD COLUMN is_quick INTEGER NOT NULL DEFAULT 0");
+    if (!colNames.includes('source'))
+      await _db.run("ALTER TABLE foods ADD COLUMN source TEXT NOT NULL DEFAULT 'app'");
 
     // Migrazione tabella plans (multi-piano)
     const tables = (await _db.all("SELECT name FROM sqlite_master WHERE type='table'")).map(t => t.name);
