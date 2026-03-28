@@ -194,7 +194,7 @@ router.put('/:id', upload.single('image'), async (req, res) => {
     if (!existing) return res.status(404).json({ error: 'Alimento non trovato' });
 
     const { name, brand, kcal_100g, protein_100g, fat_100g, carbs_100g,
-            portions, barcode, image_url, components, recipe_yield_g } = req.body;
+            portions, barcode, image_url, components, recipe_yield_g, source } = req.body;
 
     const portionsJson  = portions   ? (typeof portions   === 'string' ? portions   : JSON.stringify(portions))   : existing.portions;
     const componentsArr = components ? (typeof components === 'string' ? JSON.parse(components) : components) : JSON.parse(existing.components || '[]');
