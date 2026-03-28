@@ -147,7 +147,7 @@ body {
 }
 
 .login-card {
-  background: white;
+  background: var(--color-card);
   border-radius: 20px;
   padding: 36px 28px;
   width: 100%; max-width: 380px;
