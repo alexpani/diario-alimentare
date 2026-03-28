@@ -11,7 +11,8 @@ const MEALS = [
   { id: 'extra',              label: 'Extra',              icon: '🍬' }
 ];
 
-function _fmtSrc(src) {
+function _fmtSrc(src, components) {
+  if (Array.isArray(components) && components.length > 0) return 'Ricetta';
   if (!src) return 'APP';
   const s = src.toLowerCase();
   if (s === 'crea') return 'CREA';
