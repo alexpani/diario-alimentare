@@ -658,8 +658,8 @@ input:focus, select:focus, textarea:focus {
   display: flex; align-items: center; justify-content: center;
   transition: all 0.15s; flex-shrink: 0;
 }
-.btn-remove-entry:active { background: #FFEBEE; color: var(--color-danger); }
-.btn-edit-entry:active { background: #E3F2FD; color: var(--color-primary); }
+.btn-remove-entry:active { background: var(--color-danger-bg); color: var(--color-danger); }
+.btn-edit-entry:active { background: var(--color-primary-light); color: var(--color-primary); }
 .btn-remove-entry svg, .btn-edit-entry svg { width: 15px; height: 15px; }
 
 /* ── Voce rapida ── */
