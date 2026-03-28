@@ -95,6 +95,10 @@ window.DiaryLog = (() => {
       targetValues.push(plan.kcal_target);
     }
 
+    // Aggiorna titolo con target
+    const titleEl = document.getElementById('chart-weekly-title');
+    if (titleEl) titleEl.textContent = `Calorie ultimi 7 giorni. Target: ${Math.round(plan.kcal_target)} kcal`;
+
     const ctx = document.getElementById('chart-weekly').getContext('2d');
 
     if (weeklyChart) weeklyChart.destroy();
