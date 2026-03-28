@@ -130,6 +130,7 @@ window.FoodsTab = (() => {
     document.getElementById('ff-ingredients-list').innerHTML = '';
     document.getElementById('ff-recipe-totals').classList.add('hidden');
     document.getElementById('ff-recipe-yield').value = '';
+    document.getElementById('btn-clone-recipe').classList.add('hidden');
 
     if (id) {
       const food = allFoods.find(f => f.id === id);
