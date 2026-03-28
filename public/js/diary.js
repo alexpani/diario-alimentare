@@ -149,6 +149,10 @@ window.DiaryTab = (() => {
       btn.addEventListener('click', () => copyFromYesterday(btn.dataset.meal));
     });
 
+    container.querySelectorAll('.btn-save-as-recipe').forEach(btn => {
+      btn.addEventListener('click', () => openSaveAsRecipeModal(btn.dataset.meal));
+    });
+
     container.querySelectorAll('[data-remove-entry]').forEach(btn => {
       btn.addEventListener('click', () => removeEntry(parseInt(btn.dataset.removeEntry)));
     });
