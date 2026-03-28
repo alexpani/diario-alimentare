@@ -309,20 +309,22 @@
 
     <!-- Step 1: Ricerca -->
     <div id="modal-step-search">
-      <div style="display:flex;gap:8px;align-items:center">
+      <div style="display:flex;gap:8px;align-items:stretch">
         <div class="search-wrap" style="flex:1">
           <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <input type="text" id="modal-food-search" placeholder="Cerca alimento..." class="search-input" autocomplete="off">
         </div>
-        <button id="btn-quick-new-food" class="btn btn-primary btn-sm" style="white-space:nowrap;font-size:20px;line-height:1;padding:4px 12px">+</button>
+        <button id="btn-quick-new-food" class="btn btn-primary" style="white-space:nowrap;font-size:22px;line-height:1;padding:0 16px">+</button>
       </div>
-      <button id="btn-open-quick-entry" class="btn btn-outline btn-full mt-8" style="border-color:var(--color-primary);color:var(--color-primary)">
-        ⚡ Voce rapida (stima calorie)
-      </button>
-      <button id="btn-scan-barcode" class="btn btn-outline btn-full mt-8">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;vertical-align:middle;margin-right:6px"><rect x="3" y="3" width="6" height="18"/><rect x="13" y="3" width="2" height="18"/><rect x="17" y="3" width="4" height="18"/></svg>
-        Scansiona con fotocamera
-      </button>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button id="btn-open-quick-entry" class="btn btn-outline" style="flex:1;border-color:var(--color-primary);color:var(--color-primary);font-size:13px;padding:8px 0">
+          ⚡ Voce rapida
+        </button>
+        <button id="btn-scan-barcode" class="btn btn-outline" style="flex:1;font-size:13px;padding:8px 0">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;vertical-align:middle;margin-right:4px"><rect x="3" y="3" width="6" height="18"/><rect x="13" y="3" width="2" height="18"/><rect x="17" y="3" width="4" height="18"/></svg>
+          Fotocamera
+        </button>
+      </div>
       <input type="file" id="barcode-file-input" accept="image/*" capture="environment" style="display:none">
       <button id="btn-scan-barcode-file" class="btn btn-outline btn-full mt-8 hidden">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;vertical-align:middle;margin-right:6px"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
