@@ -283,6 +283,39 @@ router.put('/:id', async (req, res) => {
   }
 });
 
+// POST /api/diary/copy — copia le voci di un pasto da un'altra data
+router.post('/copy', async (req, res) => {
+  try {
+    const db = await getDb();
+    const { from_date, to_date, meal_type } = req.body;
+
+    if (!from_date || !to_date || !meal_type) {
+      return res.status(400).json({ error: 'Campi obbligatori: from_date, to_date, meal_type' });
+    }
+
+    const sourceEntries = await db.all(
+      'SELECT food_id, quantity_g, quantity_label FROM diary_entries WHERE date = ? AND meal_type = ?',
+      from_date, meal_type
+    );
+
+    if (sourceEntries.length === 0) {
+      return res.status(404).json({ error: 'Nessuna voce trovata per il pasto di origine' });
+    }
+
+    for (const e of sourceEntries) {
+      await db.run(
+        'INSERT INTO diary_entries (date, meal_type, food_id, quantity_g, quantity_label) VALUES (?, ?, ?, ?, ?)',
+        to_date, meal_type, e.food_id, e.quantity_g, e.quantity_label
+      );
+    }
+
+    res.json({ ok: true, copied: sourceEntries.length });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Errore del server' });
+  }
+});
+
 // DELETE /api/diary/:id
 router.delete('/:id', async (req, res) => {
   try {
