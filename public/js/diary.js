@@ -391,7 +391,6 @@ window.DiaryTab = (() => {
   // Search — unica casella: DB locale + catalogo
   document.getElementById('modal-food-search').addEventListener('input', (e) => {
     clearTimeout(searchTimeout);
-    clearTimeout(catalogSearchTimeout);
     const q = e.target.value.trim();
     if (q.length < 4) {
       document.getElementById('modal-search-results').innerHTML = '';
