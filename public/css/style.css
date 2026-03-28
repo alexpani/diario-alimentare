@@ -122,12 +122,14 @@
 [data-theme="dark"] .plan-item           { border-color: var(--color-border); }
 
 [data-theme="dark"] .sri-placeholder,
+[data-theme="dark"] .catalog-result-img-placeholder,
 [data-theme="dark"] .entry-food-img-placeholder { background: var(--color-input); }
+
+[data-theme="dark"] .search-result-item,
+[data-theme="dark"] .catalog-result-item     { background: var(--color-input); }
 
 [data-theme="dark"] .cal-cell            { color: var(--color-text); }
 [data-theme="dark"] .cal-future          { opacity: 0.35; }
-
-[data-theme="dark"] .catalog-result-item     { background: var(--color-input); }
 
 /* Transizione fluida al cambio tema */
 body, .tab-bar, .modal-box, .card, input, select, textarea, .btn-outline {
