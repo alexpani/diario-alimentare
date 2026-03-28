@@ -7,6 +7,14 @@ window.FoodsTab = (() => {
   let editingId = null;
   let searchTimeout = null;
 
+  function formatSource(src) {
+    if (!src) return 'APP';
+    const s = src.toLowerCase();
+    if (s === 'crea') return 'CREA';
+    if (s === 'off' || s === 'openfoodfacts') return 'OFF';
+    return 'APP';
+  }
+
   // ── Refresh ─────────────────────────────
   async function refresh(q = '') {
     let url;
