@@ -733,6 +733,7 @@ window.FoodsTab = (() => {
     document.getElementById('ff-protein').value = product.protein_100g || 0;
     document.getElementById('ff-fat').value = product.fat_100g || 0;
     document.getElementById('ff-carbs').value = product.carbs_100g || 0;
+    document.getElementById('ff-source').value = product.source || 'app';
 
     if (product.image_url) {
       document.getElementById('ff-image-url').value = product.image_url;
