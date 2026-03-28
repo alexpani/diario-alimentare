@@ -16,7 +16,7 @@ window.PlanTab = (() => {
   function renderList() {
     const container = document.getElementById('plans-list');
     if (!plans.length) {
-      container.innerHTML = '<div class="card"><p style="color:var(--color-text-secondary,#666)">Nessun piano. Creane uno!</p></div>';
+      container.innerHTML = '<div class="card"><p style="color:var(--color-text-secondary)">Nessun piano. Creane uno!</p></div>';
       return;
     }
     container.innerHTML = plans.map(p => {
