@@ -498,8 +498,8 @@ input:focus, select:focus, textarea:focus {
   transform-origin: center;
   transition: stroke-dasharray 0.6s ease, stroke 0.3s;
 }
-.ds-gauge-fill.over  { stroke: #FFD54F; }
-.ds-gauge-fill.warning { stroke: #A5D6A7; }
+.ds-gauge-fill.over  { stroke: var(--color-gauge-over); }
+.ds-gauge-fill.warning { stroke: var(--color-gauge-warning); }
 
 /* Testo al centro del gauge */
 .ds-gauge-inner {
