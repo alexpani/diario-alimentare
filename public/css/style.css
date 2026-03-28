@@ -236,7 +236,7 @@ body {
   white-space: nowrap; gap: 6px;
 }
 
-.btn-primary { background: var(--color-primary); color: white; }
+.btn-primary { background: var(--color-primary); color: var(--color-text-on-primary); }
 .btn-primary:active { background: var(--color-primary-dark); transform: scale(0.97); }
 
 .btn-outline {
