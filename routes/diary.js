@@ -225,6 +225,34 @@ router.get('/recent', async (req, res) => {
   }
 });
 
+// GET /api/diary/frequent?meal_type=xxx&limit=8
+router.get('/frequent', async (req, res) => {
+  try {
+    const db = await getDb();
+    const { meal_type, limit = 8 } = req.query;
+    if (!meal_type) return res.status(400).json({ error: 'meal_type obbligatorio' });
+
+    const rows = await db.all(`
+      SELECT f.id, f.name, f.brand, f.kcal_100g, f.protein_100g, f.fat_100g, f.carbs_100g,
+             f.portions, f.image_path, COUNT(de.id) as use_count
+      FROM diary_entries de
+      JOIN foods f ON f.id = de.food_id
+      WHERE de.meal_type = ? AND f.is_quick = 0
+      GROUP BY de.food_id
+      ORDER BY use_count DESC
+      LIMIT ?
+    `, meal_type, parseInt(limit));
+
+    res.json(rows.map(r => ({
+      ...r,
+      portions: r.portions ? JSON.parse(r.portions) : []
+    })));
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Errore del server' });
+  }
+});
+
 // PUT /api/diary/:id
 router.put('/:id', async (req, res) => {
   try {
