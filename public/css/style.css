@@ -578,11 +578,11 @@ input:focus, select:focus, textarea:focus {
   border-radius: 99px; overflow: hidden; margin-bottom: 12px;
 }
 .progress-bar {
-  height: 100%; border-radius: 99px; background: white;
+  height: 100%; border-radius: 99px; background: var(--color-text-on-primary);
   transition: width 0.4s ease; max-width: 100%;
 }
-.progress-bar.warning { background: #FFD54F; }
-.progress-bar.over    { background: #EF9A9A; }
+.progress-bar.warning { background: var(--color-gauge-over); }
+.progress-bar.over    { background: var(--color-danger); }
 
 /* Meal sections */
 .meal-section {
