@@ -379,7 +379,7 @@ input:focus, select:focus, textarea:focus {
 }
 .cal-overlay.hidden { display: none; }
 .cal-popup {
-  background: #ffffff;
+  background: var(--color-card);
   border-radius: 20px;
   padding: 20px 16px 16px;
   width: min(340px, calc(100vw - 32px));
