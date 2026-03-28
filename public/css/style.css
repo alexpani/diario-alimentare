@@ -298,8 +298,8 @@ input:focus, select:focus, textarea:focus {
 
 .error-msg { color: var(--color-danger); font-size: 13px; padding: 8px 0; }
 .msg { padding: 10px 14px; border-radius: var(--radius-sm); font-size: 14px; }
-.msg.success { background: #E8F5E9; color: #2E7D32; }
-.msg.error { background: #FFEBEE; color: #C62828; }
+.msg.success { background: var(--color-success-bg); color: var(--color-success-text); }
+.msg.error { background: var(--color-danger-bg); color: var(--color-danger-text); }
 
 /* =========================================
    CARDS
