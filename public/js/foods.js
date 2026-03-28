@@ -11,7 +11,7 @@ window.FoodsTab = (() => {
     if (!src) return 'APP';
     const s = src.toLowerCase();
     if (s === 'crea') return 'CREA';
-    if (s === 'off' || s === 'openfoodfacts') return 'OFF';
+    if (s === 'openfoodfacts') return 'OpenFoodFacts';
     return 'APP';
   }
 
