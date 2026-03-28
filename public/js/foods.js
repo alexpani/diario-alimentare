@@ -7,7 +7,8 @@ window.FoodsTab = (() => {
   let editingId = null;
   let searchTimeout = null;
 
-  function formatSource(src) {
+  function formatSource(src, components) {
+    if (Array.isArray(components) && components.length > 0) return 'Ricetta';
     if (!src) return 'APP';
     const s = src.toLowerCase();
     if (s === 'crea') return 'CREA';
