@@ -1221,6 +1221,18 @@ input:focus, select:focus, textarea:focus {
   pointer-events: none; opacity: 0.7;
 }
 
+/* ── Salva come ricetta ──────────────────────────── */
+.btn-save-as-recipe {
+  display: flex; align-items: center; gap: 6px; justify-content: center;
+  width: 100%; padding: 8px 12px; margin-bottom: 6px;
+  border: 1px dashed var(--color-primary); border-radius: 10px;
+  background: transparent; color: var(--color-primary);
+  font-size: 0.85rem; font-weight: 500; cursor: pointer;
+}
+.btn-save-as-recipe:active {
+  background: var(--color-primary-light);
+}
+
 /* =========================================
    VALORI PER PORZIONE (form alimento)
    ========================================= */
