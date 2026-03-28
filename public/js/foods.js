@@ -642,7 +642,6 @@ window.FoodsTab = (() => {
     document.getElementById('modal-catalog').classList.add('hidden');
   };
   document.getElementById('modal-catalog-close').addEventListener('click', closeCatalogModal);
-  document.getElementById('modal-catalog-backdrop').addEventListener('click', closeCatalogModal);
 
   document.getElementById('btn-catalog-search').addEventListener('click', searchCatalog);
   document.getElementById('catalog-query').addEventListener('keydown', e => { if (e.key === 'Enter') searchCatalog(); });
