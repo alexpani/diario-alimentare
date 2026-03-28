@@ -1036,7 +1036,7 @@ input:focus, select:focus, textarea:focus {
 
 /* Search results */
 .search-results { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
-.search-result-item {
+.search-result-item, .catalog-result-item {
   display: flex; align-items: center; gap: 10px;
   padding: 10px;
   background: var(--color-bg);
