@@ -735,7 +735,7 @@ input:focus, select:focus, textarea:focus {
 
 .diary-list { padding: 0 12px 12px; display: flex; flex-direction: column; gap: 8px; }
 .diary-day-card {
-  background: white; border-radius: var(--radius);
+  background: var(--color-card); border-radius: var(--radius);
   padding: 14px; box-shadow: var(--shadow);
   cursor: pointer; transition: all 0.15s;
   display: flex; align-items: center; gap: 12px;
