@@ -207,8 +207,6 @@ window.DiaryTab = (() => {
 
   // ── Remove entry ────────────────────────
   async function removeEntry(id) {
-    const confirmed = await showConfirm('Rimuovi alimento', 'Sei sicuro di voler rimuovere questa voce dal diario?');
-    if (!confirmed) return;
     await apiDelete(`/api/diary/${id}`);
     await refresh();
   }
