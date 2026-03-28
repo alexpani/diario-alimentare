@@ -395,6 +395,9 @@ window.DiaryTab = (() => {
   document.getElementById('modal-food-search').addEventListener('input', (e) => {
     clearTimeout(searchTimeout);
     const q = e.target.value.trim();
+    // Pulisci risultati catalogo quando si usa la ricerca DB
+    document.getElementById('modal-catalog-search').value = '';
+    document.getElementById('modal-catalog-results').innerHTML = '';
     if (q.length < 2) {
       document.getElementById('modal-search-results').innerHTML = '';
       document.getElementById('modal-recent-section').classList.toggle('hidden', document.getElementById('modal-recent-foods').children.length === 0);
