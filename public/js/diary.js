@@ -391,20 +391,18 @@ window.DiaryTab = (() => {
     }
   });
 
-  // Search
+  // Search — unica casella: DB locale + catalogo
   document.getElementById('modal-food-search').addEventListener('input', (e) => {
     clearTimeout(searchTimeout);
+    clearTimeout(catalogSearchTimeout);
     const q = e.target.value.trim();
-    // Pulisci risultati catalogo quando si usa la ricerca DB
-    document.getElementById('modal-catalog-search').value = '';
-    document.getElementById('modal-catalog-results').innerHTML = '';
-    if (q.length < 2) {
+    if (q.length < 4) {
       document.getElementById('modal-search-results').innerHTML = '';
       document.getElementById('modal-recent-section').classList.toggle('hidden', document.getElementById('modal-recent-foods').children.length === 0);
       return;
     }
     document.getElementById('modal-recent-section').classList.add('hidden');
-    searchTimeout = setTimeout(() => searchFoods(q), 300);
+    searchTimeout = setTimeout(() => searchUnified(q), 400);
   });
 
   // ── Quick new food — apre il form completo della tab Alimenti ───────────
