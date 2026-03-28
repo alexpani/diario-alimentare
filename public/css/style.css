@@ -5,32 +5,33 @@
 
 :root {
   /* ── Palette primaria ── */
-  --color-primary: #4CAF50;
-  --color-primary-dark: #388E3C;
+  --color-primary: #2E7D32;
+  --color-primary-dark: #1B5E20;
   --color-primary-light: #C8E6C9;
+  --color-primary-surface: #4CAF50;
   /* ── Semantici ── */
-  --color-danger: #f44336;
+  --color-danger: #D32F2F;
   --color-danger-bg: #FFEBEE;
-  --color-danger-text: #C62828;
-  --color-warning: #FF9800;
+  --color-danger-text: #B71C1C;
+  --color-warning: #E65100;
   --color-warning-bg: #FFF8E1;
-  --color-warning-border: #FFC107;
-  --color-warning-text: #5d4037;
+  --color-warning-border: #F9A825;
+  --color-warning-text: #4E342E;
   --color-success-bg: #E8F5E9;
-  --color-success-text: #2E7D32;
+  --color-success-text: #1B5E20;
   /* ── Superfici ── */
   --color-text: #212121;
-  --color-text-secondary: #757575;
+  --color-text-secondary: #616161;
   --color-text-on-primary: #ffffff;
-  --color-border: #E0E0E0;
+  --color-border: #BDBDBD;
   --color-bg: #F5F5F5;
   --color-card: #ffffff;
   --color-input: #ffffff;
   --color-elevated: #2C2C2E;
   /* ── Macro nutrienti ── */
-  --color-protein: #5C6BC0;
-  --color-fat: #FFA726;
-  --color-carbs: #66BB6A;
+  --color-protein: #3949AB;
+  --color-fat: #E65100;
+  --color-carbs: #2E7D32;
   /* ── Gauge / grafici ── */
   --color-gauge-over: #FFD54F;
   --color-gauge-warning: #A5D6A7;
