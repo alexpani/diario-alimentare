@@ -835,9 +835,9 @@ input:focus, select:focus, textarea:focus {
   font-size: 12px; font-weight: 600;
   padding: 3px 8px;
 }
-.plan-macro-p { color: #1565C0; }
-.plan-macro-f { color: #E65100; }
-.plan-macro-c { color: #6A1B9A; }
+.plan-macro-p { color: var(--color-protein); }
+.plan-macro-f { color: var(--color-fat); }
+.plan-macro-c { color: var(--color-carbs); }
 
 /* Active plan name — right side of gauge, symmetric to "Assunte" */
 .ds-plan-name {
