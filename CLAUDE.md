@@ -55,7 +55,7 @@ node update_plans_kcal.js  # aggiorna kcal piani su TDEE personale
 
 | Tabella | Descrizione |
 |---------|-------------|
-| `foods` | Libreria alimenti. `deleted_at` per soft-delete. `is_quick=1` per voci al volo. |
+| `foods` | Libreria alimenti. `deleted_at` per soft-delete. `is_quick=1` per voci al volo. `source` = `app`/`openfoodfacts`/`crea` (origine del prodotto). |
 | `diary_entries` | Voci del diario: `food_id`, `meal` (colazione/pranzo/cena/snack), `quantity_g`, `date` |
 | `portions` | Porzioni nominate per alimento (es. "1 fetta = 30g") |
 | `plans` | Piani nutrizionali. `is_active=1` sul piano corrente (uno solo alla volta). |
