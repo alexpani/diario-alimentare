@@ -174,6 +174,25 @@ window.DiaryLog = (() => {
     const avgFat = data.reduce((s, d) => s + d.fat, 0) / data.length;
     const avgCarbs = data.reduce((s, d) => s + d.carbs, 0) / data.length;
 
+    // Calcola percentuali kcal dai macro
+    const proteinKcal = avgProtein * 4;
+    const fatKcal = avgFat * 9;
+    const carbsKcal = avgCarbs * 4;
+    const totalKcal = proteinKcal + fatKcal + carbsKcal;
+    const proteinPct = totalKcal > 0 ? Math.round(proteinKcal / totalKcal * 100) : 0;
+    const fatPct = totalKcal > 0 ? Math.round(fatKcal / totalKcal * 100) : 0;
+    const carbsPct = totalKcal > 0 ? 100 - proteinPct - fatPct : 0;
+
+    // Legenda con grammi e percentuali
+    const legendEl = document.getElementById('chart-macros-legend');
+    if (legendEl) {
+      legendEl.innerHTML = `
+        <div class="macros-legend-item"><span class="macros-legend-dot" style="background:${cssColor('--color-protein')}"></span>Proteine: ${Math.round(avgProtein)}g · ${proteinPct}%</div>
+        <div class="macros-legend-item"><span class="macros-legend-dot" style="background:${cssColor('--color-fat')}"></span>Grassi: ${Math.round(avgFat)}g · ${fatPct}%</div>
+        <div class="macros-legend-item"><span class="macros-legend-dot" style="background:${cssColor('--color-carbs')}"></span>Carboidrati: ${Math.round(avgCarbs)}g · ${carbsPct}%</div>
+      `;
+    }
+
     const ctx = document.getElementById('chart-macros').getContext('2d');
     if (macrosChart) macrosChart.destroy();
 
@@ -190,13 +209,13 @@ window.DiaryLog = (() => {
       options: {
         responsive: true,
         plugins: {
-          legend: {
-            position: 'bottom',
-            labels: { padding: 16, font: { size: 12 } }
-          },
+          legend: { display: false },
           tooltip: {
             callbacks: {
-              label: ctx => `${ctx.label}: ${ctx.raw}g (media)`
+              label: ctx => {
+                const pct = [proteinPct, fatPct, carbsPct][ctx.dataIndex];
+                return `${ctx.label}: ${ctx.raw}g · ${pct}%`;
+              }
             }
           }
         }
