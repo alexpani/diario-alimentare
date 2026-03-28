@@ -643,7 +643,6 @@ window.FoodsTab = (() => {
   };
   document.getElementById('modal-catalog-close').addEventListener('click', closeCatalogModal);
 
-  document.getElementById('btn-catalog-search').addEventListener('click', searchCatalog);
   document.getElementById('catalog-query').addEventListener('keydown', e => { if (e.key === 'Enter') searchCatalog(); });
 
   // Ricerca predittiva catalogo (4+ caratteri)
@@ -651,7 +650,10 @@ window.FoodsTab = (() => {
   document.getElementById('catalog-query').addEventListener('input', (e) => {
     clearTimeout(catalogSearchTimeout);
     const q = e.target.value.trim();
-    if (q.length < 4) return;
+    if (q.length < 4) {
+      if (q.length === 0) document.getElementById('catalog-results').innerHTML = '';
+      return;
+    }
     catalogSearchTimeout = setTimeout(() => searchCatalog(), 400);
   });
 
