@@ -184,10 +184,12 @@ window.DiaryLog = (() => {
     }
     card.style.display = '';
 
-    // Aggiorna tab attivo
+    // Aggiorna tab attivo e titolo
     document.querySelectorAll('.macros-tab').forEach(t => {
       t.classList.toggle('active', parseInt(t.dataset.macrosDays) === numDays);
     });
+    const titleMacros = document.getElementById('chart-macros-title');
+    if (titleMacros) titleMacros.textContent = `Macro medi ultimi ${numDays} giorni`;
 
     const avgProtein = data.reduce((s, d) => s + d.protein, 0) / data.length;
     const avgFat = data.reduce((s, d) => s + d.fat, 0) / data.length;
