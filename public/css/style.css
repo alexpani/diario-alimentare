@@ -362,7 +362,7 @@ input:focus, select:focus, textarea:focus {
 .date-label {
   background: none; border: none; cursor: pointer;
   font-size: 16px; font-weight: 700;
-  color: white;
+  color: var(--color-text-on-primary);
   padding: 8px 16px;
   border-radius: var(--radius-sm);
   transition: background 0.15s;
