@@ -11,6 +11,14 @@ const MEALS = [
   { id: 'extra',              label: 'Extra',              icon: '🍬' }
 ];
 
+function _fmtSrc(src) {
+  if (!src) return 'APP';
+  const s = src.toLowerCase();
+  if (s === 'crea') return 'CREA';
+  if (s === 'off' || s === 'openfoodfacts') return 'OFF';
+  return 'APP';
+}
+
 window.DiaryTab = (() => {
   let currentDate = todayStr();
   let entries = [];
