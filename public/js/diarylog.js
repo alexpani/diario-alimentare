@@ -108,8 +108,8 @@ window.DiaryLog = (() => {
             label: 'Kcal',
             data: kcalValues,
             backgroundColor: kcalValues.map((v, i) => {
-              if (i === 6) return 'rgba(76, 175, 80, 0.9)'; // oggi
-              return 'rgba(76, 175, 80, 0.5)';
+              if (i === 6) return cssColor('--color-primary', 0.9);
+              return cssColor('--color-primary', 0.5);
             }),
             borderRadius: 6,
             order: 2
