@@ -6,6 +6,15 @@ window.DiaryLog = (() => {
   let weeklyChart = null;
   let macrosChart = null;
 
+  // Leggi colori dalla palette CSS
+  function cssColor(name, alpha = 1) {
+    const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    if (alpha >= 1) return v;
+    // Converte hex → rgba
+    const r = parseInt(v.slice(1, 3), 16), g = parseInt(v.slice(3, 5), 16), b = parseInt(v.slice(5, 7), 16);
+    return `rgba(${r},${g},${b},${alpha})`;
+  }
+
   async function refresh() {
     await Promise.all([
       loadDays(),
