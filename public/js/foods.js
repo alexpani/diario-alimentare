@@ -686,6 +686,10 @@ window.FoodsTab = (() => {
       return;
     }
 
+    // Ordina per sorgente: APP > CREA > OFF
+    const sourceOrder = { app: 0, crea: 1 };
+    products.sort((a, b) => (sourceOrder[a.source] ?? 2) - (sourceOrder[b.source] ?? 2));
+
     // Barcodes già presenti nel DB locale
     const localBarcodes = new Set(allFoods.filter(f => f.barcode).map(f => f.barcode));
 
