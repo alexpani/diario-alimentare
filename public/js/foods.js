@@ -186,6 +186,7 @@ window.FoodsTab = (() => {
         if (food.recipe_yield_g) document.getElementById('ff-recipe-yield').value = food.recipe_yield_g;
         setRecipeMode(true);
         renderIngredients();
+        document.getElementById('btn-clone-recipe').classList.remove('hidden');
       })();
     }
   }
