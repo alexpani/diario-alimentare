@@ -504,7 +504,7 @@ window.DiaryTab = (() => {
       targetEl.innerHTML = headerHtml + products.map((p, i) => {
         const localFood = p.barcode && localByBarcode[p.barcode];
         const action = localFood
-          ? `<button class="btn btn-primary btn-sm btn-catalog-modal-select" data-idx="${i}">Aggiungi</button>`
+          ? `<span class="btn-catalog-modal-select" data-idx="${i}" style="font-size:0.75rem;color:var(--color-primary);font-weight:600;white-space:nowrap;cursor:pointer">✓ Già presente</span>`
           : `<button class="btn btn-primary btn-sm btn-catalog-modal-import" data-idx="${i}">Importa</button>`;
         return `
         <div class="catalog-result-item">
