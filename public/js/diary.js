@@ -428,8 +428,17 @@ window.DiaryTab = (() => {
   async function searchFoods(q) {
     const resultsEl = document.getElementById('modal-search-results');
     resultsEl.innerHTML = '<div class="spinner"></div>';
-    const foods = await apiGet(`/api/foods?q=${encodeURIComponent(q)}&limit=20`);
-    if (!foods) return;
+
+    const isBarcode = /^\d{8,14}$/.test(q);
+    let foods;
+    if (isBarcode) {
+      // Cerca per barcode nel DB locale
+      const barcodeResults = await apiGet(`/api/foods?barcode=${encodeURIComponent(q)}`);
+      foods = barcodeResults || [];
+    } else {
+      foods = await apiGet(`/api/foods?q=${encodeURIComponent(q)}&limit=20`);
+      if (!foods) return;
+    }
 
     if (foods.length === 0) {
       // Fallback: cerca nel catalogo Food Tracker
