@@ -587,7 +587,7 @@ input:focus, select:focus, textarea:focus {
 /* Meal sections */
 .meal-section {
   margin: 8px 12px;
-  background: white;
+  background: var(--color-card);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   overflow: hidden;
