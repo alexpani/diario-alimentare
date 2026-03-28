@@ -91,21 +91,34 @@ window.DiaryTab = (() => {
     for (const meal of MEALS) {
       const mealEntries = entries.filter(e => e.meal_type === meal.id);
       const mealKcal = mealEntries.reduce((s, e) => s + e.kcal, 0);
+      const mealProtein = mealEntries.reduce((s, e) => s + e.protein, 0);
+      const mealFat = mealEntries.reduce((s, e) => s + e.fat, 0);
+      const mealCarbs = mealEntries.reduce((s, e) => s + e.carbs, 0);
       const isOpen = openMealId === meal.id;
+
+      const macrosHtml = mealKcal > 0 ? `
+        <div class="meal-macros">
+          <span class="meal-kcal-badge">${Math.round(mealKcal)} kcal</span>
+          <span class="meal-macro" style="color:var(--color-protein)">P:${fmt(mealProtein, 0)}g</span>
+          <span class="meal-macro" style="color:var(--color-carbs)">C:${fmt(mealCarbs, 0)}g</span>
+          <span class="meal-macro" style="color:var(--color-fat)">G:${fmt(mealFat, 0)}g</span>
+        </div>` : '';
 
       const section = document.createElement('div');
       section.className = 'meal-section';
       section.innerHTML = `
         <div class="meal-header" data-meal="${meal.id}">
           <div class="meal-header-left">
-            <span class="meal-icon">${meal.icon}</span>
             <span class="meal-name">${meal.label}</span>
-            ${mealKcal > 0 ? `<span class="meal-kcal-badge">${Math.round(mealKcal)} kcal</span>` : ''}
           </div>
-          <svg class="meal-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:16px;height:16px;color:var(--color-text-secondary);transition:transform .2s;${isOpen ? 'transform:rotate(180deg)' : ''}"><polyline points="6 9 12 15 18 9"/></svg>
+          ${macrosHtml}
         </div>
         <div class="meal-body" id="meal-body-${meal.id}" style="${isOpen ? '' : 'display:none'}">
           ${mealEntries.map(e => renderEntryRow(e)).join('')}
+          ${mealEntries.length === 0 ? `<button class="btn-copy-from-yesterday" data-meal="${meal.id}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copia da ieri
+          </button>` : ''}
           <button class="btn-add-to-meal" data-meal="${meal.id}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:18px;height:18px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
             Aggiungi alimento
