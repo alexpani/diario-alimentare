@@ -839,5 +839,97 @@ window.DiaryTab = (() => {
     });
   });
 
+  // ── Salva come ricetta ────────────────────────────────────────────────────
+  let _recipeMealType = null;
+
+  function openSaveAsRecipeModal(mealType) {
+    _recipeMealType = mealType;
+    const mealEntries = entries.filter(e => e.meal_type === mealType);
+    if (mealEntries.length < 2) return;
+
+    const modal = document.getElementById('modal-save-recipe');
+    const nameInput = document.getElementById('recipe-name-input');
+    const summaryEl = document.getElementById('recipe-ingredients-summary');
+    const totalsEl = document.getElementById('recipe-totals-summary');
+
+    nameInput.value = '';
+
+    // Riepilogo ingredienti
+    summaryEl.innerHTML = `
+      <div style="font-size:0.82rem;font-weight:600;margin-bottom:6px;color:var(--color-text-secondary)">INGREDIENTI</div>
+      ${mealEntries.map(e => `
+        <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:0.85rem;border-bottom:1px solid var(--color-border)">
+          <span>${e.food.name}</span>
+          <span style="color:var(--color-text-secondary)">${e.quantity_label || fmt(e.quantity_g, 0) + 'g'}</span>
+        </div>
+      `).join('')}
+    `;
+
+    // Totali
+    const totalKcal = mealEntries.reduce((s, e) => s + e.kcal, 0);
+    const totalP = mealEntries.reduce((s, e) => s + e.protein, 0);
+    const totalF = mealEntries.reduce((s, e) => s + e.fat, 0);
+    const totalC = mealEntries.reduce((s, e) => s + e.carbs, 0);
+    const totalG = mealEntries.reduce((s, e) => s + e.quantity_g, 0);
+
+    totalsEl.innerHTML = `
+      <div style="display:flex;gap:8px;flex-wrap:wrap;font-size:0.82rem">
+        <span class="recipe-macro-badge">⚡ ${Math.round(totalKcal)} kcal</span>
+        <span class="recipe-macro-badge" style="color:var(--color-protein)">P: ${fmt(totalP)}g</span>
+        <span class="recipe-macro-badge" style="color:var(--color-fat)">G: ${fmt(totalF)}g</span>
+        <span class="recipe-macro-badge" style="color:var(--color-carbs)">C: ${fmt(totalC)}g</span>
+      </div>
+      <div style="font-size:0.78rem;color:var(--color-text-secondary);margin-top:6px">
+        Peso totale: ${Math.round(totalG)}g — verrà salvata come 1 porzione
+      </div>
+    `;
+
+    modal.classList.remove('hidden');
+    setTimeout(() => nameInput.focus(), 100);
+  }
+
+  function closeSaveAsRecipeModal() {
+    document.getElementById('modal-save-recipe').classList.add('hidden');
+    _recipeMealType = null;
+  }
+
+  document.getElementById('btn-cancel-recipe').addEventListener('click', closeSaveAsRecipeModal);
+  document.getElementById('modal-recipe-backdrop').addEventListener('click', closeSaveAsRecipeModal);
+
+  document.getElementById('btn-confirm-recipe').addEventListener('click', async () => {
+    const name = document.getElementById('recipe-name-input').value.trim();
+    if (!name) {
+      document.getElementById('recipe-name-input').focus();
+      return;
+    }
+
+    const btn = document.getElementById('btn-confirm-recipe');
+    btn.disabled = true;
+    btn.textContent = 'Salvataggio...';
+
+    try {
+      const res = await fetch('/api/foods/recipe-from-meal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, date: currentDate, meal_type: _recipeMealType })
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => null);
+        alert(err?.error || 'Errore nel salvataggio');
+        return;
+      }
+
+      closeSaveAsRecipeModal();
+      await refresh();
+    } catch (e) {
+      console.error('Save recipe error:', e);
+      alert('Errore di rete');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Salva';
+    }
+  });
+
   return { refresh, setDate, get currentDate() { return currentDate; } };
 })();
