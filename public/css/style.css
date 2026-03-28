@@ -779,27 +779,11 @@ input:focus, select:focus, textarea:focus {
 .foods-list { padding: 8px 12px; display: flex; flex-direction: column; gap: 8px; }
 
 .food-card {
-  background: var(--color-card); border-radius: var(--radius);
-  padding: 12px 14px; box-shadow: var(--shadow);
-  display: flex; align-items: center; gap: 12px;
+  background: var(--color-bg); border-radius: var(--radius-sm);
+  padding: 12px; display: flex; align-items: flex-start; gap: 10px;
+  cursor: pointer; transition: background 0.15s;
 }
-.food-card-img {
-  width: 52px; height: 52px;
-  border-radius: 10px; object-fit: cover;
-  background: var(--color-bg); flex-shrink: 0;
-}
-.food-card-img-placeholder {
-  width: 52px; height: 52px;
-  border-radius: 10px;
-  background: var(--color-bg);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 24px; flex-shrink: 0;
-}
-.food-card-info { flex: 1; min-width: 0; }
-.food-card-name { font-size: 15px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.food-card-brand { font-size: 12px; color: var(--color-text-secondary); }
-.food-card-macros { font-size: 12px; color: var(--color-text-secondary); margin-top: 4px; }
-.food-card-actions { display: flex; gap: 4px; flex-shrink: 0; }
+.food-card-actions { display: flex; gap: 4px; flex-shrink: 0; align-self: center; }
 .food-card-actions .btn-icon { width: 34px; height: 34px; }
 .food-card-actions .btn-icon svg { width: 16px; height: 16px; }
 
