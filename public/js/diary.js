@@ -133,6 +133,10 @@ window.DiaryTab = (() => {
       btn.addEventListener('click', () => openAddModal(btn.dataset.meal));
     });
 
+    container.querySelectorAll('.btn-copy-from-yesterday').forEach(btn => {
+      btn.addEventListener('click', () => copyFromYesterday(btn.dataset.meal));
+    });
+
     container.querySelectorAll('[data-remove-entry]').forEach(btn => {
       btn.addEventListener('click', () => removeEntry(parseInt(btn.dataset.removeEntry)));
     });
@@ -168,11 +172,9 @@ window.DiaryTab = (() => {
 
         // Chiudi tutti
         container.querySelectorAll('.meal-body').forEach(b => { b.style.display = 'none'; });
-        container.querySelectorAll('.meal-chevron').forEach(c => { c.style.transform = ''; });
 
         if (!isOpen) {
           body.style.display = '';
-          h.querySelector('.meal-chevron').style.transform = 'rotate(180deg)';
           openMealId = mealId;
         } else {
           openMealId = null;
