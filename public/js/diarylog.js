@@ -41,6 +41,7 @@ window.DiaryLog = (() => {
     container.innerHTML = days.map(d => {
       const date = new Date(d.date + 'T00:00:00');
       const day = date.getDate();
+      const weekday = date.toLocaleDateString('it-IT', { weekday: 'short' }).toUpperCase();
       const month = date.toLocaleDateString('it-IT', { month: 'short' });
       const pct = plan.kcal_target > 0 ? Math.round((d.kcal / plan.kcal_target) * 100) : 0;
       const isOver = pct > 110;
@@ -48,12 +49,13 @@ window.DiaryLog = (() => {
       return `
         <div class="diary-day-card" data-date="${d.date}">
           <div class="diary-day-date">
+            <div class="diary-day-weekday">${weekday}</div>
             <div class="diary-day-num">${day}</div>
             <div class="diary-day-month">${month}</div>
           </div>
           <div class="diary-day-info">
             <div class="diary-day-kcal">${Math.round(d.kcal)} kcal</div>
-            <div class="diary-day-macros">P: ${fmt(d.protein)}g · G: ${fmt(d.fat)}g · C: ${fmt(d.carbs)}g</div>
+            <div class="diary-day-macros">P:${fmt(d.protein)}g · G:${fmt(d.fat)}g · C:${fmt(d.carbs)}g</div>
           </div>
           <div class="diary-day-pct ${isOver ? 'over' : ''}">${pct}%</div>
         </div>
