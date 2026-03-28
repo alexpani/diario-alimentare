@@ -231,8 +231,6 @@ window.DiaryTab = (() => {
     document.getElementById('modal-step-qty').classList.add('hidden');
     document.getElementById('modal-food-search').value = '';
     document.getElementById('modal-search-results').innerHTML = '';
-    document.getElementById('modal-catalog-search').value = '';
-    document.getElementById('modal-catalog-results').innerHTML = '';
     document.getElementById('modal-recent-section').classList.add('hidden');
     document.getElementById('barcode-scanner-wrap').classList.add('hidden');
 
