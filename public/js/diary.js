@@ -556,8 +556,9 @@ window.DiaryTab = (() => {
     clearTimeout(catalogSearchTimeout);
     const q = e.target.value.trim();
     const resultsEl = document.getElementById('modal-catalog-results');
-    if (q.length < 2) {
+    if (q.length < 4) {
       resultsEl.innerHTML = '';
+      if (q.length < 2) document.getElementById('modal-recent-section').classList.toggle('hidden', document.getElementById('modal-recent-foods').children.length === 0);
       return;
     }
     document.getElementById('modal-recent-section').classList.add('hidden');
