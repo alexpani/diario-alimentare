@@ -525,7 +525,7 @@ window.DiaryTab = (() => {
             <div class="catalog-result-name">${f.name}</div>
             ${f.brand ? `<div class="catalog-result-brand">${f.brand}</div>` : ''}
             <div class="catalog-result-macros">${Math.round(f.kcal_100g)} kcal · P:${fmt(f.protein_100g)}g G:${fmt(f.fat_100g)}g C:${fmt(f.carbs_100g)}g</div>
-            <div class="catalog-result-source">${_fmtSrc(f.source)}${f.barcode ? ' · ' + f.barcode : ''}</div>
+            <div class="catalog-result-source">${_fmtSrc(f.source, f.components)}${f.barcode ? ' · ' + f.barcode : ''}</div>
           </div>
         </div>
       `).join('');
