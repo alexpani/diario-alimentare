@@ -754,8 +754,14 @@ input:focus, select:focus, textarea:focus {
 }
 .diary-day-card:active { transform: scale(0.98); }
 .diary-day-date { min-width: 48px; text-align: center; }
-.diary-day-num { font-size: 26px; font-weight: 800; color: var(--color-primary); line-height: 1; }
+.diary-day-weekday { font-size: 10px; font-weight: 700; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+.diary-day-num { font-size: 24px; font-weight: 800; color: var(--color-primary); line-height: 1.1; }
 .diary-day-month { font-size: 11px; color: var(--color-text-secondary); text-transform: uppercase; }
+
+/* Legenda macro con percentuali */
+.macros-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 12px; }
+.macros-legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--color-text-secondary); }
+.macros-legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 .diary-day-info { flex: 1; }
 .diary-day-kcal { font-size: 16px; font-weight: 700; }
 .diary-day-macros { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; }
