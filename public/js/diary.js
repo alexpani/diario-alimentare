@@ -326,11 +326,14 @@ window.DiaryTab = (() => {
   async function loadRecentFoods(meal) {
     const mealEnc = encodeURIComponent(meal);
     const [recents, frequents] = await Promise.all([
-      apiGet(`/api/diary/recent?meal_type=${mealEnc}&limit=8`),
-      apiGet(`/api/diary/frequent?meal_type=${mealEnc}&limit=8`)
+      apiGet(`/api/diary/recent?meal_type=${mealEnc}&limit=12`),
+      apiGet(`/api/diary/frequent?meal_type=${mealEnc}&limit=12`)
     ]);
-    _recentFoods = recents || [];
-    _frequentFoods = frequents || [];
+
+    // Escludi alimenti già presenti in questo pasto oggi
+    const mealFoodIds = new Set(entries.filter(e => e.meal_type === meal).map(e => e.food_id));
+    _recentFoods = (recents || []).filter(f => !mealFoodIds.has(f.id)).slice(0, 8);
+    _frequentFoods = (frequents || []).filter(f => !mealFoodIds.has(f.id)).slice(0, 8);
 
     if (_recentFoods.length === 0 && _frequentFoods.length === 0) return;
 
