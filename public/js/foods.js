@@ -36,12 +36,13 @@ window.FoodsTab = (() => {
     container.innerHTML = foods.map(f => `
       <div class="food-card">
         ${f.image_path
-          ? `<img class="food-card-img" src="${f.image_path}" alt="" loading="lazy">`
-          : `<div class="food-card-img-placeholder">🥗</div>`}
-        <div class="food-card-info">
-          <div class="food-card-name">${f.name}</div>
-          ${f.brand ? `<div class="food-card-brand">${f.brand}</div>` : ''}
-          <div class="food-card-macros">${Math.round(f.kcal_100g)} kcal · P:${fmt(f.protein_100g)}g G:${fmt(f.fat_100g)}g C:${fmt(f.carbs_100g)}g per 100g</div>
+          ? `<img class="catalog-result-img" src="${f.image_path}" alt="" loading="lazy">`
+          : `<div class="catalog-result-img-placeholder"></div>`}
+        <div class="catalog-result-info">
+          <div class="catalog-result-name">${f.name}</div>
+          ${f.brand ? `<div class="catalog-result-brand">${f.brand}</div>` : ''}
+          <div class="catalog-result-macros">${Math.round(f.kcal_100g)} kcal · P:${fmt(f.protein_100g)}g G:${fmt(f.fat_100g)}g C:${fmt(f.carbs_100g)}g</div>
+          <div class="catalog-result-source">APP${f.barcode ? ' · ' + f.barcode : ''}</div>
         </div>
         <div class="food-card-actions">
           <button class="btn-icon btn-edit-food" data-id="${f.id}" title="Modifica" style="color:var(--color-primary)">
