@@ -503,7 +503,7 @@ window.DiaryTab = (() => {
       html += '<div class="recent-label" style="margin-bottom:6px">Nel tuo database</div>';
       html += localFoods.map(f => `
         <div class="search-result-item" data-food-id="${f.id}">
-          ${f.image_path ? `<img class="catalog-result-img" src="${f.image_path}" alt="" loading="lazy">` : '<div class="catalog-result-img-placeholder"></div>'}
+          ${f.image_path ? `<img class="catalog-result-img" src="${f.image_path}" alt="" loading="lazy">` : '<div class="catalog-result-img-placeholder">🥗</div>'}
           <div class="catalog-result-info">
             <div class="catalog-result-name">${f.name}</div>
             ${f.brand ? `<div class="catalog-result-brand">${f.brand}</div>` : ''}
@@ -519,7 +519,7 @@ window.DiaryTab = (() => {
       html += '<div class="recent-label" style="margin:14px 0 6px">Dal catalogo</div>';
       html += catalogProducts.map((p, i) => `
         <div class="catalog-result-item">
-          ${p.image_url ? `<img src="${p.image_url}" alt="" loading="lazy">` : '<div class="catalog-result-img-placeholder"></div>'}
+          ${p.image_url ? `<img src="${p.image_url}" alt="" loading="lazy">` : '<div class="catalog-result-img-placeholder">🥗</div>'}
           <div class="catalog-result-info">
             <div class="catalog-result-name">${p.name}</div>
             ${p.brand ? `<div class="catalog-result-brand">${p.brand}</div>` : ''}
