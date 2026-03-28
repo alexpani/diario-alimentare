@@ -163,16 +163,24 @@ window.FoodsTab = (() => {
     // Ricetta
     const components = food.components || [];
     if (components.length > 0) {
-      // Carica i dettagli nutrizionali di ciascun componente
       (async () => {
         recipeIngredients = [];
         for (const c of components) {
-          const f = await apiGet(`/api/foods/${c.food_id}`);
-          if (f) recipeIngredients.push({
-            food_id: c.food_id, name: f.name, quantity_g: c.quantity_g,
-            kcal_100g: f.kcal_100g, protein_100g: f.protein_100g,
-            fat_100g: f.fat_100g, carbs_100g: f.carbs_100g,
-          });
+          // Usa snapshot se presente, altrimenti fetch dal DB
+          if (c.kcal_100g !== undefined && c.name) {
+            recipeIngredients.push({
+              food_id: c.food_id, name: c.name, quantity_g: c.quantity_g,
+              kcal_100g: c.kcal_100g, protein_100g: c.protein_100g,
+              fat_100g: c.fat_100g, carbs_100g: c.carbs_100g,
+            });
+          } else {
+            const f = await apiGet(`/api/foods/${c.food_id}`);
+            if (f) recipeIngredients.push({
+              food_id: c.food_id, name: f.name, quantity_g: c.quantity_g,
+              kcal_100g: f.kcal_100g, protein_100g: f.protein_100g,
+              fat_100g: f.fat_100g, carbs_100g: f.carbs_100g,
+            });
+          }
         }
         if (food.recipe_yield_g) document.getElementById('ff-recipe-yield').value = food.recipe_yield_g;
         setRecipeMode(true);
