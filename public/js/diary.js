@@ -320,13 +320,18 @@ window.DiaryTab = (() => {
   function renderRecentList(foods) {
     const list = document.getElementById('modal-recent-foods');
     list.innerHTML = foods.map(f => {
-      const qtyInfo = f.last_qty_label || (f.last_qty_g ? `${f.last_qty_g}g` : '');
+      const qtyLabel = f.last_qty_label || (f.last_qty_g ? `${f.last_qty_g}g` : '');
+      const portionKcal = f.last_qty_g ? Math.round(f.kcal_100g / 100 * f.last_qty_g) : null;
+      const detail = f.brand ? f.brand + ' · ' : '';
+      const qtyPart = qtyLabel
+        ? `<span style="color:var(--color-primary)">${qtyLabel}</span>${portionKcal !== null ? ` · ${portionKcal} kcal` : ''}`
+        : `${Math.round(f.kcal_100g)} kcal/100g`;
       return `
       <div class="recent-food-item" data-recent-food-id="${f.id}">
         ${f.image_path ? `<img class="sri-img" src="${f.image_path}" alt="" loading="lazy">` : `<div class="sri-placeholder">🥗</div>`}
         <div class="sri-info">
           <div class="sri-name">${f.name}</div>
-          <div class="sri-detail">${f.brand ? f.brand + ' · ' : ''}${Math.round(f.kcal_100g)} kcal/100g${qtyInfo ? ` · <span style="color:var(--color-primary)">${qtyInfo}</span>` : ''}</div>
+          <div class="sri-detail">${detail}${qtyPart}</div>
         </div>
       </div>`;
     }).join('');
