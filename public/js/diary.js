@@ -503,10 +503,12 @@ window.DiaryTab = (() => {
       html += '<div class="recent-label" style="margin-bottom:6px">Nel tuo database</div>';
       html += localFoods.map(f => `
         <div class="search-result-item" data-food-id="${f.id}">
-          ${f.image_path ? `<img class="sri-img" src="${f.image_path}" alt="" loading="lazy">` : `<div class="sri-placeholder">🥗</div>`}
-          <div class="sri-info">
-            <div class="sri-name">${f.name}</div>
-            <div class="sri-detail">${f.brand ? f.brand + ' · ' : ''}${Math.round(f.kcal_100g)} kcal/100g</div>
+          ${f.image_path ? `<img class="catalog-result-img" src="${f.image_path}" alt="" loading="lazy">` : '<div class="catalog-result-img-placeholder"></div>'}
+          <div class="catalog-result-info">
+            <div class="catalog-result-name">${f.name}</div>
+            ${f.brand ? `<div class="catalog-result-brand">${f.brand}</div>` : ''}
+            <div class="catalog-result-macros">${Math.round(f.kcal_100g)} kcal · P:${fmt(f.protein_100g)}g G:${fmt(f.fat_100g)}g C:${fmt(f.carbs_100g)}g</div>
+            <div class="catalog-result-source">APP${f.barcode ? ' · ' + f.barcode : ''}</div>
           </div>
         </div>
       `).join('');
