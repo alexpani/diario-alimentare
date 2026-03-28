@@ -16,6 +16,7 @@ window.DiaryLog = (() => {
   }
 
   async function refresh() {
+    _rangeCache = {};
     await Promise.all([
       loadDays(),
       loadWeeklyChart(),
