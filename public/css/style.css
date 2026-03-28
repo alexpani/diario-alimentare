@@ -4,19 +4,37 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
+  /* ── Palette primaria ── */
   --color-primary: #4CAF50;
   --color-primary-dark: #388E3C;
   --color-primary-light: #C8E6C9;
+  /* ── Semantici ── */
   --color-danger: #f44336;
+  --color-danger-bg: #FFEBEE;
+  --color-danger-text: #C62828;
   --color-warning: #FF9800;
+  --color-warning-bg: #FFF8E1;
+  --color-warning-border: #FFC107;
+  --color-warning-text: #5d4037;
+  --color-success-bg: #E8F5E9;
+  --color-success-text: #2E7D32;
+  /* ── Superfici ── */
   --color-text: #212121;
   --color-text-secondary: #757575;
+  --color-text-on-primary: #ffffff;
   --color-border: #E0E0E0;
   --color-bg: #F5F5F5;
   --color-card: #ffffff;
+  --color-input: #ffffff;
+  --color-elevated: #2C2C2E;
+  /* ── Macro nutrienti ── */
   --color-protein: #5C6BC0;
   --color-fat: #FFA726;
   --color-carbs: #66BB6A;
+  /* ── Gauge / grafici ── */
+  --color-gauge-over: #FFD54F;
+  --color-gauge-warning: #A5D6A7;
+  /* ── Dimensioni e ombre ── */
   --tab-bar-height: 72px;
   --header-height: 52px;
   --radius: 12px;
