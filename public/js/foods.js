@@ -37,7 +37,7 @@ window.FoodsTab = (() => {
       <div class="food-card">
         ${f.image_path
           ? `<img class="catalog-result-img" src="${f.image_path}" alt="" loading="lazy">`
-          : `<div class="catalog-result-img-placeholder"></div>`}
+          : `<div class="catalog-result-img-placeholder">🥗</div>`}
         <div class="catalog-result-info">
           <div class="catalog-result-name">${f.name}</div>
           ${f.brand ? `<div class="catalog-result-brand">${f.brand}</div>` : ''}
