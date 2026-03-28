@@ -1068,7 +1068,7 @@ input:focus, select:focus, textarea:focus {
 
 .image-preview { margin-top: 10px; }
 .image-preview img { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-radius: var(--radius-sm); }
-.btn-remove-image { margin-top: 8px; color: var(--color-danger, #e53935); border-color: var(--color-danger, #e53935); }
+.btn-remove-image { margin-top: 8px; color: var(--color-danger); border-color: var(--color-danger); }
 
 /* ── Modale crop ── */
 #modal-crop { z-index: 400; }
