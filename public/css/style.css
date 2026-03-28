@@ -649,6 +649,22 @@ input:focus, select:focus, textarea:focus {
   letter-spacing: 0.5px; color: var(--color-text-secondary);
   margin: 14px 0 6px;
 }
+.recent-tabs {
+  display: flex; gap: 0; margin: 14px 0 6px;
+  border-bottom: 1px solid var(--color-border);
+}
+.recent-tab {
+  flex: 1; padding: 8px 0; border: none; background: none;
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.5px; color: var(--color-text-secondary);
+  border-bottom: 2px solid transparent; cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  text-align: center;
+}
+.recent-tab.active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
 .recent-foods-list { display: flex; flex-direction: column; gap: 2px; }
 .recent-food-item {
   display: flex; align-items: center; gap: 10px;
