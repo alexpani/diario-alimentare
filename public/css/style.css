@@ -991,11 +991,11 @@ input:focus, select:focus, textarea:focus {
 }
 .qty-tab {
   flex: 1; padding: 10px;
-  background: white; border: none; cursor: pointer;
+  background: var(--color-card); border: none; cursor: pointer;
   font-size: 14px; font-weight: 600; color: var(--color-text-secondary);
   transition: all 0.15s;
 }
-.qty-tab.active { background: var(--color-primary); color: white; }
+.qty-tab.active { background: var(--color-primary); color: var(--color-text-on-primary); }
 
 .qty-calculated { text-align: center; margin: 8px 0; color: var(--color-text-secondary); font-size: 14px; }
 .qty-calculated strong { font-size: 18px; color: var(--color-text); }
