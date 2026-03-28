@@ -481,6 +481,9 @@ window.DiaryTab = (() => {
       if (res.ok) {
         const products = await res.json();
         // Filtra doppioni: escludi prodotti con barcode già presenti nel DB locale
+        // Ordina per sorgente: APP > CREA > OFF
+        const sourceOrder = { app: 0, crea: 1 };
+        products.sort((a, b) => (sourceOrder[a.source] ?? 2) - (sourceOrder[b.source] ?? 2));
         catalogProducts = products.filter(p => !p.barcode || !localBarcodes.has(p.barcode));
       }
     } catch (e) {
