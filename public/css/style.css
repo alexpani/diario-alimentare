@@ -344,7 +344,7 @@ input:focus, select:focus, textarea:focus {
 }
 
 .date-nav .btn-icon {
-  color: white;
+  color: var(--color-text-on-primary);
   opacity: 0.9;
   -webkit-appearance: none;
   appearance: none;
