@@ -116,6 +116,60 @@ node update_plans_kcal.js  # aggiorna kcal piani su TDEE personale
 4. Se non trovato → cerca in Food Tracker via `import-catalog`
 5. Se trovato → apre form pre-compilato per modifica/salvataggio nella libreria
 
+## Palette colori (WCAG AA)
+
+Tutti i colori sono definiti come CSS custom properties in `style.css` (`:root` e `[data-theme="dark"]`).
+Non usare mai colori hardcoded — usa sempre `var(--color-xxx)`.
+
+### Light mode
+
+| Variabile | Hex | Uso |
+|-----------|-----|-----|
+| `--color-primary` | `#2E7D32` 🟩 | Bottoni, link, accenti principali |
+| `--color-primary-dark` | `#1B5E20` 🟩 | Gradienti, hover |
+| `--color-primary-light` | `#C8E6C9` 🟩 | Sfondo tap/active |
+| `--color-primary-surface` | `#4CAF50` 🟩 | Gradienti hero (daily summary) |
+| `--color-text` | `#212121` ⬛ | Testo principale |
+| `--color-text-secondary` | `#616161` 🔘 | Testo secondario, dettagli |
+| `--color-text-on-primary` | `#ffffff` ⬜ | Testo su sfondi primary |
+| `--color-bg` | `#F5F5F5` ⬜ | Sfondo pagina |
+| `--color-card` | `#ffffff` ⬜ | Sfondo card |
+| `--color-input` | `#ffffff` ⬜ | Sfondo input |
+| `--color-border` | `#8E8E8E` 🔘 | Bordi (3:1 su card) |
+| `--color-danger` | `#D32F2F` 🟥 | Errori, eliminazione |
+| `--color-danger-bg` | `#FFEBEE` 🟥 | Sfondo messaggi errore |
+| `--color-danger-text` | `#B71C1C` 🟥 | Testo errore su danger-bg |
+| `--color-warning` | `#E65100` 🟧 | Avvisi |
+| `--color-warning-bg` | `#FFF8E1` 🟨 | Sfondo avvisi |
+| `--color-warning-text` | `#4E342E` 🟫 | Testo avvisi |
+| `--color-success-bg` | `#E8F5E9` 🟩 | Sfondo messaggi successo |
+| `--color-success-text` | `#1B5E20` 🟩 | Testo successo |
+| `--color-protein` | `#3949AB` 🟦 | Macro: proteine |
+| `--color-fat` | `#BF360C` 🟧 | Macro: grassi |
+| `--color-carbs` | `#2E7D32` 🟩 | Macro: carboidrati |
+
+### Dark mode
+
+| Variabile | Hex | Note |
+|-----------|-----|------|
+| `--color-primary` | `#66BB6A` 🟩 | Più chiaro per contrasto su scuro |
+| `--color-text-on-primary` | `#000000` ⬛ | Testo scuro su primary chiaro |
+| `--color-bg` | `#0F0F0F` ⬛ | Sfondo pagina |
+| `--color-card` | `#1C1C1E` ⬛ | Sfondo card |
+| `--color-text` | `#F2F2F7` ⬜ | Testo principale |
+| `--color-text-secondary` | `#A1A1A6` 🔘 | Testo secondario |
+| `--color-border` | `#6A6A6C` 🔘 | Bordi (3:1 su card) |
+| `--color-input` | `#2C2C2E` ⬛ | Sfondo input |
+| `--color-protein` | `#7986CB` 🟦 | Macro: proteine (più chiaro) |
+| `--color-fat` | `#FFB74D` 🟧 | Macro: grassi (più chiaro) |
+| `--color-carbs` | `#81C784` 🟩 | Macro: carboidrati (più chiaro) |
+
+### Regole
+- Ogni combinazione testo/sfondo supera WCAG AA (4.5:1 per testo, 3:1 per UI)
+- I colori macro (protein/fat/carbs) sono usati globalmente: Home, Piano, Diario, grafici Chart.js
+- Chart.js legge i colori a runtime via `cssColor('--color-xxx')` in `diarylog.js`
+- In dark mode i colori macro sono più chiari per mantenere contrasto su sfondi scuri
+
 ## Gotcha importanti
 
 ### sqlite async
