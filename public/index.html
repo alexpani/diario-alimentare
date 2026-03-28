@@ -328,12 +328,20 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;vertical-align:middle;margin-right:6px"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
         Fotografa barcode (iOS)
       </button>
+      <div class="search-wrap mt-8">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="modal-catalog-search" placeholder="Cerca nel catalogo..." class="search-input" autocomplete="off">
+      </div>
+      <div id="modal-catalog-results" class="search-results"></div>
       <div id="barcode-scanner-wrap" class="hidden">
         <div id="barcode-reader"></div>
         <button id="btn-stop-scan" class="btn btn-outline btn-full mt-8">Ferma scanner</button>
       </div>
       <div id="modal-recent-section" class="hidden">
-        <div class="recent-label">Usati di recente per questo pasto</div>
+        <div class="recent-tabs">
+          <button class="recent-tab active" data-recent-mode="recent">Recenti</button>
+          <button class="recent-tab" data-recent-mode="frequent">Frequenti</button>
+        </div>
         <div id="modal-recent-foods" class="recent-foods-list"></div>
       </div>
       <div id="modal-search-results" class="search-results"></div>
