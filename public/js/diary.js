@@ -632,22 +632,8 @@ window.DiaryTab = (() => {
 
     btn.disabled = false;
     if (res && !res.error) {
-      if (editingEntryId) {
-        // Modifica: chiudi la modale
-        closeAddModal();
-      } else {
-        // Aggiunta: torna alla ricerca e mostra feedback
-        const addedName = selectedFood.name;
-        selectedFood = null;
-        editingEntryId = null;
-        document.getElementById('modal-step-qty').classList.add('hidden');
-        document.getElementById('modal-step-search').classList.remove('hidden');
-        document.getElementById('modal-food-search').value = '';
-        document.getElementById('modal-search-results').innerHTML = '';
-        loadRecentFoods(selectedMeal);
-        showAddedToast(addedName);
-        setTimeout(() => document.getElementById('modal-food-search').focus(), 100);
-      }
+      // Chiudi la modale e torna alla Home col pasto aggiornato
+      closeAddModal();
       await refresh();
     }
   });
