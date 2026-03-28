@@ -524,7 +524,7 @@ window.DiaryTab = (() => {
             <div class="catalog-result-name">${p.name}</div>
             ${p.brand ? `<div class="catalog-result-brand">${p.brand}</div>` : ''}
             <div class="catalog-result-macros">${Math.round(p.kcal_100g)} kcal · P:${(p.protein_100g||0).toFixed(1)}g G:${(p.fat_100g||0).toFixed(1)}g C:${(p.carbs_100g||0).toFixed(1)}g</div>
-            <div class="catalog-result-source">${p.source === 'crea' ? 'CREA' : p.source === 'app' ? 'APP' : 'OFF'}${p.barcode ? ' · ' + p.barcode : ''}</div>
+            <div class="catalog-result-source">${_fmtSrc(p.source)}${p.barcode ? ' · ' + p.barcode : ''}</div>
           </div>
           <button class="btn btn-primary btn-sm btn-catalog-modal-import" data-idx="${i}">Importa</button>
         </div>
