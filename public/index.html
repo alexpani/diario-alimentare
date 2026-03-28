@@ -135,9 +135,13 @@
           <canvas id="chart-weekly"></canvas>
         </div>
         <div class="chart-card">
-          <h3>Macro medi ultimi 30 giorni</h3>
+          <div class="macros-tabs">
+            <button class="macros-tab active" data-macros-days="7">7 giorni</button>
+            <button class="macros-tab" data-macros-days="30">30 giorni</button>
+          </div>
           <canvas id="chart-macros"></canvas>
           <div id="chart-macros-legend" class="macros-legend"></div>
+          <div id="chart-macros-deviation" class="macros-deviation"></div>
         </div>
       </div>
       <h3 class="section-title">Storico</h3>
