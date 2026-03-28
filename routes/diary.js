@@ -206,19 +206,17 @@ router.get('/recent', async (req, res) => {
 
     const rows = await db.all(`
       SELECT f.id, f.name, f.brand, f.kcal_100g, f.protein_100g, f.fat_100g, f.carbs_100g,
-             f.portions, f.image_path, latest.last_used, latest.quantity_g AS last_qty_g, latest.quantity_label AS last_qty_label
+             f.portions, f.image_path, agg.last_used, latest.quantity_g AS last_qty_g, latest.quantity_label AS last_qty_label
       FROM (
-        SELECT food_id, MAX(date || ' ' || created_at) AS max_ts, MAX(date) AS last_used
+        SELECT food_id, MAX(id) AS max_id, MAX(date) AS last_used
         FROM diary_entries WHERE meal_type = ? GROUP BY food_id
       ) agg
-      JOIN diary_entries latest ON latest.food_id = agg.food_id
-        AND (latest.date || ' ' || latest.created_at) = agg.max_ts
-        AND latest.meal_type = ?
+      JOIN diary_entries latest ON latest.id = agg.max_id
       JOIN foods f ON f.id = agg.food_id
       WHERE f.is_quick = 0
       ORDER BY agg.last_used DESC
       LIMIT ?
-    `, meal_type, meal_type, parseInt(limit));
+    `, meal_type, parseInt(limit));
 
     res.json(rows.map(r => ({
       ...r,
