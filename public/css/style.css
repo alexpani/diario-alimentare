@@ -664,10 +664,10 @@ input:focus, select:focus, textarea:focus {
 
 /* ── Voce rapida ── */
 .quick-entry-hint {
-  font-size: 13px; color: var(--color-text-secondary);
-  background: #FFF8E1; border-radius: var(--radius-sm);
+  font-size: 13px; color: var(--color-warning-text);
+  background: var(--color-warning-bg); border-radius: var(--radius-sm);
   padding: 10px 12px; margin-bottom: 16px;
-  border-left: 3px solid #FFC107;
+  border-left: 3px solid var(--color-warning-border);
 }
 .quick-macro-row {
   display: flex; gap: 8px;
