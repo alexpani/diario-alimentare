@@ -758,10 +758,26 @@ input:focus, select:focus, textarea:focus {
 .diary-day-num { font-size: 24px; font-weight: 800; color: var(--color-primary); line-height: 1.1; }
 .diary-day-month { font-size: 11px; color: var(--color-text-secondary); text-transform: uppercase; }
 
+/* Tab macro periodo */
+.macros-tabs { display: flex; gap: 0; margin-bottom: 10px; }
+.macros-tab {
+  flex: 1; padding: 6px 0; border: none; background: none;
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.5px; color: var(--color-text-secondary);
+  border-bottom: 2px solid transparent; cursor: pointer;
+}
+.macros-tab.active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
 /* Legenda macro con percentuali */
 .macros-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 12px; }
 .macros-legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--color-text-secondary); }
 .macros-legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+/* Scostamento dal piano */
+.macros-deviation { margin-top: 10px; text-align: center; }
+.macros-deviation-title { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 4px; }
+.macros-deviation-row { display: flex; justify-content: center; gap: 16px; font-size: 13px; font-weight: 600; }
 .diary-day-info { flex: 1; }
 .diary-day-kcal { font-size: 16px; font-weight: 700; }
 .diary-day-macros { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; }
