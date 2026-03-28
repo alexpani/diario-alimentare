@@ -182,7 +182,7 @@ body {
   display: flex; align-items: stretch;
   z-index: 100;
   box-shadow: 0 -2px 10px rgba(0,0,0,0.06);
-  padding-bottom: env(safe-area-inset-bottom);
+  padding-bottom: max(8px, env(safe-area-inset-bottom));
 }
 
 .tab-btn {
@@ -193,7 +193,7 @@ body {
   color: var(--color-text-secondary);
   font-size: 10px; font-weight: 500;
   transition: color 0.15s;
-  padding: 8px 4px;
+  padding: 8px 4px 4px;
 }
 
 .tab-btn svg { width: 22px; height: 22px; transition: transform 0.15s; }
