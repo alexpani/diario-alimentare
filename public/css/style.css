@@ -447,6 +447,13 @@ input:focus, select:focus, textarea:focus {
 }
 .cal-cell.cal-selected .cal-dot { background: rgba(255,255,255,0.8); }
 
+.cal-today-btn {
+  display: block; margin: 10px auto 0; padding: 6px 24px;
+  background: none; border: 1px solid var(--color-primary); border-radius: 8px;
+  color: var(--color-primary); font-size: 0.85rem; font-weight: 600; cursor: pointer;
+}
+.cal-today-btn:active { background: var(--color-primary-light); }
+
 /* ── Daily Summary Hero ─────────────────────────────────────────────────── */
 .daily-summary {
   background: linear-gradient(180deg, color-mix(in srgb, var(--color-primary-dark) 80%, black) 0%, var(--color-primary-dark) 40%, var(--color-primary) 100%);
