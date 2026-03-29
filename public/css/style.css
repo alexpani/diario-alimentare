@@ -29,9 +29,9 @@
   --color-input: #ffffff;
   --color-elevated: #2C2C2E;
   /* ── Macro nutrienti ── */
-  --color-protein: #3949AB;
-  --color-fat: #BF360C;
-  --color-carbs: #2E7D32;
+  --color-protein: #C2185B;
+  --color-fat: #E65100;
+  --color-carbs: #1565C0;
   /* ── Gauge / grafici ── */
   --color-gauge-over: #FFD54F;
   --color-gauge-warning: #A5D6A7;
