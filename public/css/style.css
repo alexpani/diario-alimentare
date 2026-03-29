@@ -136,7 +136,7 @@
   background: linear-gradient(180deg, #2E7D32 0%, #1a4a1e 35%, #0F0F0F 100%);
   color: #ffffff;
 }
-[data-theme="dark"] .app-header          { color: #ffffff; }
+[data-theme="dark"] .app-header          { color: var(--color-text); }
 [data-theme="dark"] .date-nav .btn-icon svg { stroke: rgba(255,255,255,0.7); }
 [data-theme="dark"] .ds-gauge-bg         { stroke: rgba(255,255,255,0.12); }
 [data-theme="dark"] .ds-gauge-fill       { stroke: var(--color-primary); }
