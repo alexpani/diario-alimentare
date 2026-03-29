@@ -909,7 +909,7 @@ input:focus, select:focus, textarea:focus {
 /* Active plan name — right side of gauge, symmetric to "Assunte" */
 .ds-plan-name {
   font-size: 13px; font-weight: 700;
-  color: var(--color-text-on-primary);
+  color: var(--color-text);
   text-align: center;
   line-height: 1.25;
   word-break: break-word;
