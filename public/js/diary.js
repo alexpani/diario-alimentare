@@ -158,15 +158,6 @@ window.DiaryTab = (() => {
       btn.addEventListener('click', () => removeEntry(parseInt(btn.dataset.removeEntry)));
     });
 
-    container.querySelectorAll('[data-edit-entry]').forEach(btn => {
-      btn.addEventListener('click', (ev) => {
-        ev.stopPropagation();
-        const id = parseInt(btn.dataset.editEntry);
-        const entry = entries.find(e => e.id === id);
-        if (entry) openEditModal(entry);
-      });
-    });
-
     // Click su nome/dettaglio → modifica diretta
     container.querySelectorAll('.entry-info').forEach(info => {
       info.style.cursor = 'pointer';
