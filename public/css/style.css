@@ -131,6 +131,12 @@
 [data-theme="dark"] .cal-cell            { color: var(--color-text); }
 [data-theme="dark"] .cal-future          { opacity: 0.35; }
 
+[data-theme="dark"] .daily-summary,
+[data-theme="dark"] .app-header          { color: #ffffff; }
+[data-theme="dark"] .date-nav .btn-icon svg { stroke: #ffffff; }
+[data-theme="dark"] .ds-gauge-fill       { stroke: #ffffff; }
+[data-theme="dark"] .progress-bar        { background: #ffffff; }
+
 /* Transizione fluida al cambio tema */
 body, .tab-bar, .modal-box, .card, input, select, textarea, .btn-outline {
   transition: background-color 0.2s, border-color 0.2s, color 0.2s;
