@@ -38,7 +38,7 @@ node update_plans_kcal.js  # aggiorna kcal piani su TDEE personale
 │   ├── plan.js            # /api/plan, /api/plans — piani nutrizionali
 │   └── settings.js        # /api/settings — password, sync Food Tracker
 ├── public/
-│   ├── index.html         # Shell SPA (tab: home, diario, alimenti, piano, impostazioni)
+│   ├── index.html         # Shell SPA (tab bar: home, diario, alimenti, piano; impostazioni nell'header)
 │   ├── foods-table.html   # Spreadsheet alimenti (standalone)
 │   └── js/
 │       ├── app.js         # Core: tab switching, sessione, utility globali
