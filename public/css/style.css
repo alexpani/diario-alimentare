@@ -147,7 +147,8 @@
 }
 [data-theme="dark"] .ds-mc-bar-wrap      { background: rgba(255,255,255,0.15); }
 [data-theme="dark"] .progress-bar        { background: #ffffff; }
-[data-theme="dark"] .ds-plan-name        { color: #ffffff; }
+[data-theme="dark"] .ds-plan-name,
+[data-theme="dark"] .date-label          { color: #ffffff; }
 
 /* Transizione fluida al cambio tema */
 body, .tab-bar, .modal-box, .card, input, select, textarea, .btn-outline {
