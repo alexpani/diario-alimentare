@@ -179,6 +179,11 @@ document.getElementById('btn-logout').addEventListener('click', async () => {
   document.getElementById('login-pass').value = '';
 });
 
+// ── Header settings button ───────────────
+document.getElementById('btn-header-settings').addEventListener('click', () => {
+  switchTab('impostazioni');
+});
+
 // ── Tab routing ───────────────────────────
 const tabTitles = {
   home: 'FoodDiary',

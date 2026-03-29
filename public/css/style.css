@@ -217,6 +217,9 @@ body {
   width: 32px; height: 32px;
   border-radius: 8px;
 }
+.header-right {
+  display: flex; align-items: center; gap: 4px;
+}
 
 .app-header h1 { font-size: 18px; font-weight: 700; letter-spacing: 0.3px; }
 
