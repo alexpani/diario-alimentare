@@ -144,15 +144,18 @@ Non usare mai colori hardcoded — usa sempre `var(--color-xxx)`.
 | `--color-warning-text` | `#4E342E` 🟫 | Testo avvisi |
 | `--color-success-bg` | `#E8F5E9` 🟩 | Sfondo messaggi successo |
 | `--color-success-text` | `#1B5E20` 🟩 | Testo successo |
-| `--color-protein` | `#3949AB` 🟦 | Macro: proteine |
-| `--color-fat` | `#BF360C` 🟧 | Macro: grassi |
-| `--color-carbs` | `#2E7D32` 🟩 | Macro: carboidrati |
+| `--color-protein` | `#C2185B` 🩷 | Macro: proteine (rosa/fucsia) |
+| `--color-fat` | `#E65100` 🟧 | Macro: grassi (arancione) |
+| `--color-carbs` | `#1565C0` 🔵 | Macro: carboidrati (blu) |
 
 ### Dark mode
 
 | Variabile | Hex | Note |
 |-----------|-----|------|
 | `--color-primary` | `#66BB6A` 🟩 | Più chiaro per contrasto su scuro |
+| `--color-primary-dark` | `#43A047` 🟩 | Gradienti, hover |
+| `--color-primary-light` | `#1B3A1F` 🟩 | Sfondo tap/active (scuro) |
+| `--color-primary-surface` | `#388E3C` 🟩 | Gradienti hero |
 | `--color-text-on-primary` | `#000000` ⬛ | Testo scuro su primary chiaro |
 | `--color-bg` | `#0F0F0F` ⬛ | Sfondo pagina |
 | `--color-card` | `#1C1C1E` ⬛ | Sfondo card |
@@ -160,13 +163,21 @@ Non usare mai colori hardcoded — usa sempre `var(--color-xxx)`.
 | `--color-text-secondary` | `#A1A1A6` 🔘 | Testo secondario |
 | `--color-border` | `#6A6A6C` 🔘 | Bordi (3:1 su card) |
 | `--color-input` | `#2C2C2E` ⬛ | Sfondo input |
-| `--color-protein` | `#7986CB` 🟦 | Macro: proteine (più chiaro) |
-| `--color-fat` | `#FFB74D` 🟧 | Macro: grassi (più chiaro) |
-| `--color-carbs` | `#81C784` 🟩 | Macro: carboidrati (più chiaro) |
+| `--color-protein` | `#F06292` 🩷 | Macro: proteine (rosa chiaro) |
+| `--color-fat` | `#FFB74D` 🟧 | Macro: grassi (arancione chiaro) |
+| `--color-carbs` | `#42A5F5` 🔵 | Macro: carboidrati (blu chiaro) |
+
+### Dark mode — hero e gauge
+La Home in dark mode usa uno stile ispirato a Yazio:
+- **Hero**: gradiente verde-nero `linear-gradient(180deg, #2E7D32 0%, #1a4a1e 35%, #0F0F0F 100%)`
+- **Gauge**: arco verde `var(--color-primary)`, sfondo `rgba(255,255,255,0.12)`
+- **Macro box**: sfondo `rgba(0,0,0,0.5)` con `backdrop-filter: blur(8px)`
+- **Testi hero**: forzati a `#ffffff` (override di `--color-text-on-primary` che è nero)
+- **Light mode gauge**: arco `#A5D6A7` (verde chiaro), sfondo `rgba(255,255,255,0.18)`
 
 ### Regole
 - Ogni combinazione testo/sfondo supera WCAG AA (4.5:1 per testo, 3:1 per UI)
-- I colori macro (protein/fat/carbs) sono usati globalmente: Home, Piano, Diario, grafici Chart.js
+- I colori macro (protein/fat/carbs) sono coerenti tra light e dark: stessa famiglia cromatica (rosa, arancione, blu)
 - Chart.js legge i colori a runtime via `cssColor('--color-xxx')` in `diarylog.js`
 - In dark mode i colori macro sono più chiari per mantenere contrasto su sfondi scuri
 
