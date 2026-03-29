@@ -131,10 +131,21 @@
 [data-theme="dark"] .cal-cell            { color: var(--color-text); }
 [data-theme="dark"] .cal-future          { opacity: 0.35; }
 
-[data-theme="dark"] .daily-summary,
+/* ── Dark hero: ispirato a Yazio dark ── */
+[data-theme="dark"] .daily-summary {
+  background: linear-gradient(180deg, #2E7D32 0%, #1a4a1e 35%, #0F0F0F 100%);
+  color: #ffffff;
+}
 [data-theme="dark"] .app-header          { color: #ffffff; }
-[data-theme="dark"] .date-nav .btn-icon svg { stroke: #ffffff; }
-[data-theme="dark"] .ds-gauge-fill       { stroke: #ffffff; }
+[data-theme="dark"] .date-nav .btn-icon svg { stroke: rgba(255,255,255,0.7); }
+[data-theme="dark"] .ds-gauge-bg         { stroke: rgba(255,255,255,0.12); }
+[data-theme="dark"] .ds-gauge-fill       { stroke: var(--color-primary); }
+[data-theme="dark"] .ds-gauge-fill.over  { stroke: var(--color-gauge-over); }
+[data-theme="dark"] .ds-macro-card {
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(8px);
+}
+[data-theme="dark"] .ds-mc-bar-wrap      { background: rgba(255,255,255,0.15); }
 [data-theme="dark"] .progress-bar        { background: #ffffff; }
 
 /* Transizione fluida al cambio tema */
