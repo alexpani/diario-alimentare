@@ -71,10 +71,13 @@ function formatDate(dateStr) {
   const todayStr = today.toISOString().slice(0, 10);
   const yesterdayStr = yesterday.toISOString().slice(0, 10);
 
-  if (dateStr === todayStr) return 'Oggi';
-  if (dateStr === yesterdayStr) return 'Ieri';
+  const dayMonth = d.toLocaleDateString('it-IT', { day: 'numeric', month: 'short' }).toUpperCase();
 
-  return d.toLocaleDateString('it-IT', { weekday: 'short', day: 'numeric', month: 'short' });
+  if (dateStr === todayStr) return `OGGI, ${dayMonth}`;
+  if (dateStr === yesterdayStr) return `IERI, ${dayMonth}`;
+
+  const weekday = d.toLocaleDateString('it-IT', { weekday: 'long' }).toUpperCase();
+  return `${weekday}, ${dayMonth}`;
 }
 
 function todayStr() {
