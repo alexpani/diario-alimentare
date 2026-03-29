@@ -581,6 +581,7 @@ input:focus, select:focus, textarea:focus {
   border-radius: 14px;
   padding: 10px 10px 8px;
   backdrop-filter: blur(12px);
+  color: var(--color-text);
 }
 .ds-mc-title {
   font-size: 11px;
