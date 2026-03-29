@@ -302,7 +302,8 @@ body {
 }
 .btn-icon svg { stroke: currentColor; }
 .btn-icon:active { background: rgba(0,0,0,0.08); }
-.app-header .btn-icon { color: var(--color-text-secondary); }
+.app-header .btn-icon { color: var(--color-text-secondary); width: 36px; height: 36px; }
+.app-header .btn-icon svg { width: 20px; height: 20px; }
 .app-header .btn-icon:active { background: rgba(0,0,0,0.08); }
 
 /* =========================================
