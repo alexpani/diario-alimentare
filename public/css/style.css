@@ -577,10 +577,10 @@ input:focus, select:focus, textarea:focus {
 }
 .ds-macro-card {
   flex: 1;
-  background: rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.85);
   border-radius: 14px;
   padding: 10px 10px 8px;
-  backdrop-filter: blur(4px);
+  color: var(--color-text);
 }
 .ds-mc-title {
   font-size: 11px;
