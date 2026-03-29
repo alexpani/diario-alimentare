@@ -321,6 +321,11 @@ const Cal = (() => {
 
   document.getElementById('cal-prev-month').addEventListener('click', (e) => { e.stopPropagation(); changeMonth(-1); });
   document.getElementById('cal-next-month').addEventListener('click', (e) => { e.stopPropagation(); changeMonth(+1); });
+  document.getElementById('cal-today').addEventListener('click', (e) => {
+    e.stopPropagation();
+    window.DiaryTab?.setDate(todayStr());
+    close();
+  });
   overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
   popup.addEventListener('click', (e) => e.stopPropagation());
 
