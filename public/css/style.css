@@ -299,8 +299,8 @@ body {
 }
 .btn-icon svg { stroke: currentColor; }
 .btn-icon:active { background: rgba(0,0,0,0.08); }
-.app-header .btn-icon { color: var(--color-text-on-primary); }
-.app-header .btn-icon:active { background: rgba(255,255,255,0.2); }
+.app-header .btn-icon { color: var(--color-text-secondary); }
+.app-header .btn-icon:active { background: rgba(0,0,0,0.08); }
 
 /* =========================================
    FORMS
