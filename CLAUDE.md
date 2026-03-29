@@ -167,13 +167,23 @@ Non usare mai colori hardcoded — usa sempre `var(--color-xxx)`.
 | `--color-fat` | `#FFB74D` 🟧 | Macro: grassi (arancione chiaro) |
 | `--color-carbs` | `#42A5F5` 🔵 | Macro: carboidrati (blu chiaro) |
 
-### Dark mode — hero e gauge
-La Home in dark mode usa uno stile ispirato a Yazio:
-- **Hero**: gradiente verde-nero `linear-gradient(180deg, #2E7D32 0%, #1a4a1e 35%, #0F0F0F 100%)`
-- **Gauge**: arco verde `var(--color-primary)`, sfondo `rgba(255,255,255,0.12)`
+### Hero e gauge (ispirato a Yazio)
+
+**Light mode**:
+- **Hero**: gradiente `linear-gradient(180deg, #47E95F 0%, #81C784 50%, var(--color-bg) 100%)`
+- **Gauge**: arco `#2E7D32` (verde scuro), sfondo `rgba(0,0,0,0.08)`
+- **Macro box**: sfondo `rgba(255,255,255,0.85)`, testo `var(--color-text)` (scuro)
+- **Testi hero**: `var(--color-text)` (scuro su verde chiaro)
+
+**Dark mode**:
+- **Hero**: gradiente `linear-gradient(180deg, #2E7D32 0%, #1a4a1e 35%, #0F0F0F 100%)`
+- **Gauge**: arco `var(--color-primary)`, sfondo `rgba(255,255,255,0.12)`
 - **Macro box**: sfondo `rgba(0,0,0,0.5)` con `backdrop-filter: blur(8px)`
-- **Testi hero**: forzati a `#ffffff` (override di `--color-text-on-primary` che è nero)
-- **Light mode gauge**: arco `#A5D6A7` (verde chiaro), sfondo `rgba(255,255,255,0.18)`
+- **Testi hero**: forzati a `#ffffff`
+
+### Layout
+- **Header**: sfondo `var(--color-card)`, bordo inferiore, logo a sinistra + titolo, ingranaggio + logout a destra
+- **Tab bar** (footer): 4 tab — Home, Diario, Alimenti, Piano (Impostazioni spostata nell'header)
 
 ### Regole
 - Ogni combinazione testo/sfondo supera WCAG AA (4.5:1 per testo, 3:1 per UI)
