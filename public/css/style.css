@@ -518,7 +518,7 @@ input:focus, select:focus, textarea:focus {
 /* Arco di sfondo: 270° aperto in basso */
 .ds-gauge-bg {
   fill: none;
-  stroke: rgba(255,255,255,0.25);
+  stroke: rgba(255,255,255,0.18);
   stroke-width: 14;
   stroke-linecap: round;
   /* circ = 2π*80 ≈ 502.65 | 270° = 376.99 | gap 90° = 125.66 */
@@ -529,7 +529,7 @@ input:focus, select:focus, textarea:focus {
 /* Arco di progresso */
 .ds-gauge-fill {
   fill: none;
-  stroke: white;
+  stroke: #A5D6A7;
   stroke-width: 14;
   stroke-linecap: round;
   stroke-dasharray: 0 502.65;
