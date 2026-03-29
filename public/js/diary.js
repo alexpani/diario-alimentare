@@ -4,9 +4,9 @@
 
 const MEALS = [
   { id: 'colazione',          label: 'Colazione',          icon: '☀️' },
-  { id: 'spuntino_mattino',   label: 'Spuntino mattino',   icon: '🍎' },
+  { id: 'spuntino_mattino',   label: 'Spuntino',            icon: '🍎' },
   { id: 'pranzo',             label: 'Pranzo',             icon: '🍽️' },
-  { id: 'spuntino_pomeriggio',label: 'Spuntino pomeriggio',icon: '🧃' },
+  { id: 'spuntino_pomeriggio',label: 'Merenda',            icon: '🧃' },
   { id: 'cena',               label: 'Cena',               icon: '🌙' },
   { id: 'extra',              label: 'Extra',              icon: '🍬' }
 ];
