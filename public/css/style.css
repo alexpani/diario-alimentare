@@ -529,7 +529,7 @@ input:focus, select:focus, textarea:focus {
 /* Arco di progresso */
 .ds-gauge-fill {
   fill: none;
-  stroke: #A5D6A7;
+  stroke: #2E7D32;
   stroke-width: 14;
   stroke-linecap: round;
   stroke-dasharray: 0 502.65;
