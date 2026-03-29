@@ -476,7 +476,7 @@ input:focus, select:focus, textarea:focus {
 
 /* ── Daily Summary Hero ─────────────────────────────────────────────────── */
 .daily-summary {
-  background: linear-gradient(180deg, #00A43A 0%, #81C784 50%, var(--color-bg) 100%);
+  background: linear-gradient(180deg, #47E95F 0%, #81C784 50%, var(--color-bg) 100%);
   color: var(--color-text);
   padding: 16px 16px 0;
   margin: 0;
