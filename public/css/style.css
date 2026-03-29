@@ -381,8 +381,8 @@ input:focus, select:focus, textarea:focus {
   appearance: none;
 }
 .date-nav .btn-icon svg {
-  stroke: var(--color-text-on-primary);
-  color: var(--color-text-on-primary);
+  stroke: var(--color-text);
+  color: var(--color-text);
   width: 24px;
   height: 24px;
   display: block;
