@@ -814,6 +814,7 @@ window.DiaryTab = (() => {
     BarcodeScanner.start(async (barcode) => {
       const resultsEl = document.getElementById('modal-search-results');
       resultsEl.innerHTML = '<div class="spinner"></div>';
+      document.getElementById('modal-recent-section').classList.add('hidden');
 
       // 1. Cerca nel DB locale per barcode esatto
       const local = await apiGet(`/api/foods?barcode=${encodeURIComponent(barcode)}`);
