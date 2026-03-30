@@ -502,8 +502,9 @@ window.DiaryTab = (() => {
       localFoods = await apiGet(`/api/foods?q=${encodeURIComponent(q)}&limit=20`) || [];
     }
 
-    // Set di barcode locali per evitare doppioni dal catalogo
+    // Set per evitare doppioni dal catalogo
     const localBarcodes = new Set(localFoods.filter(f => f.barcode).map(f => f.barcode));
+    const localNames = new Set(localFoods.map(f => (f.name || '').toLowerCase().trim()));
 
     // 2. Cerca in parallelo nel catalogo Food Tracker
     let catalogProducts = [];
@@ -520,7 +521,13 @@ window.DiaryTab = (() => {
         // Ordina per sorgente: APP > CREA > OFF
         const sourceOrder = { app: 0, crea: 1 };
         products.sort((a, b) => (sourceOrder[a.source] ?? 2) - (sourceOrder[b.source] ?? 2));
-        catalogProducts = products.filter(p => !p.barcode || !localBarcodes.has(p.barcode));
+        catalogProducts = products.filter(p => {
+          // Escludi se barcode già presente in locale
+          if (p.barcode && localBarcodes.has(p.barcode)) return false;
+          // Escludi prodotti APP con stesso nome (sincronizzati da questa app)
+          if (p.source === 'app' && localNames.has((p.name || '').toLowerCase().trim())) return false;
+          return true;
+        });
       }
     } catch (e) {
       console.warn('Catalog search error:', e);
