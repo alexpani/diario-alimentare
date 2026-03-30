@@ -39,9 +39,12 @@ node update_plans_kcal.js  # aggiorna kcal piani su TDEE personale
 │   └── settings.js        # /api/settings — password, sync Food Tracker
 ├── public/
 │   ├── index.html         # Shell SPA (tab bar: home, diario, alimenti, piano; impostazioni nell'header)
+│   ├── manifest.json      # Web App Manifest (PWA)
+│   ├── apple-touch-icon.png  # Icona 180x180 per iOS Home Screen
+│   ├── icons/             # Icone PWA (192x192, 512x512)
 │   ├── foods-table.html   # Spreadsheet alimenti (standalone)
 │   └── js/
-│       ├── app.js         # Core: tab switching, sessione, utility globali
+│       ├── app.js         # Core: tab switching, sessione, utility globali, calendario con anelli colorati
 │       ├── diary.js       # Tab Home — diario del giorno
 │       ├── diarylog.js    # Tab Diario — storico e grafici
 │       ├── foods.js       # Tab Alimenti — CRUD alimenti, foto, barcode, catalogo
@@ -107,7 +110,7 @@ node update_plans_kcal.js  # aggiorna kcal piani su TDEE personale
 4. Se non trovato → cerca in Food Tracker via `import-catalog`
 5. Se trovato nel catalogo → apre form alimento pre-compilato per modifica/salvataggio
 6. Se salvato → selezione quantità → aggiunta al pasto
-7. Se non trovato → messaggio "non trovato nel catalogo"
+7. Se non trovato → mostra "Nessun risultato" + bottone "Crea questo alimento" con barcode precompilato
 
 ### Tab Alimenti (gestione libreria)
 1. Scansione barcode
@@ -115,6 +118,43 @@ node update_plans_kcal.js  # aggiorna kcal piani su TDEE personale
 3. Se trovato → apre form di modifica (anche per promuovere `is_quick=1` a normale)
 4. Se non trovato → cerca in Food Tracker via `import-catalog`
 5. Se trovato → apre form pre-compilato per modifica/salvataggio nella libreria
+
+## Calendario Home — anelli colorati
+
+Il calendario nella Home mostra anelli colorati (semaforo) intorno ai giorni con registrazioni:
+- **Verde** (`#43A047`) — sotto il target kcal del piano
+- **Giallo** (`#F9A825`) — sopra fino a +200 kcal
+- **Rosso** (`#E53935`) — oltre +200 kcal sopra il target
+
+Il giorno selezionato usa il colore dell'anello come sfondo (non sempre verde).
+I dati vengono da `/api/diary/range` che restituisce kcal per giorno.
+
+## Gauge — "Oltre" in eccesso
+
+Quando le kcal consumate superano il target del piano, il gauge mostra:
+- Label: "Oltre" (invece di "Rimanenti")
+- Valore: "+XXX" (kcal in eccesso)
+- Il colore del testo rimane invariato (non cambia in rosso)
+
+## Copia da ieri
+
+Nei pasti vuoti appare il bottone "Copia [pasto] da ieri" con anteprima:
+- Mostra l'alimento più calorico di ieri + conteggio altri + kcal totali
+- Es. "Copia colazione da ieri" con sotto "Muffin e 1 altro — 450 kcal"
+- Se ieri il pasto era vuoto, il bottone non appare
+- I dati di ieri sono caricati in `loadEntries()` via `/api/diary?date=yesterday`
+
+## Recenti e frequenti
+
+La modale "Aggiungi alimento" mostra fino a 12 alimenti recenti/frequenti per pasto (era 8).
+
+## PWA
+
+L'app è installabile come PWA su iOS (Home Screen):
+- `public/manifest.json` — Web App Manifest
+- `public/apple-touch-icon.png` — 180x180 (generata da `logo.png` con `sips`)
+- `public/icons/icon-192.png` e `icon-512.png` — icone manifest
+- Meta tag in `index.html`: `apple-mobile-web-app-capable`, `apple-mobile-web-app-title`, `apple-touch-icon`, `manifest`
 
 ## Palette colori (WCAG AA)
 

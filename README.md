@@ -45,6 +45,7 @@ food-diary/
 ├── server.js           # Entry point Express
 ├── setup.js            # Script di inizializzazione DB
 ├── .env                # Configurazione (non committare!)
+├── logo.png            # Logo app (sorgente per icone PWA)
 ├── database/
 │   ├── db.js           # Singleton connessione SQLite + migrazioni
 │   └── food_diary.sqlite
@@ -55,10 +56,15 @@ food-diary/
 │   ├── plan.js         # API piani nutrizionali (/api/plan, /api/plans)
 │   └── settings.js     # API impostazioni + sync Food Tracker (/api/settings)
 ├── public/
-│   ├── index.html      # SPA shell (5 tab)
+│   ├── index.html      # SPA shell (4 tab + impostazioni in header)
+│   ├── manifest.json   # Web App Manifest (PWA)
+│   ├── apple-touch-icon.png  # Icona 180x180 per iOS
+│   ├── icons/
+│   │   ├── icon-192.png      # Icona 192x192 (manifest)
+│   │   └── icon-512.png      # Icona 512x512 (manifest/splash)
 │   ├── css/style.css   # Stili con dark mode
 │   └── js/
-│       ├── app.js      # Core SPA, tab switching, sessione
+│       ├── app.js      # Core SPA, tab switching, sessione, calendario
 │       ├── diary.js    # Tab Home — diario del giorno
 │       ├── diarylog.js # Tab Diario — storico e grafici
 │       ├── foods.js    # Tab Alimenti — CRUD, catalogo, barcode
@@ -72,11 +78,15 @@ food-diary/
 
 ## Funzionalità
 
-- **Home**: diario del giorno con navigazione data, aggiunta alimenti per pasto (6 pasti), riepilogo kcal/macros con gauge, spostamento alimenti tra pasti
+- **Home**: diario del giorno con navigazione data, aggiunta alimenti per pasto (6 pasti), riepilogo kcal/macros con gauge (mostra "Oltre +XXX" in eccesso), spostamento alimenti tra pasti
+- **Calendario**: anelli colorati semaforo (verde/giallo/rosso) sui giorni in base alle kcal vs target del piano; giorno selezionato usa il colore dell'anello come sfondo
+- **Copia da ieri**: nei pasti vuoti mostra anteprima con alimento top + conteggio + kcal (es. "Copia colazione da ieri — Muffin e 1 altro — 450 kcal")
 - **Diario**: storico giorni, grafici settimanali e mensili (Chart.js)
-- **Alimenti**: database personale con ricerca, import dal catalogo Food Tracker, barcode scanner, upload foto, porzioni decimali
+- **Alimenti**: database personale con ricerca, import dal catalogo Food Tracker, barcode scanner, upload foto, porzioni decimali; recenti e frequenti fino a 12 alimenti
+- **Barcode**: se non trovato nel DB locale né nel catalogo, mostra "Crea questo alimento" con barcode precompilato
 - **Piano**: 7 piani nutrizionali preimpostati (calibrati su TDEE personale), attivazione singola
 - **Impostazioni**: cambio password, sincronizzazione verso Food Tracker, tema chiaro/scuro
+- **PWA**: manifest.json + apple-touch-icon per installazione su Home Screen iOS
 
 ## Integrazione Food Tracker
 
