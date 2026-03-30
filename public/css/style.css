@@ -665,7 +665,7 @@ input:focus, select:focus, textarea:focus {
 }
 
 .btn-copy-from-yesterday {
-  display: flex; align-items: center; gap: 8px;
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
   width: 100%;
   padding: 10px 0;
   background: none; border: none; cursor: pointer;
@@ -675,6 +675,14 @@ input:focus, select:focus, textarea:focus {
   transition: color 0.15s;
 }
 .btn-copy-from-yesterday:active { color: var(--color-primary); }
+.copy-yesterday-detail {
+  width: 100%;
+  padding-left: 24px;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--color-text-secondary);
+  opacity: 0.75;
+}
 
 .meal-body { padding: 0 14px 8px; }
 

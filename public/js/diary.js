@@ -30,6 +30,7 @@ window.DiaryTab = (() => {
   let _recentFoods = [];
   let _frequentFoods = [];
   let _currentRecentMode = 'recent';
+  let yesterdayEntries = [];
 
   // ── Render ──────────────────────────────
   async function refresh() {
@@ -42,6 +43,10 @@ window.DiaryTab = (() => {
   async function loadEntries() {
     const data = await apiGet(`/api/diary?date=${currentDate}`);
     entries = data || [];
+    // Carica voci di ieri per l'anteprima "Copia da ieri"
+    const yesterday = shiftDate(currentDate, -1);
+    const yData = await apiGet(`/api/diary?date=${yesterday}`);
+    yesterdayEntries = yData || [];
   }
 
   function renderDateNav() {
@@ -124,10 +129,20 @@ window.DiaryTab = (() => {
         </div>
         <div class="meal-body" id="meal-body-${meal.id}" style="${isOpen ? '' : 'display:none'}">
           ${mealEntries.map(e => renderEntryRow(e)).join('')}
-          ${mealEntries.length === 0 ? `<button class="btn-copy-from-yesterday" data-meal="${meal.id}">
+          ${mealEntries.length === 0 ? (() => {
+            const yMeal = yesterdayEntries.filter(e => e.meal_type === meal.id);
+            if (yMeal.length === 0) return '';
+            const totalKcal = Math.round(yMeal.reduce((s, e) => s + e.kcal, 0));
+            const top = yMeal.reduce((a, b) => b.kcal > a.kcal ? b : a);
+            const topName = (top.food && top.food.name) || top.food_name || '?';
+            const others = yMeal.length - 1;
+            const desc = others > 0 ? `${topName} e ${others === 1 ? '1 altro' : others + ' altri'}` : topName;
+            return `<button class="btn-copy-from-yesterday" data-meal="${meal.id}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-            Copia da ieri
-          </button>` : ''}
+            <span class="copy-yesterday-label">Copia da ieri</span>
+            <span class="copy-yesterday-detail">${desc} — ${totalKcal} kcal</span>
+          </button>`;
+          })() : ''}
           ${mealEntries.length >= 2 ? `<button class="btn-save-as-recipe" data-meal="${meal.id}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
             Salva come ricetta
