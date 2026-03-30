@@ -850,7 +850,17 @@ window.DiaryTab = (() => {
         console.warn('Catalog lookup error:', e);
       }
 
-      resultsEl.innerHTML = `<div class="empty-state"><p>Barcode <strong>${barcode}</strong> non trovato nel catalogo.</p></div>`;
+      resultsEl.innerHTML = `<div class="empty-state"><p>Nessun risultato per <strong>${barcode}</strong></p><button class="btn btn-primary btn-sm" id="btn-barcode-new-food" style="margin-top:8px">+ Crea questo alimento</button></div>`;
+      document.getElementById('btn-barcode-new-food').addEventListener('click', () => {
+        document.getElementById('modal-add-food').classList.add('hidden');
+        FoodsTab.openFoodForm(null, {
+          prefillBarcode: barcode,
+          onSaved: (newFood) => {
+            document.getElementById('modal-add-food').classList.remove('hidden');
+            selectFood(newFood);
+          }
+        });
+      });
     });
   });
 

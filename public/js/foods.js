@@ -106,7 +106,7 @@ window.FoodsTab = (() => {
   // ── Food form modal ──────────────────────
   let _onFoodSaved = null; // callback opzionale(food) dopo salvataggio
 
-  function openFoodForm(id = null, { prefillName = '', onSaved = null } = {}) {
+  function openFoodForm(id = null, { prefillName = '', prefillBarcode = '', onSaved = null } = {}) {
     editingId = id;
     _onFoodSaved = onSaved || null;
     const titleEl = document.getElementById('food-form-title');
@@ -135,8 +135,9 @@ window.FoodsTab = (() => {
     if (id) {
       const food = allFoods.find(f => f.id === id);
       if (food) fillFoodForm(food);
-    } else if (prefillName) {
-      document.getElementById('ff-name').value = prefillName;
+    } else {
+      if (prefillName) document.getElementById('ff-name').value = prefillName;
+      if (prefillBarcode) document.getElementById('ff-barcode').value = prefillBarcode;
     }
 
     document.getElementById('modal-food-form').classList.remove('hidden');
