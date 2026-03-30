@@ -81,7 +81,18 @@ window.DiaryTab = (() => {
       (pct >= 1 ? ' over' : pct >= 0.9 ? ' warning' : '');
 
     document.getElementById('total-kcal').textContent  = Math.round(totalKcal);
-    document.getElementById('ds-remaining').textContent = Math.max(0, Math.round(targetKcal - totalKcal));
+    const remaining = Math.round(targetKcal - totalKcal);
+    const remainingEl = document.getElementById('ds-remaining');
+    const remainingLabel = document.querySelector('.ds-remaining-label');
+    if (remaining >= 0) {
+      remainingLabel.textContent = 'Rimanenti';
+      remainingEl.textContent = remaining;
+      remainingEl.classList.remove('ds-over');
+    } else {
+      remainingLabel.textContent = 'Oltre';
+      remainingEl.textContent = '+' + Math.abs(remaining);
+      remainingEl.classList.add('ds-over');
+    }
     document.getElementById('target-kcal').textContent  = Math.round(targetKcal);
 
     // ── Barre macro ────────────────────────────────────────────────────────

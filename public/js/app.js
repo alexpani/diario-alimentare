@@ -287,18 +287,17 @@ const Cal = (() => {
       const dayInfo = daysData[dateStr];
       const isFuture = dateStr > today;
 
-      let dotClass = '';
+      let ringClass = '';
       if (dayInfo) {
         const target = App.plan?.kcal_target || 2000;
         const diff = dayInfo.kcal - target;
-        if (diff <= 0) dotClass = 'cal-dot-green';
-        else if (diff <= 200) dotClass = 'cal-dot-yellow';
-        else dotClass = 'cal-dot-red';
+        if (diff <= 0) ringClass = 'cal-ring-green';
+        else if (diff <= 200) ringClass = 'cal-ring-yellow';
+        else ringClass = 'cal-ring-red';
       }
 
-      html += `<div class="cal-cell${isSel ? ' cal-selected' : ''}${isToday ? ' cal-today' : ''}${isFuture ? ' cal-future' : ''}" data-date="${dateStr}">
+      html += `<div class="cal-cell${isSel ? ' cal-selected' : ''}${isToday ? ' cal-today' : ''}${isFuture ? ' cal-future' : ''}${ringClass ? ' ' + ringClass : ''}" data-date="${dateStr}">
         <span>${d}</span>
-        ${dayInfo ? `<span class="cal-dot ${dotClass}"></span>` : ''}
       </div>`;
     }
 
