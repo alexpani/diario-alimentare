@@ -477,7 +477,10 @@ input:focus, select:focus, textarea:focus {
   background: var(--color-primary);
   flex-shrink: 0;
 }
-.cal-cell.cal-selected .cal-dot { background: rgba(255,255,255,0.8); }
+.cal-dot-green { background: var(--color-primary) !important; }
+.cal-dot-yellow { background: var(--color-warning) !important; }
+.cal-dot-red { background: var(--color-danger) !important; }
+.cal-cell.cal-selected .cal-dot { opacity: 0.85; }
 
 .cal-today-btn {
   display: block; margin: 10px auto 0; padding: 6px 24px;

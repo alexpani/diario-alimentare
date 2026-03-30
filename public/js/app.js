@@ -246,7 +246,7 @@ async function initApp() {
 const Cal = (() => {
   let viewYear = 0;
   let viewMonth = 0; // 0-11
-  let daysWithEntries = new Set();
+  let daysData = {}; // { 'YYYY-MM-DD': { kcal } }
 
   const overlay  = document.getElementById('cal-overlay');
   const popup    = document.getElementById('cal-popup');
@@ -257,12 +257,11 @@ const Cal = (() => {
                      'Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
 
   async function loadDaysWithEntries(year, month) {
-    // Carica il mese visualizzato + un buffer di mesi adiacenti
     const from = `${year}-${String(month + 1).padStart(2, '0')}-01`;
     const lastDay = new Date(year, month + 1, 0).getDate();
     const to   = `${year}-${String(month + 1).padStart(2, '0')}-${lastDay}`;
     const data = await apiGet(`/api/diary/range?from=${from}&to=${to}`);
-    if (data) data.forEach(d => daysWithEntries.add(d.date));
+    if (data) data.forEach(d => { daysData[d.date] = { kcal: d.kcal }; });
   }
 
   function render() {
@@ -285,12 +284,21 @@ const Cal = (() => {
       const dateStr = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
       const isSel   = dateStr === selected;
       const isToday = dateStr === today;
-      const hasDot  = daysWithEntries.has(dateStr);
+      const dayInfo = daysData[dateStr];
       const isFuture = dateStr > today;
+
+      let dotClass = '';
+      if (dayInfo) {
+        const target = App.plan?.kcal_target || 2000;
+        const diff = dayInfo.kcal - target;
+        if (diff <= 0) dotClass = 'cal-dot-green';
+        else if (diff <= 200) dotClass = 'cal-dot-yellow';
+        else dotClass = 'cal-dot-red';
+      }
 
       html += `<div class="cal-cell${isSel ? ' cal-selected' : ''}${isToday ? ' cal-today' : ''}${isFuture ? ' cal-future' : ''}" data-date="${dateStr}">
         <span>${d}</span>
-        ${hasDot ? '<span class="cal-dot"></span>' : ''}
+        ${dayInfo ? `<span class="cal-dot ${dotClass}"></span>` : ''}
       </div>`;
     }
 
@@ -309,7 +317,7 @@ const Cal = (() => {
     const [y, m] = cur.split('-').map(Number);
     viewYear  = y;
     viewMonth = m - 1;
-    daysWithEntries.clear();
+    daysData = {};
     await loadDaysWithEntries(viewYear, viewMonth);
     render();
     overlay.classList.remove('hidden');
@@ -339,7 +347,7 @@ const Cal = (() => {
 
   document.getElementById('current-date-btn').addEventListener('click', open);
 
-  return { open, close, refresh: () => { daysWithEntries.clear(); loadDaysWithEntries(viewYear, viewMonth).then(render); } };
+  return { open, close, refresh: () => { daysData = {}; loadDaysWithEntries(viewYear, viewMonth).then(render); } };
 })();
 
 // ── Theme ──────────────────────────────────
