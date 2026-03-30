@@ -139,7 +139,7 @@ window.DiaryTab = (() => {
             const desc = others > 0 ? `${topName} e ${others === 1 ? '1 altro' : others + ' altri'}` : topName;
             return `<button class="btn-copy-from-yesterday" data-meal="${meal.id}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-            <span class="copy-yesterday-label">Copia da ieri</span>
+            <span class="copy-yesterday-label">Copia ${meal.label.toLowerCase()} da ieri</span>
             <span class="copy-yesterday-detail">${desc} — ${totalKcal} kcal</span>
           </button>`;
           })() : ''}
