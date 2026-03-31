@@ -953,7 +953,10 @@ window.DiaryTab = (() => {
       const match = bestMatch || catalogMatch;
 
       const matchName = match ? match.name : item.ai_name;
-      const matchDetail = match ? `${Math.round(match.kcal_100g)} kcal/100g` : '';
+      const estKcal = match ? Math.round(match.kcal_100g / 100 * item.ai_quantity_g) : 0;
+      const matchDetail = match
+        ? `${estKcal} kcal · P:${fmt(match.protein_100g / 100 * item.ai_quantity_g)}g G:${fmt(match.fat_100g / 100 * item.ai_quantity_g)}g C:${fmt(match.carbs_100g / 100 * item.ai_quantity_g)}g`
+        : '';
       const matchSource = bestMatch ? 'DB locale' : (catalogMatch ? (_fmtSrc(catalogMatch.source)) : '');
       const matchImg = match?.image_path || match?.image_url || null;
 
