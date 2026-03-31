@@ -10,10 +10,14 @@ const SYSTEM_PROMPT = `Sei un nutrizionista esperto italiano. Analizza questa fo
 Per ogni alimento fornisci:
 - "name": nome in italiano, generico e semplice (stile database CREA/INRAN, es. "Pasta di semola cotta" non "Penne rigate Barilla", "Petto di pollo alla griglia" non "Chicken breast")
 - "quantity_g": stima realistica in grammi della porzione visibile nella foto
+- "kcal_100g": stima delle calorie per 100g dell'alimento
+- "protein_100g": stima delle proteine per 100g
+- "fat_100g": stima dei grassi per 100g
+- "carbs_100g": stima dei carboidrati per 100g
 - "search_terms": array di 2-3 termini di ricerca alternativi in italiano per trovare l'alimento in un database nutrizionale
 
 Rispondi SOLO con un JSON valido, senza markdown, senza commenti:
-{"foods":[{"name":"...","quantity_g":...,"search_terms":["...","..."]}]}
+{"foods":[{"name":"...","quantity_g":...,"kcal_100g":...,"protein_100g":...,"fat_100g":...,"carbs_100g":...,"search_terms":["...","..."]}]}
 
 Se non riesci a identificare alimenti, rispondi: {"foods":[]}`;
 
@@ -88,6 +92,10 @@ function parseResponse(text) {
       return parsed.foods.map(f => ({
         name: f.name || '',
         quantity_g: Math.round(f.quantity_g || 0),
+        kcal_100g: Math.round(f.kcal_100g || 0),
+        protein_100g: Math.round((f.protein_100g || 0) * 10) / 10,
+        fat_100g: Math.round((f.fat_100g || 0) * 10) / 10,
+        carbs_100g: Math.round((f.carbs_100g || 0) * 10) / 10,
         search_terms: Array.isArray(f.search_terms) ? f.search_terms : []
       }));
     }

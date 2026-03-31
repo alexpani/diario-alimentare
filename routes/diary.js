@@ -443,6 +443,10 @@ router.post('/recognize-photo', aiUpload.single('image'), async (req, res) => {
       items.push({
         ai_name: food.name,
         ai_quantity_g: food.quantity_g,
+        ai_kcal_100g: food.kcal_100g || 0,
+        ai_protein_100g: food.protein_100g || 0,
+        ai_fat_100g: food.fat_100g || 0,
+        ai_carbs_100g: food.carbs_100g || 0,
         local_matches: localMatches,
         catalog_matches: catalogMatches
       });

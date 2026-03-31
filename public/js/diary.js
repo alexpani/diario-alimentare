@@ -953,11 +953,13 @@ window.DiaryTab = (() => {
       const match = bestMatch || catalogMatch;
 
       const matchName = match ? match.name : item.ai_name;
-      const estKcal = match ? Math.round(match.kcal_100g / 100 * item.ai_quantity_g) : 0;
-      const matchDetail = match
-        ? `${estKcal} kcal · P:${fmt(match.protein_100g / 100 * item.ai_quantity_g)}g G:${fmt(match.fat_100g / 100 * item.ai_quantity_g)}g C:${fmt(match.carbs_100g / 100 * item.ai_quantity_g)}g`
+      // Usa dati nutrizionali dal match, oppure stime AI come fallback
+      const nut = match || { kcal_100g: item.ai_kcal_100g || 0, protein_100g: item.ai_protein_100g || 0, fat_100g: item.ai_fat_100g || 0, carbs_100g: item.ai_carbs_100g || 0 };
+      const estKcal = Math.round(nut.kcal_100g / 100 * item.ai_quantity_g);
+      const matchDetail = nut.kcal_100g > 0
+        ? `${estKcal} kcal · P:${fmt(nut.protein_100g / 100 * item.ai_quantity_g)}g G:${fmt(nut.fat_100g / 100 * item.ai_quantity_g)}g C:${fmt(nut.carbs_100g / 100 * item.ai_quantity_g)}g`
         : '';
-      const matchSource = bestMatch ? 'DB locale' : (catalogMatch ? (_fmtSrc(catalogMatch.source)) : '');
+      const matchSource = bestMatch ? 'DB locale' : (catalogMatch ? (_fmtSrc(catalogMatch.source)) : (nut.kcal_100g > 0 ? 'stima IA' : ''));
       const matchImg = match?.image_path || match?.image_url || null;
 
       const hasAlternatives = (item.local_matches.length + item.catalog_matches.length) > 1;
