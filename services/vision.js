@@ -5,7 +5,10 @@
  * Provider selezionato via env var VISION_PROVIDER (default: claude)
  */
 
-const SYSTEM_PROMPT = `Sei un nutrizionista esperto italiano. Analizza questa foto di cibo e identifica gli alimenti visibili.
+const fs = require('fs');
+const path = require('path');
+
+const DEFAULT_PROMPT = `Sei un nutrizionista esperto italiano. Analizza questa foto di cibo e identifica gli alimenti visibili.
 
 REGOLE FONDAMENTALI:
 1. SCOMPONI SEMPRE i piatti composti nei singoli ingredienti base. Esempi:
@@ -36,6 +39,18 @@ Rispondi SOLO con un JSON valido, senza markdown, senza commenti:
 {"foods":[{"name":"...","quantity_g":...,"kcal_100g":...,"protein_100g":...,"fat_100g":...,"carbs_100g":...,"search_terms":["...","..."]}]}
 
 Se non riesci a identificare alimenti, rispondi: {"foods":[]}`;
+
+const PROMPT_FILE = path.join(__dirname, '..', 'vision-prompt.txt');
+
+function getPrompt() {
+  try {
+    if (fs.existsSync(PROMPT_FILE)) {
+      const custom = fs.readFileSync(PROMPT_FILE, 'utf8').trim();
+      if (custom) return custom;
+    }
+  } catch (e) { /* fallback al default */ }
+  return DEFAULT_PROMPT;
+}
 
 /**
  * Analizza un'immagine e restituisce gli alimenti riconosciuti
@@ -72,7 +87,7 @@ async function recognizeWithClaude(imageBuffer, mimeType) {
           type: 'image',
           source: { type: 'base64', media_type: mimeType, data: base64 }
         },
-        { type: 'text', text: SYSTEM_PROMPT }
+        { type: 'text', text: getPrompt() }
       ]
     }]
   });
@@ -91,7 +106,7 @@ async function recognizeWithGemini(imageBuffer, mimeType) {
   const base64 = imageBuffer.toString('base64');
 
   const result = await model.generateContent([
-    SYSTEM_PROMPT,
+    getPrompt(),
     { inlineData: { mimeType, data: base64 } }
   ]);
 
@@ -122,4 +137,4 @@ function parseResponse(text) {
   }
 }
 
-module.exports = { recognizeFood };
+module.exports = { recognizeFood, getPrompt, DEFAULT_PROMPT };

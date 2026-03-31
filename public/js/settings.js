@@ -33,7 +33,16 @@ window.SettingsTab = (() => {
         `<option value="${m.key}"${m.key === vm.current ? ' selected' : ''}>${m.label}</option>`
       ).join('');
     }
+
+    // ── Prompt IA ────────────────────────────────────────────────────────
+    const vp = await apiGet('/api/settings/vision-prompt');
+    if (vp) {
+      document.getElementById('vision-prompt-text').value = vp.prompt;
+      _defaultPrompt = vp.default_prompt;
+    }
   }
+
+  let _defaultPrompt = '';
 
   // ── Cambio modello IA ──────────────────────────────────────────────────
   document.getElementById('vision-model-select').addEventListener('change', async (e) => {
@@ -44,6 +53,41 @@ window.SettingsTab = (() => {
       showMsg(msgEl, 'Modello aggiornato', 'success');
     } else {
       showMsg(msgEl, res?.error || 'Errore', 'error');
+    }
+  });
+
+  // ── Toggle prompt IA ──────────────────────────────────────────────────
+  document.getElementById('btn-toggle-prompt').addEventListener('click', () => {
+    const wrap = document.getElementById('vision-prompt-wrap');
+    const btn = document.getElementById('btn-toggle-prompt');
+    const visible = !wrap.classList.toggle('hidden');
+    btn.textContent = visible ? 'Nascondi prompt' : 'Mostra prompt';
+  });
+
+  // ── Salva prompt ──────────────────────────────────────────────────────
+  document.getElementById('btn-save-prompt').addEventListener('click', async () => {
+    const msgEl = document.getElementById('vision-prompt-msg');
+    msgEl.classList.add('hidden');
+    const prompt = document.getElementById('vision-prompt-text').value;
+    const res = await apiPut('/api/settings/vision-prompt', { prompt });
+    if (res && !res.error) {
+      showMsg(msgEl, 'Prompt salvato', 'success');
+    } else {
+      showMsg(msgEl, res?.error || 'Errore', 'error');
+    }
+  });
+
+  // ── Ripristina default ────────────────────────────────────────────────
+  document.getElementById('btn-reset-prompt').addEventListener('click', async () => {
+    const msgEl = document.getElementById('vision-prompt-msg');
+    msgEl.classList.add('hidden');
+    const res = await fetch('/api/settings/vision-prompt', { method: 'DELETE' });
+    const data = await res.json();
+    if (data.ok) {
+      document.getElementById('vision-prompt-text').value = _defaultPrompt;
+      showMsg(msgEl, 'Prompt ripristinato al default', 'success');
+    } else {
+      showMsg(msgEl, data.error || 'Errore', 'error');
     }
   });
 

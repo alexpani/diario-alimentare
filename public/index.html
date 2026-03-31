@@ -258,6 +258,17 @@
         </p>
         <select id="vision-model-select" class="form-input" style="width:100%"></select>
         <div id="vision-model-msg" class="msg hidden" style="margin-top:10px"></div>
+        <button id="btn-toggle-prompt" class="btn btn-outline btn-full" style="margin-top:12px;font-size:13px">
+          Mostra prompt
+        </button>
+        <div id="vision-prompt-wrap" class="hidden" style="margin-top:10px">
+          <textarea id="vision-prompt-text" class="form-input" style="width:100%;min-height:220px;font-size:12px;line-height:1.4;font-family:monospace;resize:vertical"></textarea>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button id="btn-save-prompt" class="btn btn-primary flex-1" style="font-size:13px">Salva prompt</button>
+            <button id="btn-reset-prompt" class="btn btn-outline flex-1" style="font-size:13px">Ripristina default</button>
+          </div>
+          <div id="vision-prompt-msg" class="msg hidden" style="margin-top:8px"></div>
+        </div>
       </div>
       <div class="card" style="margin-bottom:12px">
         <h2>Strumenti</h2>
@@ -691,7 +702,7 @@
 <script src="/js/diary.js?v=41"></script>
 <script src="/js/diarylog.js?v=6"></script>
 <script src="/js/plan.js?v=4"></script>
-<script src="/js/settings.js?v=6"></script>
+<script src="/js/settings.js?v=7"></script>
 
 </body>
 </html>

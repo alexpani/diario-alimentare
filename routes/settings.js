@@ -61,6 +61,38 @@ router.put('/vision-model', (req, res) => {
   }
 });
 
+// ── Prompt IA ────────────────────────────────────────────────────────────
+const PROMPT_PATH = path.join(__dirname, '..', 'vision-prompt.txt');
+
+// GET /api/settings/vision-prompt
+router.get('/vision-prompt', (req, res) => {
+  const { getPrompt, DEFAULT_PROMPT } = require('../services/vision');
+  res.json({ prompt: getPrompt(), default_prompt: DEFAULT_PROMPT });
+});
+
+// PUT /api/settings/vision-prompt
+router.put('/vision-prompt', (req, res) => {
+  const { prompt } = req.body;
+  if (!prompt || !prompt.trim()) return res.status(400).json({ error: 'Prompt vuoto' });
+  try {
+    fs.writeFileSync(PROMPT_PATH, prompt.trim(), 'utf8');
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('Errore salvataggio prompt:', err);
+    res.status(500).json({ error: 'Impossibile salvare il prompt' });
+  }
+});
+
+// DELETE /api/settings/vision-prompt — ripristina default
+router.delete('/vision-prompt', (req, res) => {
+  try {
+    if (fs.existsSync(PROMPT_PATH)) fs.unlinkSync(PROMPT_PATH);
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Errore nel ripristino' });
+  }
+});
+
 // PATCH /api/settings/password
 router.patch('/password', (req, res) => {
   const { current_password, new_password } = req.body;
