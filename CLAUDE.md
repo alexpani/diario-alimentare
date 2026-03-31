@@ -31,9 +31,11 @@ node update_plans_kcal.js  # aggiorna kcal piani su TDEE personale
 ├── database/
 │   ├── db.js              # Singleton SQLite + migrazioni automatiche
 │   └── food_diary.sqlite  # DB (non in git)
+├── services/
+│   └── vision.js          # Riconoscimento alimenti da foto (Claude / Gemini)
 ├── routes/
 │   ├── auth.js            # Login / logout (session-based)
-│   ├── diary.js           # /api/diary — voci diario
+│   ├── diary.js           # /api/diary — voci diario + riconoscimento foto
 │   ├── foods.js           # /api/foods — libreria alimenti + integrazione Food Tracker
 │   ├── plan.js            # /api/plan, /api/plans — piani nutrizionali
 │   └── settings.js        # /api/settings — password, sync Food Tracker
@@ -163,6 +165,38 @@ Cliccando su un alimento di tipo ricetta nel pasto, il modal di modifica quantit
 - Apre `FoodsTab.openFoodForm(foodId)` — lo stesso form della tab Alimenti
 - Se il food non è nella cache `allFoods` (es. tab Alimenti mai aperta), viene caricato via `GET /api/foods/:id`
 - Dopo il salvataggio, il diario si aggiorna automaticamente
+
+## Riconoscimento piatto con IA
+
+Bottone "Riconosci piatto" nella modale aggiungi alimento. L'utente fotografa un piatto, l'IA identifica gli alimenti.
+
+### Architettura
+- **`services/vision.js`** — modulo astratto che supporta Claude e Gemini
+- **`POST /api/diary/recognize-photo`** — endpoint che riceve la foto, la ridimensiona (sharp, max 1024px), chiama l'IA, matcha i risultati
+- Provider selezionato via `VISION_PROVIDER` env var (`claude` o `gemini`)
+- Modello configurabile via `VISION_MODEL` env var
+
+### Env vars
+```bash
+VISION_PROVIDER=claude          # o gemini
+ANTHROPIC_API_KEY=sk-ant-...    # per Claude
+GEMINI_API_KEY=...              # per Gemini
+VISION_MODEL=claude-sonnet-4-20250514  # opzionale
+```
+
+### Flusso
+1. Click "Riconosci piatto" → apre fotocamera (file input con `capture="environment"`)
+2. Foto ridimensionata client-side (canvas, max 1024px, JPEG 80%)
+3. Upload a `POST /api/diary/recognize-photo`
+4. Backend: resize con sharp → Claude/Gemini Vision → JSON con alimenti
+5. Per ogni alimento: ricerca DB locale (token LIKE) → catalogo Food Tracker
+6. Frontend: step `#modal-step-ai` con lista risultati, checkbox, quantità editabile, alternative
+7. "Aggiungi N alimenti" → batch POST /api/diary per ogni item selezionato
+8. Per match catalogo: auto-import via POST /api/foods (FormData)
+9. Per nessun match: voce rapida via POST /api/diary/quick
+
+### Prompt IA
+Il prompt chiede nomi italiani stile CREA/INRAN, stima grammi, e search_terms alternativi per migliorare il matching nel DB.
 
 ## Deduplicazione ricerca catalogo
 
