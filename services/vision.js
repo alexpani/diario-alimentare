@@ -35,10 +35,12 @@ Per ogni alimento fornisci:
 - "carbs_100g": carboidrati per 100g
 - "search_terms": array di 2-3 termini di ricerca alternativi in italiano
 
-Rispondi SOLO con un JSON valido, senza markdown, senza commenti:
-{"foods":[{"name":"...","quantity_g":...,"kcal_100g":...,"protein_100g":...,"fat_100g":...,"carbs_100g":...,"search_terms":["...","..."]}]}
+Rispondi SOLO con un JSON valido, senza markdown, senza commenti.
+Includi "dish_name" con il nome del piatto identificato (es. "Lasagne alla bolognese", "Pasta al pomodoro", "Insalata caprese"). Se ci sono più piatti, descrivili tutti separati da " + " (es. "Petto di pollo alla griglia + Insalata mista").
 
-Se non riesci a identificare alimenti, rispondi: {"foods":[]}`;
+{"dish_name":"...","foods":[{"name":"...","quantity_g":...,"kcal_100g":...,"protein_100g":...,"fat_100g":...,"carbs_100g":...,"search_terms":["...","..."]}]}
+
+Se non riesci a identificare alimenti, rispondi: {"dish_name":"","foods":[]}`;
 
 const PROMPT_FILE = path.join(__dirname, '..', 'vision-prompt.txt');
 
@@ -120,7 +122,7 @@ function parseResponse(text) {
     const clean = text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
     const parsed = JSON.parse(clean);
     if (Array.isArray(parsed.foods)) {
-      return parsed.foods.map(f => ({
+      const foods = parsed.foods.map(f => ({
         name: f.name || '',
         quantity_g: Math.round(f.quantity_g || 0),
         kcal_100g: Math.round(f.kcal_100g || 0),
@@ -129,11 +131,12 @@ function parseResponse(text) {
         carbs_100g: Math.round((f.carbs_100g || 0) * 10) / 10,
         search_terms: Array.isArray(f.search_terms) ? f.search_terms : []
       }));
+      return { dish_name: parsed.dish_name || '', foods };
     }
-    return [];
+    return { dish_name: '', foods: [] };
   } catch (e) {
     console.error('Vision parse error:', e.message, 'Raw:', text);
-    return [];
+    return { dish_name: '', foods: [] };
   }
 }
 

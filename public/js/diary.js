@@ -893,6 +893,7 @@ window.DiaryTab = (() => {
 
   // ── AI: Riconosci piatto ──────────────────────────────────────────────────
   let _aiItems = []; // risultati AI correnti
+  let _aiDishName = '';
 
   document.getElementById('btn-ai-recognize').addEventListener('click', () => {
     document.getElementById('ai-photo-input').click();
@@ -929,6 +930,7 @@ window.DiaryTab = (() => {
 
       const data = await res.json();
       _aiItems = data.items || [];
+      _aiDishName = data.dish_name || '';
 
       if (_aiItems.length === 0) {
         document.getElementById('ai-results-list').innerHTML = '<div class="empty-state"><p>Nessun alimento riconosciuto nella foto.</p></div>';
@@ -965,7 +967,10 @@ window.DiaryTab = (() => {
 
     html += `
       <div class="ai-total-summary">
-        <span class="ai-total-kcal">${Math.round(totKcal)} kcal</span>
+        <div>
+          ${_aiDishName ? `<div class="ai-dish-name">${_aiDishName}</div>` : ''}
+          <span class="ai-total-kcal">${Math.round(totKcal)} kcal</span>
+        </div>
         <span class="ai-total-macros">
           <span style="color:var(--color-protein)">P:${fmt(totP, 0)}g</span>
           <span style="color:var(--color-fat)">G:${fmt(totG, 0)}g</span>

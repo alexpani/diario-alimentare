@@ -358,10 +358,12 @@ router.post('/recognize-photo', aiUpload.single('image'), async (req, res) => {
       .toBuffer();
 
     // Chiama il servizio AI
-    const foods = await recognizeFood(resized, 'image/jpeg');
+    const result = await recognizeFood(resized, 'image/jpeg');
+    const foods = result.foods || result; // backward compat
+    const dishName = result.dish_name || '';
 
     if (foods.length === 0) {
-      return res.json({ items: [] });
+      return res.json({ dish_name: dishName, items: [] });
     }
 
     // Per ogni alimento riconosciuto, cerca match nel DB locale e nel catalogo
@@ -455,7 +457,7 @@ router.post('/recognize-photo', aiUpload.single('image'), async (req, res) => {
       });
     }
 
-    res.json({ items });
+    res.json({ dish_name: dishName, items });
   } catch (err) {
     console.error('Recognize photo error:', err);
     res.status(500).json({ error: err.message || 'Errore nel riconoscimento' });

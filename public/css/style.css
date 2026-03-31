@@ -692,8 +692,12 @@ input:focus, select:focus, textarea:focus {
   padding: 10px 12px; margin-bottom: 8px; border-radius: 10px;
   background: var(--color-primary-light);
 }
+.ai-dish-name {
+  font-size: 15px; font-weight: 700; color: var(--color-text);
+  margin-bottom: 2px;
+}
 .ai-total-kcal {
-  font-size: 18px; font-weight: 700; color: var(--color-text);
+  font-size: 14px; font-weight: 600; color: var(--color-text-secondary);
 }
 .ai-total-macros {
   display: flex; gap: 10px; font-size: 13px; font-weight: 600;
