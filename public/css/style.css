@@ -687,6 +687,17 @@ input:focus, select:focus, textarea:focus {
 }
 
 /* ── AI Recognition results ──────────────────────────────────────────────── */
+.ai-total-summary {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 12px; margin-bottom: 8px; border-radius: 10px;
+  background: var(--color-primary-light);
+}
+.ai-total-kcal {
+  font-size: 18px; font-weight: 700; color: var(--color-text);
+}
+.ai-total-macros {
+  display: flex; gap: 10px; font-size: 13px; font-weight: 600;
+}
 .ai-result-item {
   padding: 10px 0;
   border-bottom: 1px solid var(--color-bg);

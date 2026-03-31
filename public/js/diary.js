@@ -943,9 +943,36 @@ window.DiaryTab = (() => {
     }
   });
 
+  function _aiItemNut(item) {
+    const match = item.local_matches[0] || item.catalog_matches[0] || null;
+    return match || { kcal_100g: item.ai_kcal_100g || 0, protein_100g: item.ai_protein_100g || 0, fat_100g: item.ai_fat_100g || 0, carbs_100g: item.ai_carbs_100g || 0 };
+  }
+
   function renderAiResults() {
     const container = document.getElementById('ai-results-list');
     let html = '';
+
+    // ── Riepilogo totale piatto ────────────────────────────────────────
+    let totKcal = 0, totP = 0, totG = 0, totC = 0;
+    _aiItems.forEach(item => {
+      const nut = _aiItemNut(item);
+      const qty = parseFloat(document.querySelector(`[data-ai-qty="${_aiItems.indexOf(item)}"]`)?.value) || item.ai_quantity_g;
+      totKcal += nut.kcal_100g / 100 * qty;
+      totP += nut.protein_100g / 100 * qty;
+      totG += nut.fat_100g / 100 * qty;
+      totC += nut.carbs_100g / 100 * qty;
+    });
+
+    html += `
+      <div class="ai-total-summary">
+        <span class="ai-total-kcal">${Math.round(totKcal)} kcal</span>
+        <span class="ai-total-macros">
+          <span style="color:var(--color-protein)">P:${fmt(totP, 0)}g</span>
+          <span style="color:var(--color-fat)">G:${fmt(totG, 0)}g</span>
+          <span style="color:var(--color-carbs)">C:${fmt(totC, 0)}g</span>
+        </span>
+      </div>
+    `;
 
     _aiItems.forEach((item, i) => {
       const bestMatch = item.local_matches[0] || null;
@@ -954,10 +981,11 @@ window.DiaryTab = (() => {
 
       const matchName = match ? match.name : item.ai_name;
       // Usa dati nutrizionali dal match, oppure stime AI come fallback
-      const nut = match || { kcal_100g: item.ai_kcal_100g || 0, protein_100g: item.ai_protein_100g || 0, fat_100g: item.ai_fat_100g || 0, carbs_100g: item.ai_carbs_100g || 0 };
-      const estKcal = Math.round(nut.kcal_100g / 100 * item.ai_quantity_g);
+      const nut = _aiItemNut(item);
+      const qty = parseFloat(document.querySelector(`[data-ai-qty="${i}"]`)?.value) || item.ai_quantity_g;
+      const estKcal = Math.round(nut.kcal_100g / 100 * qty);
       const matchDetail = nut.kcal_100g > 0
-        ? `${estKcal} kcal · P:${fmt(nut.protein_100g / 100 * item.ai_quantity_g)}g G:${fmt(nut.fat_100g / 100 * item.ai_quantity_g)}g C:${fmt(nut.carbs_100g / 100 * item.ai_quantity_g)}g`
+        ? `${estKcal} kcal · P:${fmt(nut.protein_100g / 100 * qty)}g G:${fmt(nut.fat_100g / 100 * qty)}g C:${fmt(nut.carbs_100g / 100 * qty)}g`
         : '';
       const matchSource = bestMatch ? 'DB locale' : (catalogMatch ? (_fmtSrc(catalogMatch.source)) : (nut.kcal_100g > 0 ? 'stima IA' : ''));
       const matchImg = match?.image_path || match?.image_url || null;
@@ -999,7 +1027,12 @@ window.DiaryTab = (() => {
 
     // Listener checkbox
     container.querySelectorAll('[data-ai-check]').forEach(cb => {
-      cb.addEventListener('change', updateAiConfirmButton);
+      cb.addEventListener('change', () => { updateAiConfirmButton(); updateAiTotalSummary(); });
+    });
+
+    // Listener quantità — aggiorna riepilogo
+    container.querySelectorAll('[data-ai-qty]').forEach(inp => {
+      inp.addEventListener('input', () => updateAiTotalSummary());
     });
 
     // Listener alternative
@@ -1009,6 +1042,28 @@ window.DiaryTab = (() => {
         toggleAiAlternatives(idx);
       });
     });
+  }
+
+  function updateAiTotalSummary() {
+    const el = document.querySelector('.ai-total-summary');
+    if (!el) return;
+    let totKcal = 0, totP = 0, totG = 0, totC = 0;
+    _aiItems.forEach((item, i) => {
+      const cb = document.querySelector(`[data-ai-check="${i}"]`);
+      if (cb && !cb.checked) return;
+      const nut = _aiItemNut(item);
+      const qty = parseFloat(document.querySelector(`[data-ai-qty="${i}"]`)?.value) || item.ai_quantity_g;
+      totKcal += nut.kcal_100g / 100 * qty;
+      totP += nut.protein_100g / 100 * qty;
+      totG += nut.fat_100g / 100 * qty;
+      totC += nut.carbs_100g / 100 * qty;
+    });
+    el.querySelector('.ai-total-kcal').textContent = `${Math.round(totKcal)} kcal`;
+    el.querySelector('.ai-total-macros').innerHTML = `
+      <span style="color:var(--color-protein)">P:${fmt(totP, 0)}g</span>
+      <span style="color:var(--color-fat)">G:${fmt(totG, 0)}g</span>
+      <span style="color:var(--color-carbs)">C:${fmt(totC, 0)}g</span>
+    `;
   }
 
   function updateAiConfirmButton() {
