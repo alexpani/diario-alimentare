@@ -133,8 +133,13 @@ window.FoodsTab = (() => {
     document.getElementById('btn-clone-recipe').classList.add('hidden');
 
     if (id) {
-      const food = allFoods.find(f => f.id === id);
-      if (food) fillFoodForm(food);
+      let food = allFoods.find(f => f.id === id);
+      if (food) {
+        fillFoodForm(food);
+      } else {
+        // Food non in cache (es. aperto dal diario) → fetch dall'API
+        apiGet(`/api/foods/${id}`).then(f => { if (f) fillFoodForm(f); });
+      }
     } else {
       if (prefillName) document.getElementById('ff-name').value = prefillName;
       if (prefillBarcode) document.getElementById('ff-barcode').value = prefillBarcode;
