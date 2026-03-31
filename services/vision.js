@@ -21,6 +21,7 @@ REGOLE FONDAMENTALI:
    Per la quantità, stima i grammi dell'alimento CRUDO (es. 80g di pasta cruda, non 160g di pasta cotta).
 3. Usa nomi generici stile database CREA/INRAN italiano.
 4. Stima quantità realistiche per ogni ingrediente.
+5. ESCLUDI ingredienti con apporto calorico trascurabile rispetto al piatto (es. sale, pepe, spezie, erbe aromatiche, aceto, limone spremuto, aglio in piccole quantità). Includi solo ingredienti che contribuiscono significativamente alle calorie totali.
 
 Per ogni alimento fornisci:
 - "name": nome italiano generico (CREA/INRAN), forma CRUDA
