@@ -105,8 +105,19 @@
     .col-brand   { min-width: 110px; }
     .col-num     { width: 76px; }
     .col-barcode { min-width: 120px; }
+    .col-source  { width: 70px; text-align: center; }
+    .col-date    { width: 90px; text-align: center; }
     .col-portions{ min-width: 150px; }
     .col-actions { width: 80px; text-align: center; white-space: nowrap; }
+
+    .badge-source {
+      display: inline-block; padding: 2px 7px; border-radius: 4px;
+      font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px;
+    }
+    .badge-app  { background: #e8f5e9; color: #2e7d32; }
+    .badge-crea { background: #e3f2fd; color: #1565c0; }
+    .badge-off  { background: #fff3e0; color: #e65100; }
+    .td-date    { font-size: 11px; color: #888; white-space: nowrap; }
 
     /* ── Portions cell ── */
     .portions-summary {
@@ -237,12 +248,14 @@
         <th class="sortable col-num"     data-col="fat_100g">Grassi</th>
         <th class="sortable col-num"     data-col="carbs_100g">Carbo</th>
         <th class="col-barcode"          data-col="barcode">Barcode</th>
+        <th class="sortable col-source"  data-col="source">Fonte</th>
+        <th class="sortable col-date"    data-col="created_at">Data</th>
         <th class="col-portions">Porzioni</th>
         <th class="col-actions">Azioni</th>
       </tr>
     </thead>
     <tbody id="foods-tbody">
-      <tr class="empty-row"><td colspan="10">Caricamento…</td></tr>
+      <tr class="empty-row"><td colspan="12">Caricamento…</td></tr>
     </tbody>
   </table>
 </div>
@@ -266,6 +279,21 @@ const PAGE_SIZE = 200;
 let dirtyRows   = new Map();
 let saveTimer   = null;
 let openPortionsId = null; // id alimento con editor porzioni aperto
+
+/* ── Helpers colonne ── */
+function sourceBadge(src) {
+  const s = (src || 'app').toLowerCase();
+  const labels = { app: 'APP', crea: 'CREA', openfoodfacts: 'OFF' };
+  const cls    = { app: 'badge-app', crea: 'badge-crea', openfoodfacts: 'badge-off' };
+  return `<span class="badge-source ${cls[s] || 'badge-app'}">${labels[s] || s.toUpperCase()}</span>`;
+}
+
+function fmtDate(d) {
+  if (!d) return '—';
+  const dt = new Date(d);
+  if (isNaN(dt)) return '—';
+  return dt.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: '2-digit' });
+}
 
 /* ── Fetch ── */
 async function loadFoods() {
@@ -322,7 +350,7 @@ function renderTable() {
   const slice = filtered.slice(start, start + PAGE_SIZE);
 
   if (slice.length === 0) {
-    tbody.innerHTML = `<tr class="empty-row"><td colspan="10">Nessun alimento trovato.</td></tr>`;
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="12">Nessun alimento trovato.</td></tr>`;
     updatePagination();
     return;
   }
@@ -341,7 +369,7 @@ function renderTable() {
       const editorTr = document.createElement('tr');
       editorTr.classList.add('portions-editor-row');
       editorTr.dataset.portionsFor = f.id;
-      editorTr.innerHTML = `<td colspan="10">${portionsEditorHTML(parsePotions(f))}</td>`;
+      editorTr.innerHTML = `<td colspan="12">${portionsEditorHTML(parsePotions(f))}</td>`;
       tbody.appendChild(editorTr);
       attachPortionsEditorListeners(editorTr, f);
     }
@@ -372,6 +400,8 @@ function rowHTML(f) {
     <td class="col-num">    <input type="number" data-field="fat_100g"     value="${fmt(f.fat_100g)}"     step="0.1" min="0"></td>
     <td class="col-num">    <input type="number" data-field="carbs_100g"   value="${fmt(f.carbs_100g)}"   step="0.1" min="0"></td>
     <td class="col-barcode"><input type="text"   data-field="barcode"      value="${esc(f.barcode      || '')}" placeholder="—"></td>
+    <td class="col-source">${sourceBadge(f.source)}</td>
+    <td class="td-date">${fmtDate(f.created_at)}</td>
     <td class="col-portions">
       <div class="portions-summary" data-portions-btn="${f.id}">
         <span class="portions-text ${summary ? '' : 'empty'}">${summary || 'Nessuna porzione'}</span>
