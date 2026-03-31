@@ -11,7 +11,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
   <link rel="manifest" href="/manifest.json">
   <title>FoodDiary</title>
-  <link rel="stylesheet" href="/css/style.css?v=32">
+  <link rel="stylesheet" href="/css/style.css?v=33">
 </head>
 <body>
 
@@ -342,6 +342,13 @@
           Fotocamera
         </button>
       </div>
+      <div style="margin-top:8px">
+        <button id="btn-ai-recognize" class="btn btn-outline btn-full" style="font-size:13px;padding:8px 0;border-color:var(--color-primary);color:var(--color-primary)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;vertical-align:middle;margin-right:4px"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          Riconosci piatto
+        </button>
+        <input type="file" id="ai-photo-input" accept="image/*" capture="environment" style="display:none">
+      </div>
       <input type="file" id="barcode-file-input" accept="image/*" capture="environment" style="display:none">
       <button id="btn-scan-barcode-file" class="btn btn-outline btn-full mt-8 hidden">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;vertical-align:middle;margin-right:6px"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
@@ -399,6 +406,14 @@
       </div>
       <div class="modal-actions">
         <button id="btn-confirm-add" class="btn btn-primary btn-full">Aggiungi</button>
+      </div>
+    </div>
+
+    <!-- Step AI: Risultati riconoscimento -->
+    <div id="modal-step-ai" class="hidden">
+      <div id="ai-results-list"></div>
+      <div class="modal-actions" style="margin-top:12px">
+        <button id="btn-ai-confirm" class="btn btn-primary btn-full">Aggiungi selezionati</button>
       </div>
     </div>
 
@@ -665,7 +680,7 @@
 <script src="/js/scanner-config.js?v=2"></script>
 <script src="/js/barcode.js?v=2"></script>
 <script src="/js/foods.js?v=20"></script>
-<script src="/js/diary.js?v=38"></script>
+<script src="/js/diary.js?v=39"></script>
 <script src="/js/diarylog.js?v=6"></script>
 <script src="/js/plan.js?v=4"></script>
 <script src="/js/settings.js?v=5"></script>

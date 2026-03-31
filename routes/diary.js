@@ -1,7 +1,20 @@
 const express = require('express');
 const router = express.Router();
+const path = require('path');
+const fs = require('fs');
+const multer = require('multer');
+const sharp = require('sharp');
 const { getDb } = require('../database/db');
 const { isAuth } = require('./auth');
+const { recognizeFood } = require('../services/vision');
+
+const CATALOG_BASE = process.env.CATALOG_URL || 'http://192.168.68.153:3001';
+
+// Multer per foto AI (temp)
+const aiUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 }
+});
 
 router.use(isAuth);
 
@@ -327,6 +340,118 @@ router.delete('/:id', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Errore del server' });
+  }
+});
+
+// POST /api/diary/recognize-photo — riconoscimento alimenti da foto con IA
+router.post('/recognize-photo', aiUpload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'Nessuna immagine' });
+
+    const apiKey = process.env.ANTHROPIC_API_KEY || process.env.GEMINI_API_KEY;
+    if (!apiKey) return res.status(500).json({ error: 'API key IA non configurata' });
+
+    // Ridimensiona immagine a max 1024px per ridurre costi API
+    const resized = await sharp(req.file.buffer)
+      .resize(1024, 1024, { fit: 'inside', withoutEnlargement: true })
+      .jpeg({ quality: 80 })
+      .toBuffer();
+
+    // Chiama il servizio AI
+    const foods = await recognizeFood(resized, 'image/jpeg');
+
+    if (foods.length === 0) {
+      return res.json({ items: [] });
+    }
+
+    // Per ogni alimento riconosciuto, cerca match nel DB locale e nel catalogo
+    const db = await getDb();
+    const items = [];
+
+    for (const food of foods) {
+      // Termini di ricerca: nome principale + alternative
+      const searchTerms = [food.name, ...food.search_terms];
+
+      // 1. Cerca nel DB locale
+      let localMatches = [];
+      for (const term of searchTerms) {
+        if (localMatches.length >= 3) break;
+        const tokens = term.split(/\s+/).filter(Boolean);
+        if (tokens.length === 0) continue;
+        const conditions = tokens.map(() => '(name LIKE ? OR brand LIKE ?)').join(' AND ');
+        const params = tokens.flatMap(t => [`%${t}%`, `%${t}%`]);
+        params.push(5);
+        const found = await db.all(
+          `SELECT * FROM foods WHERE deleted_at IS NULL AND is_quick = 0 AND ${conditions} ORDER BY name ASC LIMIT ?`,
+          ...params
+        );
+        // Aggiungi solo quelli non già trovati
+        const existingIds = new Set(localMatches.map(m => m.id));
+        for (const f of found) {
+          if (!existingIds.has(f.id)) {
+            localMatches.push({
+              id: f.id, name: f.name, brand: f.brand,
+              kcal_100g: f.kcal_100g, protein_100g: f.protein_100g,
+              fat_100g: f.fat_100g, carbs_100g: f.carbs_100g,
+              image_path: f.image_path, source: f.source,
+              portions: JSON.parse(f.portions || '[]')
+            });
+            existingIds.add(f.id);
+          }
+        }
+      }
+      localMatches = localMatches.slice(0, 5);
+
+      // 2. Cerca nel catalogo Food Tracker (se pochi risultati locali)
+      let catalogMatches = [];
+      if (localMatches.length < 3) {
+        try {
+          const fetch = (await import('node-fetch')).default;
+          for (const term of searchTerms) {
+            if (catalogMatches.length >= 5) break;
+            const url = `${CATALOG_BASE}/search?q=${encodeURIComponent(term)}&limit=10`;
+            const resp = await fetch(url, { timeout: 5000 });
+            if (resp.ok) {
+              const data = await resp.json();
+              const products = (data.results || []).filter(p => p.product_name);
+              // Filtra prodotti già nel DB locale
+              const localBarcodes = new Set(localMatches.filter(m => m.barcode).map(m => m.barcode));
+              for (const p of products) {
+                if (catalogMatches.length >= 5) break;
+                if (p.barcode && localBarcodes.has(p.barcode)) continue;
+                const imageUrl = p.image_url
+                  ? `/api/foods/proxy-image?url=${encodeURIComponent(p.image_url)}`
+                  : null;
+                catalogMatches.push({
+                  name: p.product_name, brand: p.brand || '',
+                  barcode: p.barcode || '',
+                  kcal_100g: p.kcal_100g || 0,
+                  protein_100g: p.protein_100g || 0,
+                  fat_100g: p.fat_100g || 0,
+                  carbs_100g: p.carbs_100g || 0,
+                  source: p.source || 'openfoodfacts',
+                  image_url: imageUrl
+                });
+              }
+            }
+          }
+        } catch (e) {
+          console.warn('Catalog search error in recognize:', e.message);
+        }
+      }
+
+      items.push({
+        ai_name: food.name,
+        ai_quantity_g: food.quantity_g,
+        local_matches: localMatches,
+        catalog_matches: catalogMatches
+      });
+    }
+
+    res.json({ items });
+  } catch (err) {
+    console.error('Recognize photo error:', err);
+    res.status(500).json({ error: err.message || 'Errore nel riconoscimento' });
   }
 });
 

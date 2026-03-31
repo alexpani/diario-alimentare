@@ -686,6 +686,55 @@ input:focus, select:focus, textarea:focus {
   text-align: left;
 }
 
+/* ── AI Recognition results ──────────────────────────────────────────────── */
+.ai-result-item {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-bg);
+}
+.ai-result-header {
+  display: flex; align-items: flex-start; gap: 10px;
+}
+.ai-result-check { flex-shrink: 0; padding-top: 2px; }
+.ai-result-check input { width: 18px; height: 18px; accent-color: var(--color-primary); }
+.ai-result-info { flex: 1; min-width: 0; }
+.ai-result-ai-name {
+  font-size: 11px; font-weight: 600; color: var(--color-text-secondary);
+  text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 4px;
+}
+.ai-result-match {
+  display: flex; align-items: center; gap: 8px;
+}
+.ai-result-img {
+  width: 36px; height: 36px; border-radius: 6px; object-fit: cover; flex-shrink: 0;
+}
+.ai-result-match-name { font-size: 14px; font-weight: 600; color: var(--color-text); }
+.ai-result-match-detail { font-size: 12px; color: var(--color-text-secondary); }
+.ai-result-source {
+  font-size: 10px; font-weight: 500; color: var(--color-text-secondary);
+  background: var(--color-bg); padding: 1px 6px; border-radius: 4px;
+}
+.ai-result-no-match {
+  font-size: 12px; color: var(--color-warning); font-style: italic; margin-top: 4px;
+}
+.ai-result-qty {
+  flex-shrink: 0; display: flex; align-items: center; gap: 4px;
+}
+.ai-result-qty input {
+  font-size: 14px; font-weight: 600; padding: 4px; border-radius: 8px;
+}
+.btn-ai-alternatives {
+  background: none; border: none; cursor: pointer;
+  font-size: 11px; color: var(--color-primary); padding: 4px 0; margin-top: 4px;
+}
+.ai-alternatives-list { margin-top: 6px; }
+.ai-alt-option {
+  padding: 6px 8px; border-radius: 8px; cursor: pointer;
+  transition: background 0.12s;
+}
+.ai-alt-option:active { background: var(--color-primary-light); }
+.ai-alt-name { font-size: 13px; font-weight: 500; }
+.ai-alt-detail { font-size: 11px; color: var(--color-text-secondary); }
+
 .meal-body { padding: 0 14px 8px; }
 
 .entry-row {

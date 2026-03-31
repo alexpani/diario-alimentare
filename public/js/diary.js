@@ -449,10 +449,12 @@ window.DiaryTab = (() => {
     } else {
       const stepQty   = document.getElementById('modal-step-qty');
       const stepQuick = document.getElementById('modal-step-quick');
-      if (!stepQty.classList.contains('hidden') || !stepQuick.classList.contains('hidden')) {
-        // Modalità aggiunta, step 2/3 → torna alla ricerca
+      const stepAi    = document.getElementById('modal-step-ai');
+      if (!stepQty.classList.contains('hidden') || !stepQuick.classList.contains('hidden') || !stepAi.classList.contains('hidden')) {
+        // Modalità aggiunta, step 2/3/AI → torna alla ricerca
         stepQty.classList.add('hidden');
         stepQuick.classList.add('hidden');
+        stepAi.classList.add('hidden');
         document.getElementById('modal-step-search').classList.remove('hidden');
       } else {
         // Step 1 → chiude
@@ -888,6 +890,277 @@ window.DiaryTab = (() => {
       });
     });
   });
+
+  // ── AI: Riconosci piatto ──────────────────────────────────────────────────
+  let _aiItems = []; // risultati AI correnti
+
+  document.getElementById('btn-ai-recognize').addEventListener('click', () => {
+    document.getElementById('ai-photo-input').click();
+  });
+
+  document.getElementById('ai-photo-input').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    e.target.value = ''; // reset per permettere ri-selezione stesso file
+
+    // Nascondi ricerca e recenti, mostra spinner
+    document.getElementById('modal-step-search').classList.add('hidden');
+    document.getElementById('modal-step-qty').classList.add('hidden');
+    document.getElementById('modal-step-ai').classList.remove('hidden');
+    document.getElementById('ai-results-list').innerHTML = '<div class="spinner"></div><p style="text-align:center;color:var(--color-text-secondary);margin-top:8px">Analisi in corso…</p>';
+    document.getElementById('btn-ai-confirm').classList.add('hidden');
+
+    try {
+      // Resize client-side per ridurre upload
+      const resized = await resizeImage(file, 1024);
+
+      const formData = new FormData();
+      formData.append('image', resized, 'photo.jpg');
+
+      const res = await fetch('/api/diary/recognize-photo', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'Errore nel riconoscimento');
+      }
+
+      const data = await res.json();
+      _aiItems = data.items || [];
+
+      if (_aiItems.length === 0) {
+        document.getElementById('ai-results-list').innerHTML = '<div class="empty-state"><p>Nessun alimento riconosciuto nella foto.</p></div>';
+        return;
+      }
+
+      renderAiResults();
+      document.getElementById('btn-ai-confirm').classList.remove('hidden');
+    } catch (err) {
+      console.error('AI recognize error:', err);
+      document.getElementById('ai-results-list').innerHTML = `<div class="empty-state"><p>${err.message}</p></div>`;
+    }
+  });
+
+  function renderAiResults() {
+    const container = document.getElementById('ai-results-list');
+    let html = '';
+
+    _aiItems.forEach((item, i) => {
+      const bestMatch = item.local_matches[0] || null;
+      const catalogMatch = item.catalog_matches[0] || null;
+      const match = bestMatch || catalogMatch;
+
+      const matchName = match ? match.name : item.ai_name;
+      const matchDetail = match ? `${Math.round(match.kcal_100g)} kcal/100g` : '';
+      const matchSource = bestMatch ? 'DB locale' : (catalogMatch ? (_fmtSrc(catalogMatch.source)) : '');
+      const matchImg = match?.image_path || match?.image_url || null;
+
+      const hasAlternatives = (item.local_matches.length + item.catalog_matches.length) > 1;
+
+      html += `
+        <div class="ai-result-item" data-ai-idx="${i}">
+          <div class="ai-result-header">
+            <label class="ai-result-check">
+              <input type="checkbox" checked data-ai-check="${i}">
+            </label>
+            <div class="ai-result-info">
+              <div class="ai-result-ai-name">${item.ai_name}</div>
+              <div class="ai-result-match">
+                ${matchImg ? `<img src="${matchImg}" class="ai-result-img" alt="">` : ''}
+                <div>
+                  <div class="ai-result-match-name">${matchName}${matchSource ? ` <span class="ai-result-source">${matchSource}</span>` : ''}</div>
+                  <div class="ai-result-match-detail">${matchDetail}</div>
+                </div>
+              </div>
+              ${!match ? '<div class="ai-result-no-match">Nessun match trovato</div>' : ''}
+              ${hasAlternatives ? `<button class="btn-ai-alternatives" data-ai-alt="${i}">Altre opzioni ▾</button>` : ''}
+              <div class="ai-alternatives-list hidden" id="ai-alt-${i}"></div>
+            </div>
+            <div class="ai-result-qty">
+              <input type="number" class="form-input" value="${item.ai_quantity_g}" data-ai-qty="${i}" style="width:70px;text-align:center">
+              <span style="font-size:11px;color:var(--color-text-secondary)">g</span>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+
+    // Conta selezionati per il bottone
+    updateAiConfirmButton();
+
+    // Listener checkbox
+    container.querySelectorAll('[data-ai-check]').forEach(cb => {
+      cb.addEventListener('change', updateAiConfirmButton);
+    });
+
+    // Listener alternative
+    container.querySelectorAll('.btn-ai-alternatives').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = parseInt(btn.dataset.aiAlt);
+        toggleAiAlternatives(idx);
+      });
+    });
+  }
+
+  function updateAiConfirmButton() {
+    const checked = document.querySelectorAll('[data-ai-check]:checked').length;
+    const btn = document.getElementById('btn-ai-confirm');
+    btn.textContent = checked > 0 ? `Aggiungi ${checked} aliment${checked === 1 ? 'o' : 'i'}` : 'Nessun alimento selezionato';
+    btn.disabled = checked === 0;
+  }
+
+  function toggleAiAlternatives(idx) {
+    const listEl = document.getElementById(`ai-alt-${idx}`);
+    if (!listEl.classList.contains('hidden')) {
+      listEl.classList.add('hidden');
+      return;
+    }
+
+    const item = _aiItems[idx];
+    const allMatches = [
+      ...item.local_matches.map((m, mi) => ({ ...m, _type: 'local', _idx: mi })),
+      ...item.catalog_matches.map((m, mi) => ({ ...m, _type: 'catalog', _idx: mi }))
+    ];
+
+    listEl.innerHTML = allMatches.map((m, j) => `
+      <div class="ai-alt-option" data-ai-parent="${idx}" data-alt-idx="${j}" data-alt-type="${m._type}" data-alt-src-idx="${m._idx}">
+        <div class="ai-alt-name">${m.name}${m.brand ? ` <span style="color:var(--color-text-secondary)">${m.brand}</span>` : ''}</div>
+        <div class="ai-alt-detail">${Math.round(m.kcal_100g)} kcal/100g · ${m._type === 'local' ? 'DB locale' : _fmtSrc(m.source)}</div>
+      </div>
+    `).join('');
+
+    listEl.classList.remove('hidden');
+
+    listEl.querySelectorAll('.ai-alt-option').forEach(opt => {
+      opt.addEventListener('click', () => {
+        const parentIdx = parseInt(opt.dataset.aiParent);
+        const altType = opt.dataset.altType;
+        const srcIdx = parseInt(opt.dataset.altSrcIdx);
+
+        // Sposta il match selezionato in cima
+        const parentItem = _aiItems[parentIdx];
+        if (altType === 'local') {
+          const selected = parentItem.local_matches.splice(srcIdx, 1)[0];
+          parentItem.local_matches.unshift(selected);
+        } else {
+          const selected = parentItem.catalog_matches.splice(srcIdx, 1)[0];
+          parentItem.local_matches = []; // Preferisci catalogo
+          parentItem.catalog_matches.unshift(selected);
+        }
+
+        renderAiResults();
+      });
+    });
+  }
+
+  // Conferma batch
+  document.getElementById('btn-ai-confirm').addEventListener('click', async () => {
+    const btn = document.getElementById('btn-ai-confirm');
+    btn.disabled = true;
+    btn.textContent = 'Aggiunta in corso...';
+
+    let added = 0;
+
+    for (let i = 0; i < _aiItems.length; i++) {
+      const cb = document.querySelector(`[data-ai-check="${i}"]`);
+      if (!cb || !cb.checked) continue;
+
+      const item = _aiItems[i];
+      const qtyInput = document.querySelector(`[data-ai-qty="${i}"]`);
+      const qty = parseInt(qtyInput?.value) || item.ai_quantity_g;
+
+      const localMatch = item.local_matches[0];
+      const catalogMatch = item.catalog_matches[0];
+
+      let foodId = null;
+
+      if (localMatch) {
+        foodId = localMatch.id;
+      } else if (catalogMatch) {
+        // Auto-importa dal catalogo
+        try {
+          const fd = new FormData();
+          fd.append('name', catalogMatch.name);
+          fd.append('brand', catalogMatch.brand || '');
+          fd.append('barcode', catalogMatch.barcode || '');
+          fd.append('kcal_100g', catalogMatch.kcal_100g);
+          fd.append('protein_100g', catalogMatch.protein_100g);
+          fd.append('fat_100g', catalogMatch.fat_100g);
+          fd.append('carbs_100g', catalogMatch.carbs_100g);
+          fd.append('source', catalogMatch.source || 'openfoodfacts');
+          const importRes = await fetch('/api/foods', { method: 'POST', body: fd });
+          if (importRes.ok) {
+            const newFood = await importRes.json();
+            foodId = newFood.id;
+          }
+        } catch (e) {
+          console.warn('Auto-import error:', e);
+        }
+      }
+
+      if (!foodId) {
+        // Nessun match: crea voce rapida
+        try {
+          const qRes = await apiPost('/api/diary/quick', {
+            date: currentDate,
+            meal_type: selectedMeal,
+            description: item.ai_name,
+            kcal: Math.round((item.local_matches[0]?.kcal_100g || 100) / 100 * qty),
+            quantity_g: qty
+          });
+          if (qRes && !qRes.error) added++;
+        } catch (e) { console.warn(e); }
+        continue;
+      }
+
+      // Aggiungi al diario
+      const res = await apiPost('/api/diary', {
+        food_id: foodId,
+        date: currentDate,
+        meal_type: selectedMeal,
+        quantity_g: qty
+      });
+      if (res && !res.error) added++;
+    }
+
+    // Torna alla ricerca
+    document.getElementById('modal-step-ai').classList.add('hidden');
+    document.getElementById('modal-step-search').classList.remove('hidden');
+    document.getElementById('modal-food-search').value = '';
+    document.getElementById('modal-search-results').innerHTML = '';
+    loadRecentFoods(selectedMeal);
+
+    if (added > 0) {
+      showAddedToast(`${added} aliment${added === 1 ? 'o' : 'i'} aggiunti`);
+      openMealId = selectedMeal;
+      await refresh();
+    }
+  });
+
+  // Resize immagine client-side
+  function resizeImage(file, maxSize) {
+    return new Promise((resolve) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      img.onload = () => {
+        let w = img.width, h = img.height;
+        if (w > maxSize || h > maxSize) {
+          if (w > h) { h = Math.round(h * maxSize / w); w = maxSize; }
+          else { w = Math.round(w * maxSize / h); h = maxSize; }
+        }
+        canvas.width = w;
+        canvas.height = h;
+        ctx.drawImage(img, 0, 0, w, h);
+        canvas.toBlob(blob => resolve(blob), 'image/jpeg', 0.8);
+      };
+      img.src = URL.createObjectURL(file);
+    });
+  }
 
   // ── Salva come ricetta ────────────────────────────────────────────────────
   let _recipeMealType = null;
