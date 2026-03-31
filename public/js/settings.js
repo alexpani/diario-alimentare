@@ -4,6 +4,7 @@
 
 window.SettingsTab = (() => {
   async function refresh() {
+    // ── Info app ─────────────────────────────────────────────────────────
     const info = await apiGet('/api/settings/info');
     if (info) {
       document.getElementById('app-info').innerHTML = `
@@ -24,7 +25,27 @@ window.SettingsTab = (() => {
       `;
     }
 
+    // ── Modello IA ───────────────────────────────────────────────────────
+    const vm = await apiGet('/api/settings/vision-model');
+    if (vm) {
+      const sel = document.getElementById('vision-model-select');
+      sel.innerHTML = vm.models.map(m =>
+        `<option value="${m.key}"${m.key === vm.current ? ' selected' : ''}>${m.label}</option>`
+      ).join('');
+    }
   }
+
+  // ── Cambio modello IA ──────────────────────────────────────────────────
+  document.getElementById('vision-model-select').addEventListener('change', async (e) => {
+    const msgEl = document.getElementById('vision-model-msg');
+    msgEl.classList.add('hidden');
+    const res = await apiPut('/api/settings/vision-model', { model_key: e.target.value });
+    if (res && !res.error) {
+      showMsg(msgEl, 'Modello aggiornato', 'success');
+    } else {
+      showMsg(msgEl, res?.error || 'Errore', 'error');
+    }
+  });
 
   document.getElementById('password-form').addEventListener('submit', async (e) => {
     e.preventDefault();

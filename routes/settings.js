@@ -7,6 +7,60 @@ const { getDb } = require('../database/db');
 
 router.use(isAuth);
 
+// ── Helper: aggiorna una variabile nel .env ──────────────────────────────
+const ENV_PATH = path.join(__dirname, '..', '.env');
+
+function updateEnvVar(key, value) {
+  let content = '';
+  if (fs.existsSync(ENV_PATH)) {
+    content = fs.readFileSync(ENV_PATH, 'utf8');
+    const regex = new RegExp(`^${key}=.*`, 'm');
+    if (regex.test(content)) {
+      content = content.replace(regex, `${key}=${value}`);
+    } else {
+      content = content.trimEnd() + `\n${key}=${value}\n`;
+    }
+  } else {
+    content = `${key}=${value}\n`;
+  }
+  fs.writeFileSync(ENV_PATH, content, 'utf8');
+  process.env[key] = value;
+}
+
+// ── Modelli IA disponibili ───────────────────────────────────────────────
+const VISION_MODELS = [
+  { key: 'claude-sonnet-4-20250514',       label: 'Claude Sonnet 4',   provider: 'claude' },
+  { key: 'claude-haiku-4-20250414',        label: 'Claude Haiku 4',    provider: 'claude' },
+  { key: 'claude-opus-4-20250514',         label: 'Claude Opus 4',     provider: 'claude' },
+  { key: 'gemini-2.0-flash',              label: 'Gemini 2.0 Flash',  provider: 'gemini' },
+  { key: 'gemini-2.5-flash-preview-05-20', label: 'Gemini 2.5 Flash',  provider: 'gemini' },
+  { key: 'gemini-2.5-pro-preview-05-06',   label: 'Gemini 2.5 Pro',    provider: 'gemini' },
+];
+
+// GET /api/settings/vision-model
+router.get('/vision-model', (req, res) => {
+  const currentProvider = (process.env.VISION_PROVIDER || 'claude').toLowerCase();
+  const currentModel = process.env.VISION_MODEL ||
+    (currentProvider === 'gemini' ? 'gemini-2.0-flash' : 'claude-sonnet-4-20250514');
+  res.json({ current: currentModel, models: VISION_MODELS });
+});
+
+// PUT /api/settings/vision-model
+router.put('/vision-model', (req, res) => {
+  const { model_key } = req.body;
+  const entry = VISION_MODELS.find(m => m.key === model_key);
+  if (!entry) return res.status(400).json({ error: 'Modello non valido' });
+
+  try {
+    updateEnvVar('VISION_MODEL', entry.key);
+    updateEnvVar('VISION_PROVIDER', entry.provider);
+    res.json({ ok: true, model: entry.key, provider: entry.provider });
+  } catch (err) {
+    console.error('Errore aggiornamento modello IA:', err);
+    res.status(500).json({ error: 'Impossibile aggiornare il file .env' });
+  }
+});
+
 // PATCH /api/settings/password
 router.patch('/password', (req, res) => {
   const { current_password, new_password } = req.body;
@@ -23,23 +77,8 @@ router.patch('/password', (req, res) => {
     return res.status(400).json({ error: 'La nuova password deve essere lunga almeno 6 caratteri' });
   }
 
-  const envPath = path.join(__dirname, '..', '.env');
-
   try {
-    let envContent = '';
-    if (fs.existsSync(envPath)) {
-      envContent = fs.readFileSync(envPath, 'utf8');
-      if (envContent.includes('ADMIN_PASSWORD=')) {
-        envContent = envContent.replace(/^ADMIN_PASSWORD=.*/m, `ADMIN_PASSWORD=${new_password}`);
-      } else {
-        envContent += `\nADMIN_PASSWORD=${new_password}`;
-      }
-    } else {
-      envContent = `PORT=${process.env.PORT || 3000}\nSESSION_SECRET=${process.env.SESSION_SECRET || 'secret'}\nADMIN_USER=${process.env.ADMIN_USER || 'admin'}\nADMIN_PASSWORD=${new_password}\n`;
-    }
-
-    fs.writeFileSync(envPath, envContent, 'utf8');
-    process.env.ADMIN_PASSWORD = new_password;
+    updateEnvVar('ADMIN_PASSWORD', new_password);
 
     req.session.destroy(() => {
       res.json({ ok: true, message: 'Password aggiornata. Effettua di nuovo il login.' });
