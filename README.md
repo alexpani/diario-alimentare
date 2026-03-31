@@ -84,6 +84,7 @@ food-diary/
 - **Diario**: storico giorni, grafici settimanali e mensili (Chart.js)
 - **Alimenti**: database personale con ricerca, import dal catalogo Food Tracker, barcode scanner, upload foto, porzioni decimali; recenti e frequenti fino a 12 alimenti
 - **Barcode**: se non trovato nel DB locale né nel catalogo, mostra "Crea questo alimento" con barcode precompilato
+- **Ricette**: modifica ricetta direttamente dal diario cliccando sull'alimento nel pasto (senza passare dalla tab Alimenti)
 - **Piano**: 7 piani nutrizionali preimpostati (calibrati su TDEE personale), attivazione singola
 - **Impostazioni**: cambio password, sincronizzazione verso Food Tracker, tema chiaro/scuro
 - **PWA**: manifest.json + apple-touch-icon per installazione su Home Screen iOS

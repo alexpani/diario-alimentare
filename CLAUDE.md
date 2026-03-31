@@ -156,6 +156,20 @@ L'app è installabile come PWA su iOS (Home Screen):
 - `public/icons/icon-192.png` e `icon-512.png` — icone manifest
 - Meta tag in `index.html`: `apple-mobile-web-app-capable`, `apple-mobile-web-app-title`, `apple-touch-icon`, `manifest`
 
+## Modifica ricetta dal diario
+
+Cliccando su un alimento di tipo ricetta nel pasto, il modal di modifica quantità mostra il bottone **"Modifica ricetta"**:
+- Visibile solo per alimenti con `components.length > 0`
+- Apre `FoodsTab.openFoodForm(foodId)` — lo stesso form della tab Alimenti
+- Se il food non è nella cache `allFoods` (es. tab Alimenti mai aperta), viene caricato via `GET /api/foods/:id`
+- Dopo il salvataggio, il diario si aggiorna automaticamente
+
+## Deduplicazione ricerca catalogo
+
+Quando si cercano alimenti, i risultati del catalogo Food Tracker vengono filtrati per evitare doppioni:
+- Prodotti con barcode già presente nel DB locale → esclusi
+- Prodotti con `source: app` e stesso nome (case-insensitive) di un alimento locale → esclusi
+
 ## Palette colori (WCAG AA)
 
 Tutti i colori sono definiti come CSS custom properties in `style.css` (`:root` e `[data-theme="dark"]`).
