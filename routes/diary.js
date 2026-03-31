@@ -418,19 +418,20 @@ router.post('/recognize-photo', aiUpload.single('image'), async (req, res) => {
               const localBarcodes = new Set(localMatches.filter(m => m.barcode).map(m => m.barcode));
               for (const p of products) {
                 if (catalogMatches.length >= 5) break;
-                if (p.barcode && localBarcodes.has(p.barcode)) continue;
-                const imageUrl = p.image_url
-                  ? `/api/foods/proxy-image?url=${encodeURIComponent(p.image_url)}`
-                  : null;
+                const pBarcode = p.external_id || '';
+                if (pBarcode && localBarcodes.has(pBarcode)) continue;
+                let imageUrl = p.image_url || '';
+                if (imageUrl && !imageUrl.startsWith('http')) imageUrl = CATALOG_BASE + imageUrl;
+                if (imageUrl) imageUrl = `/api/foods/proxy-image?url=${encodeURIComponent(imageUrl)}`;
                 catalogMatches.push({
-                  name: p.product_name, brand: p.brand || '',
-                  barcode: p.barcode || '',
-                  kcal_100g: p.kcal_100g || 0,
-                  protein_100g: p.protein_100g || 0,
+                  name: p.product_name, brand: p.brands || '',
+                  barcode: pBarcode,
+                  kcal_100g: p.energy_kcal || 0,
+                  protein_100g: p.proteins_100g || 0,
                   fat_100g: p.fat_100g || 0,
-                  carbs_100g: p.carbs_100g || 0,
+                  carbs_100g: p.carbohydrates_100g || 0,
                   source: p.source || 'openfoodfacts',
-                  image_url: imageUrl
+                  image_url: imageUrl || null
                 });
               }
             }
