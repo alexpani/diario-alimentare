@@ -413,8 +413,10 @@ router.post('/recognize-photo', aiUpload.single('image'), async (req, res) => {
             const resp = await fetch(url, { timeout: 5000 });
             if (resp.ok) {
               const data = await resp.json();
-              const products = (data.results || []).filter(p => p.product_name);
-              // Filtra prodotti già nel DB locale
+              // Filtra: solo CREA e APP (no OpenFoodFacts), e non già nel DB locale
+              const products = (data.results || []).filter(p =>
+                p.product_name && p.source && p.source !== 'openfoodfacts'
+              );
               const localBarcodes = new Set(localMatches.filter(m => m.barcode).map(m => m.barcode));
               for (const p of products) {
                 if (catalogMatches.length >= 5) break;
