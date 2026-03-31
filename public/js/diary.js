@@ -282,6 +282,7 @@ window.DiaryTab = (() => {
     document.getElementById('modal-meal-title').textContent = `Aggiungi a ${mealLabel}`;
     document.getElementById('btn-confirm-add').textContent = 'Aggiungi';
     document.getElementById('edit-meal-move-wrap').classList.add('hidden');
+    document.getElementById('edit-recipe-wrap').classList.add('hidden');
 
     // Reset steps
     document.getElementById('modal-step-search').classList.remove('hidden');
@@ -319,6 +320,10 @@ window.DiaryTab = (() => {
     });
     sel.value = '';
     document.getElementById('edit-meal-move-wrap').classList.remove('hidden');
+
+    // Mostra bottone "Modifica ricetta" solo per ricette
+    const isRecipe = Array.isArray(entry.food.components) && entry.food.components.length > 0;
+    document.getElementById('edit-recipe-wrap').classList.toggle('hidden', !isRecipe);
 
     document.getElementById('modal-step-search').classList.add('hidden');
     document.getElementById('modal-step-qty').classList.remove('hidden');
@@ -485,6 +490,18 @@ window.DiaryTab = (() => {
   }
 
   document.getElementById('btn-quick-new-food').addEventListener('click', showQuickNewFood);
+
+  // Modifica ricetta dal modal quantità
+  document.getElementById('btn-edit-recipe').addEventListener('click', () => {
+    if (!selectedFood) return;
+    const foodId = selectedFood.id;
+    closeAddModal();
+    FoodsTab.openFoodForm(foodId, {
+      onSaved: async () => {
+        await refresh();
+      }
+    });
+  });
 
   // ── Ricerca unificata: DB locale + catalogo ─────────────────────────────
   async function searchUnified(q) {

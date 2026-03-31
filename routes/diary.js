@@ -15,7 +15,7 @@ router.get('/', async (req, res) => {
       SELECT
         de.id, de.date, de.meal_type, de.quantity_g, de.quantity_label, de.created_at,
         f.id AS food_id, f.name, f.brand, f.kcal_100g, f.protein_100g, f.fat_100g, f.carbs_100g,
-        f.image_path, f.portions
+        f.image_path, f.portions, f.components
       FROM diary_entries de
       JOIN foods f ON f.id = de.food_id
       WHERE de.date = ?
@@ -38,7 +38,8 @@ router.get('/', async (req, res) => {
         fat_100g: e.fat_100g,
         carbs_100g: e.carbs_100g,
         image_path: e.image_path,
-        portions: JSON.parse(e.portions || '[]')
+        portions: JSON.parse(e.portions || '[]'),
+        components: JSON.parse(e.components || '[]')
       },
       kcal: Math.round((e.kcal_100g / 100) * e.quantity_g * 10) / 10,
       protein: Math.round((e.protein_100g / 100) * e.quantity_g * 10) / 10,
