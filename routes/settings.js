@@ -29,19 +29,19 @@ function updateEnvVar(key, value) {
 
 // ── Modelli IA disponibili ───────────────────────────────────────────────
 const VISION_MODELS = [
-  { key: 'claude-sonnet-4-20250514',       label: 'Claude Sonnet 4',   provider: 'claude' },
-  { key: 'claude-haiku-4-20250414',        label: 'Claude Haiku 4',    provider: 'claude' },
-  { key: 'claude-opus-4-20250514',         label: 'Claude Opus 4',     provider: 'claude' },
-  { key: 'gemini-2.0-flash',              label: 'Gemini 2.0 Flash',  provider: 'gemini' },
-  { key: 'gemini-2.5-flash-preview-05-20', label: 'Gemini 2.5 Flash',  provider: 'gemini' },
-  { key: 'gemini-2.5-pro-preview-05-06',   label: 'Gemini 2.5 Pro',    provider: 'gemini' },
+  { key: 'claude-sonnet-4-6',             label: 'Claude Sonnet 4.6',  provider: 'claude' },
+  { key: 'claude-haiku-4-5-20251001',     label: 'Claude Haiku 4.5',   provider: 'claude' },
+  { key: 'claude-opus-4-6',               label: 'Claude Opus 4.6',    provider: 'claude' },
+  { key: 'gemini-2.0-flash',              label: 'Gemini 2.0 Flash',   provider: 'gemini' },
+  { key: 'gemini-2.5-flash',              label: 'Gemini 2.5 Flash',   provider: 'gemini' },
+  { key: 'gemini-2.5-pro',                label: 'Gemini 2.5 Pro',     provider: 'gemini' },
 ];
 
 // GET /api/settings/vision-model
 router.get('/vision-model', (req, res) => {
   const currentProvider = (process.env.VISION_PROVIDER || 'claude').toLowerCase();
   const currentModel = process.env.VISION_MODEL ||
-    (currentProvider === 'gemini' ? 'gemini-2.0-flash' : 'claude-sonnet-4-20250514');
+    (currentProvider === 'gemini' ? 'gemini-2.5-flash' : 'claude-sonnet-4-6');
   res.json({ current: currentModel, models: VISION_MODELS });
 });
 
