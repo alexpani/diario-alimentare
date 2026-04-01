@@ -56,6 +56,34 @@ async function getDb() {
         );
       }
     }
+
+    // Fix macro ricette: ricalcola kcal/macro da componenti per ricette con recipe_yield_g stantio
+    const recipes = await _db.all(
+      `SELECT id, components FROM foods WHERE components IS NOT NULL AND components != '[]' AND deleted_at IS NULL`
+    );
+    for (const r of recipes) {
+      let comps;
+      try { comps = JSON.parse(r.components || '[]'); } catch { continue; }
+      if (!comps.length || comps[0].kcal_100g === undefined) continue;
+      let totalKcal = 0, totalP = 0, totalF = 0, totalC = 0, totalW = 0;
+      for (const c of comps) {
+        const q = parseFloat(c.quantity_g) || 0;
+        totalKcal += (c.kcal_100g    / 100) * q;
+        totalP    += (c.protein_100g / 100) * q;
+        totalF    += (c.fat_100g     / 100) * q;
+        totalC    += (c.carbs_100g   / 100) * q;
+        totalW    += q;
+      }
+      const yieldG = totalW || 100;
+      await _db.run(
+        `UPDATE foods SET kcal_100g=?, protein_100g=?, fat_100g=?, carbs_100g=?, recipe_yield_g=NULL WHERE id=?`,
+        Math.round((totalKcal / yieldG) * 100 * 10) / 10,
+        Math.round((totalP    / yieldG) * 100 * 10) / 10,
+        Math.round((totalF    / yieldG) * 100 * 10) / 10,
+        Math.round((totalC    / yieldG) * 100 * 10) / 10,
+        r.id
+      );
+    }
   }
   return _db;
 }

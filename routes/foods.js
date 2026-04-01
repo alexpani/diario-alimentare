@@ -72,11 +72,30 @@ async function calcMacrosFromComponents(db, components) {
 
 // ── Helper: deserializza alimento ────────────────────────────────────────────
 function deserializeFood(f) {
-  return {
+  const food = {
     ...f,
     portions:   JSON.parse(f.portions   || '[]'),
     components: JSON.parse(f.components || '[]'),
   };
+  // Per le ricette: ricalcola sempre i macro dallo snapshot dei componenti,
+  // così i valori sono sempre coerenti indipendentemente da recipe_yield_g storico.
+  if (food.components.length > 0 && food.components[0].kcal_100g !== undefined) {
+    let totalKcal = 0, totalP = 0, totalF = 0, totalC = 0, totalW = 0;
+    for (const c of food.components) {
+      const q = parseFloat(c.quantity_g) || 0;
+      totalKcal += (c.kcal_100g    / 100) * q;
+      totalP    += (c.protein_100g / 100) * q;
+      totalF    += (c.fat_100g     / 100) * q;
+      totalC    += (c.carbs_100g   / 100) * q;
+      totalW    += q;
+    }
+    const yieldG = totalW || 100;
+    food.kcal_100g    = Math.round((totalKcal / yieldG) * 100 * 10) / 10;
+    food.protein_100g = Math.round((totalP    / yieldG) * 100 * 10) / 10;
+    food.fat_100g     = Math.round((totalF    / yieldG) * 100 * 10) / 10;
+    food.carbs_100g   = Math.round((totalC    / yieldG) * 100 * 10) / 10;
+  }
+  return food;
 }
 
 // GET /api/foods?q=&limit=&barcode=
