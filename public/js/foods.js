@@ -145,6 +145,7 @@ window.FoodsTab = (() => {
     }
 
     document.getElementById('modal-food-form').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
   }
 
   function fillFoodForm(food) {
@@ -197,6 +198,7 @@ window.FoodsTab = (() => {
 
   function closeFoodForm() {
     document.getElementById('modal-food-form').classList.add('hidden');
+    document.body.style.overflow = '';
     editingId = null;
   }
 
