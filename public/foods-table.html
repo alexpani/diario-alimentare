@@ -185,6 +185,30 @@
     }
     .btn-close-portions:hover { background: #f5f5f5; }
 
+    /* ── Photo column ── */
+    .col-photo { width: 70px; text-align: center; }
+    .photo-cell { position: relative; display: inline-block; }
+    .photo-thumb {
+      width: 50px; height: 50px; border-radius: 6px;
+      object-fit: cover; cursor: pointer; display: block;
+    }
+    .photo-thumb:hover { opacity: 0.8; }
+    .btn-remove-photo {
+      position: absolute; top: -5px; right: -5px;
+      background: #e53935; color: white; border: none;
+      border-radius: 50%; width: 17px; height: 17px;
+      font-size: 10px; cursor: pointer; line-height: 17px;
+      padding: 0; text-align: center;
+    }
+    .btn-remove-photo:hover { background: #b71c1c; }
+    .photo-placeholder {
+      width: 50px; height: 50px; border-radius: 6px;
+      background: #f0f0f0; border: 1px dashed #ccc;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; cursor: pointer; margin: 0 auto;
+    }
+    .photo-placeholder:hover { background: #e8f5e9; border-color: #4CAF50; }
+
     /* ── Delete button ── */
     .btn-del-row {
       background: none; border: none; color: #bbb; cursor: pointer;
@@ -248,6 +272,7 @@
         <th class="sortable col-num"     data-col="fat_100g">Grassi</th>
         <th class="sortable col-num"     data-col="carbs_100g">Carbo</th>
         <th class="col-barcode"          data-col="barcode">Barcode</th>
+        <th class="col-photo">Foto</th>
         <th class="sortable col-source"  data-col="source">Fonte</th>
         <th class="sortable col-date"    data-col="created_at">Data</th>
         <th class="col-portions">Porzioni</th>
@@ -255,7 +280,7 @@
       </tr>
     </thead>
     <tbody id="foods-tbody">
-      <tr class="empty-row"><td colspan="12">Caricamento…</td></tr>
+      <tr class="empty-row"><td colspan="13">Caricamento…</td></tr>
     </tbody>
   </table>
 </div>
@@ -350,7 +375,7 @@ function renderTable() {
   const slice = filtered.slice(start, start + PAGE_SIZE);
 
   if (slice.length === 0) {
-    tbody.innerHTML = `<tr class="empty-row"><td colspan="12">Nessun alimento trovato.</td></tr>`;
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="13">Nessun alimento trovato.</td></tr>`;
     updatePagination();
     return;
   }
@@ -369,7 +394,7 @@ function renderTable() {
       const editorTr = document.createElement('tr');
       editorTr.classList.add('portions-editor-row');
       editorTr.dataset.portionsFor = f.id;
-      editorTr.innerHTML = `<td colspan="12">${portionsEditorHTML(parsePotions(f))}</td>`;
+      editorTr.innerHTML = `<td colspan="13">${portionsEditorHTML(parsePotions(f))}</td>`;
       tbody.appendChild(editorTr);
       attachPortionsEditorListeners(editorTr, f);
     }
@@ -400,6 +425,14 @@ function rowHTML(f) {
     <td class="col-num">    <input type="number" data-field="fat_100g"     value="${fmt(f.fat_100g)}"     step="0.1" min="0"></td>
     <td class="col-num">    <input type="number" data-field="carbs_100g"   value="${fmt(f.carbs_100g)}"   step="0.1" min="0"></td>
     <td class="col-barcode"><input type="text"   data-field="barcode"      value="${esc(f.barcode      || '')}" placeholder="—"></td>
+    <td class="col-photo">
+      ${f.image_path
+        ? `<div class="photo-cell">
+             <img src="${f.image_path}" class="photo-thumb" data-id="${f.id}" title="Clicca per cambiare">
+             <button class="btn-remove-photo" data-id="${f.id}" title="Rimuovi foto">✕</button>
+           </div>`
+        : `<div class="photo-placeholder" data-id="${f.id}" title="Clicca per aggiungere foto">📷</div>`}
+    </td>
     <td class="col-source">${sourceBadge(f.source)}</td>
     <td class="td-date">${fmtDate(f.created_at)}</td>
     <td class="col-portions">
@@ -449,6 +482,13 @@ function attachRowListeners(row, f) {
   row.querySelector('.btn-del-row')?.addEventListener('click',  () => deleteRow(f.id, f.name));
 
   row.querySelector('[data-portions-btn]')?.addEventListener('click', () => togglePortionsEditor(f.id));
+
+  row.querySelector('.photo-thumb')?.addEventListener('click', () => uploadPhotoForRow(f.id));
+  row.querySelector('.photo-placeholder')?.addEventListener('click', () => uploadPhotoForRow(f.id));
+  row.querySelector('.btn-remove-photo')?.addEventListener('click', e => {
+    e.stopPropagation();
+    removePhotoForRow(f.id);
+  });
 }
 
 function attachPortionsEditorListeners(editorTr, f) {
@@ -660,6 +700,53 @@ function showToast(msg, type = '') {
   t.textContent = msg; t.className = `show ${type}`;
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => t.className = '', 2500);
+}
+
+/* ── Photo management ── */
+async function uploadPhotoForRow(id) {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.onchange = async () => {
+    const file = input.files[0];
+    if (!file) return;
+    const fd = new FormData();
+    fd.append('image', file);
+    setStatus('Caricamento foto…', 'saving');
+    try {
+      const res = await fetch(`/api/foods/${id}`, { method: 'PUT', body: fd });
+      if (!res.ok) throw new Error();
+      const updated = await res.json();
+      const idx = allFoods.findIndex(f => f.id === id);
+      if (idx >= 0) allFoods[idx] = { ...allFoods[idx], ...updated };
+      renderTable();
+      showToast('Foto aggiornata', 'success');
+      setStatus(`${allFoods.length} alimenti`, '');
+    } catch(e) {
+      showToast('Errore caricamento foto', 'error');
+      setStatus('Errore', 'error');
+    }
+  };
+  input.click();
+}
+
+async function removePhotoForRow(id) {
+  const fd = new FormData();
+  fd.append('remove_image', '1');
+  setStatus('Rimozione foto…', 'saving');
+  try {
+    const res = await fetch(`/api/foods/${id}`, { method: 'PUT', body: fd });
+    if (!res.ok) throw new Error();
+    const updated = await res.json();
+    const idx = allFoods.findIndex(f => f.id === id);
+    if (idx >= 0) allFoods[idx] = { ...allFoods[idx], ...updated };
+    renderTable();
+    showToast('Foto rimossa');
+    setStatus(`${allFoods.length} alimenti`, '');
+  } catch(e) {
+    showToast('Errore rimozione foto', 'error');
+    setStatus('Errore', 'error');
+  }
 }
 
 /* ── Events ── */
