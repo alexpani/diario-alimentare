@@ -16,7 +16,7 @@ REGOLE FONDAMENTALI:
    - Insalata mista → lattuga, pomodori, carote, olio extravergine di oliva
    - Panino con prosciutto → pane, prosciutto crudo, mozzarella
    - Pizza margherita → farina, mozzarella, pomodoro, olio extravergine di oliva
-   NON restituire mai il piatto intero come singola voce.
+   NON restituire mai il piatto intero come singola voce. Per identificare le ricette correttamente riferisciti a quelle presenti in siti come: giallozzaferano.it, fattoincasadabenedetta.it, cucchiaio.it,
 2. Usa SEMPRE la forma CRUDA degli alimenti dove applicabile:
    - "Pasta di semola" NON "Pasta di semola cotta"
    - "Riso" NON "Riso cotto"
