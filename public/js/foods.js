@@ -129,7 +129,6 @@ window.FoodsTab = (() => {
     setRecipeMode(false);
     document.getElementById('ff-ingredients-list').innerHTML = '';
     document.getElementById('ff-recipe-totals').classList.add('hidden');
-    document.getElementById('ff-recipe-yield').value = '';
     document.getElementById('btn-clone-recipe').classList.add('hidden');
 
     if (id) {
@@ -189,7 +188,6 @@ window.FoodsTab = (() => {
             });
           }
         }
-        if (food.recipe_yield_g) document.getElementById('ff-recipe-yield').value = food.recipe_yield_g;
         setRecipeMode(true);
         renderIngredients();
         document.getElementById('btn-clone-recipe').classList.remove('hidden');
@@ -554,8 +552,7 @@ window.FoodsTab = (() => {
       totalC       += (ing.carbs_100g   / 100) * q;
     }
 
-    const yieldInput = document.getElementById('ff-recipe-yield');
-    const yieldG = parseFloat(yieldInput.value) || totalWeight || 1;
+    const yieldG = totalWeight || 1;
 
     document.getElementById('ff-recipe-total-weight').textContent =
       `Peso totale ingredienti: ${Math.round(totalWeight)}g`;
@@ -580,10 +577,6 @@ window.FoodsTab = (() => {
     document.getElementById('ff-carbs').value   = p100.carbs;
     updatePortionsNutrition();
   }
-
-  document.getElementById('ff-recipe-yield').addEventListener('input', () => {
-    if (recipeIngredients.length > 0) updateRecipeTotals();
-  });
 
   // Submit form
   document.getElementById('food-form').addEventListener('submit', async (e) => {
@@ -619,8 +612,6 @@ window.FoodsTab = (() => {
           fat_100g: i.fat_100g, carbs_100g: i.carbs_100g,
         }))
       ));
-      const yieldVal = document.getElementById('ff-recipe-yield').value;
-      if (yieldVal) formData.append('recipe_yield_g', yieldVal);
     } else {
       formData.append('components', '[]');
     }

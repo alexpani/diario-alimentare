@@ -46,7 +46,7 @@ const upload = multer({
 
 
 // ── Helper: calcola macros da componenti (usa snapshot se presente, fallback DB) ──
-async function calcMacrosFromComponents(db, components, recipe_yield_g) {
+async function calcMacrosFromComponents(db, components) {
   let totalKcal = 0, totalProtein = 0, totalFat = 0, totalCarbs = 0, totalWeight = 0;
   for (const c of components) {
     // Usa snapshot nutrizionale se presente nel componente, altrimenti lookup DB
@@ -61,7 +61,7 @@ async function calcMacrosFromComponents(db, components, recipe_yield_g) {
     totalCarbs   += (f.carbs_100g   / 100) * q;
     totalWeight  += q;
   }
-  const yieldG = parseFloat(recipe_yield_g) || totalWeight || 100;
+  const yieldG = totalWeight || 100;
   return {
     kcal_100g:    Math.round((totalKcal    / yieldG) * 100 * 10) / 10,
     protein_100g: Math.round((totalProtein / yieldG) * 100 * 10) / 10,
@@ -207,7 +207,7 @@ router.post('/', upload.single('image'), async (req, res) => {
   try {
     const db = await getDb();
     const { name, brand, kcal_100g, protein_100g, fat_100g, carbs_100g,
-            portions, barcode, components, recipe_yield_g, source } = req.body;
+            portions, barcode, components, source } = req.body;
 
     if (!name) return res.status(400).json({ error: 'Il nome è obbligatorio' });
 
@@ -223,7 +223,7 @@ router.post('/', upload.single('image'), async (req, res) => {
       carbs_100g:   parseFloat(carbs_100g)   || 0,
     };
     if (componentsArr.length > 0) {
-      macros = await calcMacrosFromComponents(db, componentsArr, recipe_yield_g);
+      macros = await calcMacrosFromComponents(db, componentsArr);
     }
 
     const result = await db.run(
@@ -233,7 +233,7 @@ router.post('/', upload.single('image'), async (req, res) => {
       name, brand || null,
       macros.kcal_100g, macros.protein_100g, macros.fat_100g, macros.carbs_100g,
       portionsJson, barcode || null,
-      componentsJson, parseFloat(recipe_yield_g) || null,
+      componentsJson, null,
       source || 'app'
     );
 
@@ -267,12 +267,11 @@ router.put('/:id', upload.single('image'), async (req, res) => {
     if (!existing) return res.status(404).json({ error: 'Alimento non trovato' });
 
     const { name, brand, kcal_100g, protein_100g, fat_100g, carbs_100g,
-            portions, barcode, image_url, components, recipe_yield_g, source } = req.body;
+            portions, barcode, image_url, components, source } = req.body;
 
     const portionsJson  = portions   ? (typeof portions   === 'string' ? portions   : JSON.stringify(portions))   : existing.portions;
     const componentsArr = components ? (typeof components === 'string' ? JSON.parse(components) : components) : JSON.parse(existing.components || '[]');
     const componentsJson = JSON.stringify(componentsArr);
-    const yieldG = recipe_yield_g !== undefined ? (parseFloat(recipe_yield_g) || null) : existing.recipe_yield_g;
 
     // Ricalcola macros se ci sono componenti
     let macros = {
@@ -282,7 +281,7 @@ router.put('/:id', upload.single('image'), async (req, res) => {
       carbs_100g:   parseFloat(carbs_100g)   || existing.carbs_100g,
     };
     if (componentsArr.length > 0) {
-      macros = await calcMacrosFromComponents(db, componentsArr, yieldG);
+      macros = await calcMacrosFromComponents(db, componentsArr);
     }
 
     let imagePath = existing.image_path;
@@ -312,7 +311,7 @@ router.put('/:id', upload.single('image'), async (req, res) => {
       portionsJson,
       barcode !== undefined ? barcode : existing.barcode,
       imagePath,
-      componentsJson, yieldG,
+      componentsJson, null,
       source || existing.source || 'app',
       id
     );
