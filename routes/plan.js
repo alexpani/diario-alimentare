@@ -18,6 +18,7 @@ router.get('/snapshot', async (req, res) => {
       carbs_pct   REAL NOT NULL DEFAULT 40,
       updated_at  TEXT DEFAULT (datetime('now'))
     )`);
+    res.set('Cache-Control', 'no-store');
     const date = req.query.date || new Date().toISOString().slice(0, 10);
     const snap = await db.get('SELECT * FROM daily_plan_snapshots WHERE date = ?', date);
     if (snap) return res.json(snap);

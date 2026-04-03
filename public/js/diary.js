@@ -44,7 +44,7 @@ window.DiaryTab = (() => {
   async function loadEntries() {
     const [data, snap] = await Promise.all([
       apiGet(`/api/diary?date=${currentDate}`),
-      apiGet(`/api/plan/snapshot?date=${currentDate}`)
+      apiGet(`/api/plan/snapshot?date=${currentDate}&_t=${Date.now()}`)
     ]);
     entries = data || [];
     dayPlan = snap || null;
