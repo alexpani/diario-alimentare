@@ -44,7 +44,7 @@ router.get('/', async (req, res) => {
 router.put('/', async (req, res) => {
   try {
     const db = await getDb();
-    const { kcal_target, protein_pct, fat_pct, carbs_pct, name } = req.body;
+    const { kcal_target, protein_pct, fat_pct, carbs_pct, name, date } = req.body;
     const total = parseFloat(protein_pct) + parseFloat(fat_pct) + parseFloat(carbs_pct);
     if (Math.abs(total - 100) > 0.1)
       return res.status(400).json({ error: 'Le percentuali devono sommare 100' });
@@ -56,8 +56,7 @@ router.put('/', async (req, res) => {
         name || 'Piano', parseFloat(kcal_target), parseFloat(protein_pct), parseFloat(fat_pct), parseFloat(carbs_pct), active.id
       );
       const plan = await db.get('SELECT * FROM plans WHERE id = ?', active.id);
-      const today = new Date().toISOString().slice(0, 10);
-      await upsertDaySnapshot(today);
+      await upsertDaySnapshot(date || new Date().toISOString().slice(0, 10));
       return res.json(plan);
     }
     res.status(404).json({ error: 'Nessun piano attivo' });
@@ -106,7 +105,7 @@ router.post('/new', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const db = await getDb();
-    const { name, kcal_target, protein_pct, fat_pct, carbs_pct } = req.body;
+    const { name, kcal_target, protein_pct, fat_pct, carbs_pct, date } = req.body;
     const total = parseFloat(protein_pct) + parseFloat(fat_pct) + parseFloat(carbs_pct);
     if (Math.abs(total - 100) > 0.1)
       return res.status(400).json({ error: 'Le percentuali devono sommare 100' });
@@ -119,8 +118,7 @@ router.put('/:id', async (req, res) => {
     const plan = await db.get('SELECT * FROM plans WHERE id = ?', req.params.id);
     if (!plan) return res.status(404).json({ error: 'Piano non trovato' });
     if (plan.is_active) {
-      const today = new Date().toISOString().slice(0, 10);
-      await upsertDaySnapshot(today);
+      await upsertDaySnapshot(date || new Date().toISOString().slice(0, 10));
     }
     res.json(plan);
   } catch (err) {
@@ -137,8 +135,7 @@ router.post('/:id/activate', async (req, res) => {
     await db.run('UPDATE plans SET is_active = 1 WHERE id = ?', req.params.id);
     const plan = await db.get('SELECT * FROM plans WHERE id = ?', req.params.id);
     if (!plan) return res.status(404).json({ error: 'Piano non trovato' });
-    const today = new Date().toISOString().slice(0, 10);
-    await upsertDaySnapshot(today);
+    await upsertDaySnapshot(req.body.date || new Date().toISOString().slice(0, 10));
     res.json(plan);
   } catch (err) {
     console.error(err);

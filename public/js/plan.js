@@ -108,7 +108,8 @@ window.PlanTab = (() => {
 
   // ── Attiva piano ────────────────────────────
   async function activate(id) {
-    const res = await apiPost(`/api/plan/${id}/activate`, {});
+    const date = window.DiaryTab?.currentDate || new Date().toISOString().slice(0, 10);
+    const res = await apiPost(`/api/plan/${id}/activate`, { date });
     if (res && !res.error) {
       App.plan = res;
       updateActivePlanName(res.name);
@@ -157,7 +158,8 @@ window.PlanTab = (() => {
       return;
     }
 
-    const body = { name, kcal_target, protein_pct, fat_pct, carbs_pct };
+    const date = window.DiaryTab?.currentDate || new Date().toISOString().slice(0, 10);
+    const body = { name, kcal_target, protein_pct, fat_pct, carbs_pct, date };
     const res  = editingId
       ? await apiPut(`/api/plan/${editingId}`, body)
       : await apiPost('/api/plan/new', body);
