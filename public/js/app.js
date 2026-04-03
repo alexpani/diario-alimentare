@@ -261,7 +261,7 @@ const Cal = (() => {
     const lastDay = new Date(year, month + 1, 0).getDate();
     const to   = `${year}-${String(month + 1).padStart(2, '0')}-${lastDay}`;
     const data = await apiGet(`/api/diary/range?from=${from}&to=${to}`);
-    if (data) data.forEach(d => { daysData[d.date] = { kcal: d.kcal }; });
+    if (data) data.forEach(d => { daysData[d.date] = { kcal: d.kcal, kcal_target: d.kcal_target }; });
   }
 
   function render() {
@@ -289,7 +289,7 @@ const Cal = (() => {
 
       let ringClass = '';
       if (dayInfo) {
-        const target = App.plan?.kcal_target || 2000;
+        const target = dayInfo.kcal_target ?? App.plan?.kcal_target ?? 2000;
         const diff = dayInfo.kcal - target;
         if (diff <= 0) ringClass = 'cal-ring-green';
         else if (diff <= 200) ringClass = 'cal-ring-yellow';

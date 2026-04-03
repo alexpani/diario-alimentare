@@ -4,7 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
 const sharp = require('sharp');
-const { getDb } = require('../database/db');
+const { getDb, upsertDaySnapshot } = require('../database/db');
 const { isAuth } = require('./auth');
 const { recognizeFood } = require('../services/vision');
 
@@ -76,16 +76,18 @@ router.get('/range', async (req, res) => {
 
     const entries = await db.all(`
       SELECT de.date, de.quantity_g,
-        f.kcal_100g, f.protein_100g, f.fat_100g, f.carbs_100g
+        f.kcal_100g, f.protein_100g, f.fat_100g, f.carbs_100g,
+        dps.kcal_target AS snapshot_kcal_target
       FROM diary_entries de
       JOIN foods f ON f.id = de.food_id
+      LEFT JOIN daily_plan_snapshots dps ON dps.date = de.date
       WHERE de.date >= ? AND de.date <= ?
       ORDER BY de.date ASC
     `, from, to);
 
     const byDate = {};
     for (const e of entries) {
-      if (!byDate[e.date]) byDate[e.date] = { date: e.date, kcal: 0, protein: 0, fat: 0, carbs: 0 };
+      if (!byDate[e.date]) byDate[e.date] = { date: e.date, kcal: 0, protein: 0, fat: 0, carbs: 0, kcal_target: e.snapshot_kcal_target || null };
       byDate[e.date].kcal += (e.kcal_100g / 100) * e.quantity_g;
       byDate[e.date].protein += (e.protein_100g / 100) * e.quantity_g;
       byDate[e.date].fat += (e.fat_100g / 100) * e.quantity_g;
@@ -97,7 +99,8 @@ router.get('/range', async (req, res) => {
       kcal: Math.round(d.kcal),
       protein: Math.round(d.protein * 10) / 10,
       fat: Math.round(d.fat * 10) / 10,
-      carbs: Math.round(d.carbs * 10) / 10
+      carbs: Math.round(d.carbs * 10) / 10,
+      kcal_target: d.kcal_target
     })));
   } catch (err) {
     console.error(err);
@@ -161,6 +164,7 @@ router.post('/', async (req, res) => {
       date, meal_type, food_id, parseFloat(quantity_g), quantity_label || null
     );
 
+    await upsertDaySnapshot(date);
     res.json({ id: result.lastID, ok: true });
   } catch (err) {
     console.error(err);
@@ -204,6 +208,7 @@ router.post('/quick', async (req, res) => {
       date, meal_type, foodRes.lastID, `${Math.round(kcalVal)} kcal (stima)`
     );
 
+    await upsertDaySnapshot(date);
     res.json({ id: entryRes.lastID, ok: true });
   } catch (err) {
     console.error(err);

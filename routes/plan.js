@@ -1,9 +1,29 @@
 const express = require('express');
 const router = express.Router();
-const { getDb } = require('../database/db');
+const { getDb, upsertDaySnapshot } = require('../database/db');
 const { isAuth } = require('./auth');
 
 router.use(isAuth);
+
+// GET /api/plan/snapshot?date=YYYY-MM-DD — snapshot piano per la data
+router.get('/snapshot', async (req, res) => {
+  try {
+    const db = await getDb();
+    const date = req.query.date || new Date().toISOString().slice(0, 10);
+    const snap = await db.get('SELECT * FROM daily_plan_snapshots WHERE date = ?', date);
+    if (snap) return res.json(snap);
+    // fallback: piano attivo corrente
+    const plan = await db.get('SELECT * FROM plans WHERE is_active = 1 ORDER BY id LIMIT 1');
+    res.json(plan
+      ? { date, plan_name: plan.name, kcal_target: plan.kcal_target,
+          protein_pct: plan.protein_pct, fat_pct: plan.fat_pct, carbs_pct: plan.carbs_pct }
+      : { date, plan_name: 'Piano', kcal_target: 2000, protein_pct: 30, fat_pct: 30, carbs_pct: 40 }
+    );
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Errore del server' });
+  }
+});
 
 // GET /api/plan  — piano attivo (compatibilità con codice esistente)
 router.get('/', async (req, res) => {
@@ -36,6 +56,8 @@ router.put('/', async (req, res) => {
         name || 'Piano', parseFloat(kcal_target), parseFloat(protein_pct), parseFloat(fat_pct), parseFloat(carbs_pct), active.id
       );
       const plan = await db.get('SELECT * FROM plans WHERE id = ?', active.id);
+      const today = new Date().toISOString().slice(0, 10);
+      await upsertDaySnapshot(today);
       return res.json(plan);
     }
     res.status(404).json({ error: 'Nessun piano attivo' });
@@ -96,6 +118,10 @@ router.put('/:id', async (req, res) => {
     );
     const plan = await db.get('SELECT * FROM plans WHERE id = ?', req.params.id);
     if (!plan) return res.status(404).json({ error: 'Piano non trovato' });
+    if (plan.is_active) {
+      const today = new Date().toISOString().slice(0, 10);
+      await upsertDaySnapshot(today);
+    }
     res.json(plan);
   } catch (err) {
     console.error(err);
@@ -111,6 +137,8 @@ router.post('/:id/activate', async (req, res) => {
     await db.run('UPDATE plans SET is_active = 1 WHERE id = ?', req.params.id);
     const plan = await db.get('SELECT * FROM plans WHERE id = ?', req.params.id);
     if (!plan) return res.status(404).json({ error: 'Piano non trovato' });
+    const today = new Date().toISOString().slice(0, 10);
+    await upsertDaySnapshot(today);
     res.json(plan);
   } catch (err) {
     console.error(err);

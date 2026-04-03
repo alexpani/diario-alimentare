@@ -23,6 +23,7 @@ function _fmtSrc(src, components) {
 window.DiaryTab = (() => {
   let currentDate = todayStr();
   let entries = [];
+  let dayPlan = null;
   let selectedMeal = null;
   let selectedFood = null;
   let editingEntryId = null;
@@ -41,8 +42,12 @@ window.DiaryTab = (() => {
   }
 
   async function loadEntries() {
-    const data = await apiGet(`/api/diary?date=${currentDate}`);
+    const [data, snap] = await Promise.all([
+      apiGet(`/api/diary?date=${currentDate}`),
+      apiGet(`/api/plan/snapshot?date=${currentDate}`)
+    ]);
     entries = data || [];
+    dayPlan = snap || null;
     // Carica voci di ieri per l'anteprima "Copia da ieri"
     const yesterday = shiftDate(currentDate, -1);
     const yData = await apiGet(`/api/diary?date=${yesterday}`);
@@ -54,7 +59,7 @@ window.DiaryTab = (() => {
   }
 
   function renderSummary() {
-    const plan = App.plan;
+    const plan = dayPlan || App.plan;
     let totalKcal = 0, totalProtein = 0, totalFat = 0, totalCarbs = 0;
     for (const e of entries) {
       totalKcal   += e.kcal;
@@ -105,6 +110,10 @@ window.DiaryTab = (() => {
     setMacro('total-carbs',   'target-carbs',   'bar-carbs',   totalCarbs,   targetCarbs);
     setMacro('total-protein', 'target-protein', 'bar-protein', totalProtein, targetProtein);
     setMacro('total-fat',     'target-fat',     'bar-fat',     totalFat,     targetFat);
+
+    // Aggiorna nome piano (snapshot del giorno o piano attivo)
+    const nameEl = document.getElementById('active-plan-name');
+    if (nameEl) nameEl.textContent = dayPlan?.plan_name || App.plan?.name || '';
   }
 
   let openMealId = null;
