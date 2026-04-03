@@ -103,18 +103,21 @@ async function getDb() {
 
 async function upsertDaySnapshot(date) {
   const db = await getDb();
+  // Crea la tabella se non esiste (per server già in esecuzione senza restart)
+  await db.run(`CREATE TABLE IF NOT EXISTS daily_plan_snapshots (
+    date        TEXT PRIMARY KEY,
+    plan_name   TEXT NOT NULL DEFAULT 'Piano',
+    kcal_target REAL NOT NULL DEFAULT 2000,
+    protein_pct REAL NOT NULL DEFAULT 30,
+    fat_pct     REAL NOT NULL DEFAULT 30,
+    carbs_pct   REAL NOT NULL DEFAULT 40,
+    updated_at  TEXT DEFAULT (datetime('now'))
+  )`);
   const plan = await db.get('SELECT * FROM plans WHERE is_active = 1 ORDER BY id LIMIT 1');
   if (!plan) return;
   await db.run(
-    `INSERT INTO daily_plan_snapshots (date, plan_name, kcal_target, protein_pct, fat_pct, carbs_pct, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
-     ON CONFLICT(date) DO UPDATE SET
-       plan_name   = excluded.plan_name,
-       kcal_target = excluded.kcal_target,
-       protein_pct = excluded.protein_pct,
-       fat_pct     = excluded.fat_pct,
-       carbs_pct   = excluded.carbs_pct,
-       updated_at  = excluded.updated_at`,
+    `INSERT OR REPLACE INTO daily_plan_snapshots (date, plan_name, kcal_target, protein_pct, fat_pct, carbs_pct, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, datetime('now'))`,
     date, plan.name, plan.kcal_target, plan.protein_pct, plan.fat_pct, plan.carbs_pct
   );
 }

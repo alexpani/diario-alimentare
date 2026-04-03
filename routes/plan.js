@@ -9,6 +9,15 @@ router.use(isAuth);
 router.get('/snapshot', async (req, res) => {
   try {
     const db = await getDb();
+    await db.run(`CREATE TABLE IF NOT EXISTS daily_plan_snapshots (
+      date        TEXT PRIMARY KEY,
+      plan_name   TEXT NOT NULL DEFAULT 'Piano',
+      kcal_target REAL NOT NULL DEFAULT 2000,
+      protein_pct REAL NOT NULL DEFAULT 30,
+      fat_pct     REAL NOT NULL DEFAULT 30,
+      carbs_pct   REAL NOT NULL DEFAULT 40,
+      updated_at  TEXT DEFAULT (datetime('now'))
+    )`);
     const date = req.query.date || new Date().toISOString().slice(0, 10);
     const snap = await db.get('SELECT * FROM daily_plan_snapshots WHERE date = ?', date);
     if (snap) return res.json(snap);
