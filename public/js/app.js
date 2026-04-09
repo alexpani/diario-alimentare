@@ -16,12 +16,14 @@ async function apiFetch(url, options = {}) {
       ...options
     });
     if (res.status === 401) {
+      localStorage.removeItem('fd-auth-ok');
       showLogin();
       return null;
     }
     return res;
   } catch (err) {
-    console.error('Fetch error:', err);
+    // Errore di rete (offline, server down): non invalidiamo la sessione
+    console.warn('Fetch error (offline?):', url);
     return null;
   }
 }
@@ -138,12 +140,26 @@ function showApp() {
 }
 
 async function checkAuth() {
-  const res = await fetch('/api/me');
-  if (res.ok) {
-    showApp();
-    initApp();
-  } else {
-    showLogin();
+  try {
+    const res = await fetch('/api/me');
+    if (res.ok) {
+      localStorage.setItem('fd-auth-ok', '1');
+      showApp();
+      initApp();
+    } else {
+      localStorage.removeItem('fd-auth-ok');
+      showLogin();
+    }
+  } catch (err) {
+    // Errore di rete (offline): se eravamo loggati prima, mostra comunque
+    // la shell dell'app. Le singole chiamate API degradano a null.
+    if (localStorage.getItem('fd-auth-ok') === '1') {
+      console.warn('Offline: mostro shell da cache');
+      showApp();
+      initApp();
+    } else {
+      showLogin();
+    }
   }
 }
 
@@ -162,6 +178,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
   });
 
   if (res.ok) {
+    localStorage.setItem('fd-auth-ok', '1');
     showApp();
     initApp();
   } else {
@@ -173,7 +190,8 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
 
 // ── Logout ────────────────────────────────
 document.getElementById('btn-logout').addEventListener('click', async () => {
-  await fetch('/logout', { method: 'POST' });
+  try { await fetch('/logout', { method: 'POST' }); } catch (e) { /* offline: procediamo comunque */ }
+  localStorage.removeItem('fd-auth-ok');
   showLogin();
   document.getElementById('login-user').value = '';
   document.getElementById('login-pass').value = '';

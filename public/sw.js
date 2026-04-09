@@ -1,13 +1,15 @@
 // FoodDiary Service Worker
 // Strategia:
 // - Navigazioni (HTML): network-first, fallback alla shell in cache
-// - /api/*, /uploads/*: network-only (dati dinamici, mai cache)
+// - GET /api/* whitelist (diary, plan, range): SWR per lettura offline
+// - Altre /api/*, /uploads/*: network-only (dinamici, mai cache)
 // - Asset same-origin: stale-while-revalidate
 // - CDN cross-origin: network-first con fallback alla cache
 
-const VERSION = 'v1';
+const VERSION = 'v2';
 const SHELL_CACHE = `fd-shell-${VERSION}`;
 const RUNTIME_CACHE = `fd-runtime-${VERSION}`;
+const API_CACHE = `fd-api-${VERSION}`;
 
 // Shell minima da precachare all'installazione.
 // Non includiamo i JS/CSS versionati: li prende il runtime cache al primo load.
@@ -30,12 +32,11 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
+  const keep = new Set([SHELL_CACHE, RUNTIME_CACHE, API_CACHE]);
   event.waitUntil(
     caches.keys()
       .then((keys) => Promise.all(
-        keys
-          .filter((k) => k !== SHELL_CACHE && k !== RUNTIME_CACHE)
-          .map((k) => caches.delete(k))
+        keys.filter((k) => !keep.has(k)).map((k) => caches.delete(k))
       ))
       .then(() => self.clients.claim())
   );
@@ -53,6 +54,21 @@ function isNavigationRequest(request) {
     || (request.method === 'GET' && request.headers.get('accept')?.includes('text/html'));
 }
 
+// Endpoint GET /api/* che sono sicuri da servire da cache quando offline.
+// Restano esclusi: /api/plan/snapshot (no-store per design), /api/foods* (ricerca)
+// e tutti gli endpoint di settings.
+function isCacheableApi(url) {
+  const p = url.pathname;
+  if (p === '/api/plan') return true;
+  if (p === '/api/plan/all') return true;
+  if (p === '/api/diary') return true;                  // ?date=YYYY-MM-DD
+  if (p === '/api/diary/range') return true;            // ?from=&to=
+  if (p === '/api/diary/days') return true;             // ?limit=
+  if (p === '/api/diary/recent') return true;           // ?meal_type=
+  if (p === '/api/diary/frequent') return true;         // ?meal_type=
+  return false;
+}
+
 self.addEventListener('fetch', (event) => {
   const { request } = event;
 
@@ -61,13 +77,33 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(request.url);
 
-  // Mai cacheare API, upload, login/logout
+  // API: cache SWR per la whitelist, network-only per il resto
+  if (url.origin === self.location.origin && url.pathname.startsWith('/api/')) {
+    if (!isCacheableApi(url)) return; // lascia al browser
+    event.respondWith(
+      caches.open(API_CACHE).then(async (cache) => {
+        const cached = await cache.match(request);
+        const network = fetch(request)
+          .then((response) => {
+            if (response && response.status === 200) {
+              cache.put(request, response.clone());
+            }
+            return response;
+          })
+          .catch(() => cached); // se la rete fallisce, ripiega su cache
+        // SWR: se c'è cache, servila subito e aggiorna in background
+        return cached || network;
+      })
+    );
+    return;
+  }
+
+  // Uploads e login/logout: sempre network
   if (url.origin === self.location.origin) {
-    if (url.pathname.startsWith('/api/')
-        || url.pathname.startsWith('/uploads/')
+    if (url.pathname.startsWith('/uploads/')
         || url.pathname === '/login'
         || url.pathname === '/logout') {
-      return; // lascia al browser
+      return;
     }
   }
 
