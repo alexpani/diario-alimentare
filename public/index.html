@@ -700,5 +700,117 @@
 <script src="/js/plan.js?v=5"></script>
 <script src="/js/settings.js?v=7"></script>
 
+<script>
+  // Service Worker registration (PWA) + banner "nuova versione disponibile"
+  (function () {
+    if (!('serviceWorker' in navigator)) return;
+
+    function showUpdateBanner(worker) {
+      if (document.getElementById('sw-update-banner')) return;
+      var banner = document.createElement('div');
+      banner.id = 'sw-update-banner';
+      banner.setAttribute('role', 'status');
+      banner.style.cssText = [
+        'position:fixed',
+        'left:12px',
+        'right:12px',
+        'bottom:calc(68px + env(safe-area-inset-bottom, 0px))',
+        'z-index:9999',
+        'background:var(--color-card, #ffffff)',
+        'color:var(--color-text, #212121)',
+        'border:1px solid var(--color-border, #8E8E8E)',
+        'border-radius:12px',
+        'box-shadow:0 4px 16px rgba(0,0,0,0.18)',
+        'padding:12px 14px',
+        'display:flex',
+        'align-items:center',
+        'gap:12px',
+        'font-size:14px',
+        'max-width:520px',
+        'margin:0 auto',
+      ].join(';');
+
+      var msg = document.createElement('span');
+      msg.textContent = 'Nuova versione disponibile';
+      msg.style.cssText = 'flex:1;min-width:0';
+
+      var reloadBtn = document.createElement('button');
+      reloadBtn.type = 'button';
+      reloadBtn.textContent = 'Ricarica';
+      reloadBtn.style.cssText = [
+        'background:var(--color-primary, #2E7D32)',
+        'color:var(--color-text-on-primary, #ffffff)',
+        'border:none',
+        'border-radius:8px',
+        'padding:8px 14px',
+        'font-weight:600',
+        'font-size:14px',
+        'cursor:pointer',
+      ].join(';');
+
+      var dismissBtn = document.createElement('button');
+      dismissBtn.type = 'button';
+      dismissBtn.setAttribute('aria-label', 'Chiudi');
+      dismissBtn.textContent = '\u00d7';
+      dismissBtn.style.cssText = [
+        'background:transparent',
+        'color:var(--color-text-secondary, #616161)',
+        'border:none',
+        'font-size:22px',
+        'line-height:1',
+        'padding:4px 6px',
+        'cursor:pointer',
+      ].join(';');
+
+      reloadBtn.addEventListener('click', function () {
+        reloadBtn.disabled = true;
+        reloadBtn.textContent = '...';
+        worker.postMessage({ type: 'SKIP_WAITING' });
+      });
+      dismissBtn.addEventListener('click', function () {
+        banner.remove();
+      });
+
+      banner.appendChild(msg);
+      banner.appendChild(reloadBtn);
+      banner.appendChild(dismissBtn);
+      document.body.appendChild(banner);
+    }
+
+    function trackInstallingWorker(worker) {
+      if (!worker) return;
+      worker.addEventListener('statechange', function () {
+        if (worker.state === 'installed' && navigator.serviceWorker.controller) {
+          // Update trovato: mostra il banner
+          showUpdateBanner(worker);
+        }
+      });
+    }
+
+    // Se il controller cambia (nuovo SW attivato), ricarica una volta sola
+    var reloading = false;
+    navigator.serviceWorker.addEventListener('controllerchange', function () {
+      if (reloading) return;
+      reloading = true;
+      window.location.reload();
+    });
+
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('/sw.js').then(function (reg) {
+        // Caso 1: c'è già un worker in waiting al momento della registrazione
+        if (reg.waiting && navigator.serviceWorker.controller) {
+          showUpdateBanner(reg.waiting);
+        }
+        // Caso 2: un nuovo worker comincia a installarsi dopo
+        reg.addEventListener('updatefound', function () {
+          trackInstallingWorker(reg.installing);
+        });
+      }).catch(function (err) {
+        console.warn('SW registration failed:', err);
+      });
+    });
+  })();
+</script>
+
 </body>
 </html>
