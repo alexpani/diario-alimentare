@@ -700,5 +700,16 @@
 <script src="/js/plan.js?v=5"></script>
 <script src="/js/settings.js?v=7"></script>
 
+<script>
+  // Service Worker registration (PWA)
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').catch((err) => {
+        console.warn('SW registration failed:', err);
+      });
+    });
+  }
+</script>
+
 </body>
 </html>
