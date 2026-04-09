@@ -22,10 +22,10 @@ const SHELL_ASSETS = [
 ];
 
 self.addEventListener('install', (event) => {
+  // NB: niente skipWaiting qui — lo scatena il client via messaggio SKIP_WAITING
+  // dopo che l'utente ha cliccato "Ricarica" sul banner update.
   event.waitUntil(
-    caches.open(SHELL_CACHE)
-      .then((cache) => cache.addAll(SHELL_ASSETS))
-      .then(() => self.skipWaiting())
+    caches.open(SHELL_CACHE).then((cache) => cache.addAll(SHELL_ASSETS))
   );
 });
 
