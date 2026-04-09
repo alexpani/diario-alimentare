@@ -6,7 +6,7 @@
 // - Asset same-origin: stale-while-revalidate
 // - CDN cross-origin: network-first con fallback alla cache
 
-const VERSION = 'v3';
+const VERSION = 'v4';
 const SHELL_CACHE = `fd-shell-${VERSION}`;
 const RUNTIME_CACHE = `fd-runtime-${VERSION}`;
 const API_CACHE = `fd-api-${VERSION}`;
@@ -24,11 +24,50 @@ const SHELL_ASSETS = [
   '/img/logo.png',
 ];
 
+// CDN cross-origin usati da index.html (Chart.js, html5-qrcode, cropper).
+// Vengono pre-cacheati con mode: 'no-cors' per avere le response opaque
+// disponibili offline. Senza precache, se il SW installa ma la pagina non
+// viene ricaricata online, gli script non sarebbero in cache.
+const CDN_ASSETS = [
+  'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js',
+  'https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js',
+  'https://cdn.jsdelivr.net/npm/cropperjs@1.6.1/dist/cropper.min.css',
+  'https://cdn.jsdelivr.net/npm/cropperjs@1.6.1/dist/cropper.min.js',
+];
+
+// Helper: true se la response è valida da cacheare (incluse opaque dei CDN)
+function isCacheable(response) {
+  if (!response) return false;
+  // Same-origin 200, o opaque (cross-origin no-cors)
+  return response.status === 200 || response.type === 'opaque';
+}
+
+// Install: precache robusto. Ogni asset fallito non blocca gli altri.
+async function precacheShell(cache) {
+  await Promise.all(SHELL_ASSETS.map(async (url) => {
+    try {
+      const res = await fetch(url, { cache: 'reload' });
+      if (isCacheable(res)) await cache.put(url, res);
+    } catch (e) {
+      console.warn('[sw] precache fallito per', url, e);
+    }
+  }));
+  await Promise.all(CDN_ASSETS.map(async (url) => {
+    try {
+      const req = new Request(url, { mode: 'no-cors' });
+      const res = await fetch(req);
+      if (isCacheable(res)) await cache.put(req, res);
+    } catch (e) {
+      console.warn('[sw] precache CDN fallito per', url, e);
+    }
+  }));
+}
+
 self.addEventListener('install', (event) => {
   // NB: niente skipWaiting qui — lo scatena il client via messaggio SKIP_WAITING
   // dopo che l'utente ha cliccato "Ricarica" sul banner update.
   event.waitUntil(
-    caches.open(SHELL_CACHE).then((cache) => cache.addAll(SHELL_ASSETS))
+    caches.open(SHELL_CACHE).then((cache) => precacheShell(cache))
   );
 });
 
@@ -88,9 +127,7 @@ self.addEventListener('fetch', (event) => {
         const cached = await cache.match(request);
         const network = fetch(request)
           .then((response) => {
-            if (response && response.status === 200) {
-              cache.put(request, response.clone());
-            }
+            if (isCacheable(response)) cache.put(request, response.clone());
             return response;
           })
           .catch(() => cached); // se la rete fallisce, ripiega su cache
@@ -114,9 +151,7 @@ self.addEventListener('fetch', (event) => {
         const cached = await cache.match(request);
         const network = fetch(request)
           .then((response) => {
-            if (response && response.status === 200) {
-              cache.put(request, response.clone());
-            }
+            if (isCacheable(response)) cache.put(request, response.clone());
             return response;
           })
           .catch(() => cached);
@@ -148,9 +183,7 @@ self.addEventListener('fetch', (event) => {
         const cached = await cache.match(request);
         const network = fetch(request)
           .then((response) => {
-            if (response && response.status === 200) {
-              cache.put(request, response.clone());
-            }
+            if (isCacheable(response)) cache.put(request, response.clone());
             return response;
           })
           .catch(() => cached);
@@ -160,20 +193,23 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Cross-origin (CDN: Chart.js, html5-qrcode, cropper): network-first + cache fallback
-  event.respondWith(
-    caches.open(RUNTIME_CACHE).then(async (cache) => {
-      try {
-        const response = await fetch(request);
-        if (response && response.status === 200) {
-          cache.put(request, response.clone());
-        }
-        return response;
-      } catch (err) {
-        const cached = await cache.match(request);
-        if (cached) return cached;
-        throw err;
+  // Cross-origin (CDN: Chart.js, html5-qrcode, cropper): cache-first
+  // Questi sono pre-cacheati all'install in SHELL_CACHE. Se miss → network → cache.
+  event.respondWith((async () => {
+    const cached = await caches.match(request);
+    if (cached) return cached;
+    try {
+      const response = await fetch(request);
+      if (isCacheable(response)) {
+        const cache = await caches.open(RUNTIME_CACHE);
+        cache.put(request, response.clone());
       }
-    })
-  );
+      return response;
+    } catch (err) {
+      // Ultima chance: ricerca in tutte le cache
+      const fallback = await caches.match(request, { ignoreSearch: false });
+      if (fallback) return fallback;
+      throw err;
+    }
+  })());
 });
