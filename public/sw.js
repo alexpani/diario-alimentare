@@ -6,10 +6,11 @@
 // - Asset same-origin: stale-while-revalidate
 // - CDN cross-origin: network-first con fallback alla cache
 
-const VERSION = 'v2';
+const VERSION = 'v3';
 const SHELL_CACHE = `fd-shell-${VERSION}`;
 const RUNTIME_CACHE = `fd-runtime-${VERSION}`;
 const API_CACHE = `fd-api-${VERSION}`;
+const UPLOADS_CACHE = `fd-uploads-${VERSION}`;
 
 // Shell minima da precachare all'installazione.
 // Non includiamo i JS/CSS versionati: li prende il runtime cache al primo load.
@@ -32,7 +33,7 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
-  const keep = new Set([SHELL_CACHE, RUNTIME_CACHE, API_CACHE]);
+  const keep = new Set([SHELL_CACHE, RUNTIME_CACHE, API_CACHE, UPLOADS_CACHE]);
   event.waitUntil(
     caches.keys()
       .then((keys) => Promise.all(
@@ -55,8 +56,8 @@ function isNavigationRequest(request) {
 }
 
 // Endpoint GET /api/* che sono sicuri da servire da cache quando offline.
-// Restano esclusi: /api/plan/snapshot (no-store per design), /api/foods* (ricerca)
-// e tutti gli endpoint di settings.
+// Restano esclusi: /api/plan/snapshot (no-store per design), /api/me e
+// tutti gli endpoint di settings.
 function isCacheableApi(url) {
   const p = url.pathname;
   if (p === '/api/plan') return true;
@@ -66,6 +67,8 @@ function isCacheableApi(url) {
   if (p === '/api/diary/days') return true;             // ?limit=
   if (p === '/api/diary/recent') return true;           // ?meal_type=
   if (p === '/api/diary/frequent') return true;         // ?meal_type=
+  // Libreria alimenti: lista, ricerche, dettagli, barcode, proxy immagini
+  if (p.startsWith('/api/foods')) return true;
   return false;
 }
 
@@ -98,13 +101,29 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Uploads e login/logout: sempre network
-  if (url.origin === self.location.origin) {
-    if (url.pathname.startsWith('/uploads/')
-        || url.pathname === '/login'
-        || url.pathname === '/logout') {
-      return;
-    }
+  // Login/logout: sempre network (le POST non passano di qui, ma per sicurezza)
+  if (url.origin === self.location.origin
+      && (url.pathname === '/login' || url.pathname === '/logout')) {
+    return;
+  }
+
+  // Uploads (foto alimenti): SWR su cache dedicata
+  if (url.origin === self.location.origin && url.pathname.startsWith('/uploads/')) {
+    event.respondWith(
+      caches.open(UPLOADS_CACHE).then(async (cache) => {
+        const cached = await cache.match(request);
+        const network = fetch(request)
+          .then((response) => {
+            if (response && response.status === 200) {
+              cache.put(request, response.clone());
+            }
+            return response;
+          })
+          .catch(() => cached);
+        return cached || network;
+      })
+    );
+    return;
   }
 
   // Navigazioni: network-first, fallback a index.html in cache

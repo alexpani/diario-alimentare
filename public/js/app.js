@@ -258,6 +258,68 @@ async function initApp() {
 
   // Avvia tab home
   switchTab('home');
+
+  // Pre-cache di tutto il contenuto per uso offline (background, non bloccante)
+  setTimeout(() => { warmCache().catch(() => {}); }, 1500);
+}
+
+// ── Offline warm-cache ────────────────────
+// Scarica proattivamente in background tutte le risorse che il SW tiene
+// in cache, così l'app funziona completamente offline anche per giorni/foods
+// mai aperti dall'utente. Rispetta navigator.onLine e limita la concorrenza.
+async function warmCache() {
+  if (!navigator.onLine) return;
+  if (!('serviceWorker' in navigator) || !navigator.serviceWorker.controller) return;
+
+  const MEALS = ['colazione','spuntino_mattino','pranzo','spuntino_pomeriggio','cena','extra'];
+  const urls = [];
+
+  // Piano
+  urls.push('/api/plan', '/api/plan/all');
+
+  // Libreria alimenti completa
+  urls.push('/api/foods?limit=10000');
+
+  // Recenti e frequenti per ogni pasto
+  for (const m of MEALS) {
+    urls.push(`/api/diary/recent?meal_type=${m}&limit=12`);
+    urls.push(`/api/diary/frequent?meal_type=${m}&limit=12`);
+  }
+
+  // Range calendario: ultimi 3 mesi
+  const now = new Date();
+  const pad = (n) => String(n).padStart(2, '0');
+  const fmt = (d) => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  for (let offset = -2; offset <= 0; offset++) {
+    const first = new Date(now.getFullYear(), now.getMonth() + offset, 1);
+    const last  = new Date(now.getFullYear(), now.getMonth() + offset + 1, 0);
+    urls.push(`/api/diary/range?from=${fmt(first)}&to=${fmt(last)}`);
+  }
+
+  // Lista di tutti i giorni con voci (per scoprire cosa c'è da pre-cacheare)
+  try {
+    const daysRes = await fetch('/api/diary/days?limit=1000');
+    if (daysRes.ok) {
+      const days = await daysRes.json();
+      for (const d of days) urls.push(`/api/diary?date=${d.date}`);
+      console.log('[warmCache]', days.length, 'giorni di diario da pre-cacheare');
+    }
+  } catch (e) { /* offline o errore, proseguiamo con il resto */ }
+
+  // Esegui i fetch con concorrenza limitata (max 6) per non saturare il server
+  await fetchBatch(urls, 6);
+  console.log('[warmCache] completato');
+}
+
+async function fetchBatch(urls, concurrency = 6) {
+  const queue = urls.slice();
+  const workers = Array(Math.min(concurrency, queue.length)).fill(null).map(async () => {
+    while (queue.length) {
+      const url = queue.shift();
+      try { await fetch(url); } catch (e) { /* ignora, il SW farà fallback */ }
+    }
+  });
+  await Promise.all(workers);
 }
 
 // ── Calendario custom ─────────────────────
