@@ -217,12 +217,16 @@ router.post('/quick', async (req, res) => {
 });
 
 // GET /api/diary/recent?meal_type=xxx&limit=10
+// Prima mostra i recenti per il pasto specifico, poi riempie con recenti
+// da tutti i pasti (escludendo quelli già trovati) fino al limit.
 router.get('/recent', async (req, res) => {
   try {
     const db = await getDb();
     const { meal_type, limit = 10 } = req.query;
     if (!meal_type) return res.status(400).json({ error: 'meal_type obbligatorio' });
+    const lim = parseInt(limit);
 
+    // 1. Recenti per questo pasto
     const rows = await db.all(`
       SELECT f.id, f.name, f.brand, f.kcal_100g, f.protein_100g, f.fat_100g, f.carbs_100g,
              f.portions, f.image_path, agg.last_used, latest.quantity_g AS last_qty_g, latest.quantity_label AS last_qty_label
@@ -235,7 +239,30 @@ router.get('/recent', async (req, res) => {
       WHERE f.is_quick = 0
       ORDER BY agg.last_used DESC
       LIMIT ?
-    `, meal_type, parseInt(limit));
+    `, meal_type, lim);
+
+    // 2. Se non bastano, riempi con recenti da tutti i pasti
+    if (rows.length < lim) {
+      const foundIds = rows.map(r => r.id);
+      const remaining = lim - rows.length;
+      const exclude = foundIds.length > 0
+        ? `AND f.id NOT IN (${foundIds.map(() => '?').join(',')})`
+        : '';
+      const extra = await db.all(`
+        SELECT f.id, f.name, f.brand, f.kcal_100g, f.protein_100g, f.fat_100g, f.carbs_100g,
+               f.portions, f.image_path, agg.last_used, latest.quantity_g AS last_qty_g, latest.quantity_label AS last_qty_label
+        FROM (
+          SELECT food_id, MAX(id) AS max_id, MAX(date) AS last_used
+          FROM diary_entries GROUP BY food_id
+        ) agg
+        JOIN diary_entries latest ON latest.id = agg.max_id
+        JOIN foods f ON f.id = agg.food_id
+        WHERE f.is_quick = 0 ${exclude}
+        ORDER BY agg.last_used DESC
+        LIMIT ?
+      `, ...foundIds, remaining);
+      rows.push(...extra);
+    }
 
     res.json(rows.map(r => ({
       ...r,
@@ -248,12 +275,16 @@ router.get('/recent', async (req, res) => {
 });
 
 // GET /api/diary/frequent?meal_type=xxx&limit=8
+// Prima mostra i più frequenti per il pasto specifico, poi riempie con
+// frequenti da tutti i pasti fino al limit.
 router.get('/frequent', async (req, res) => {
   try {
     const db = await getDb();
     const { meal_type, limit = 8 } = req.query;
     if (!meal_type) return res.status(400).json({ error: 'meal_type obbligatorio' });
+    const lim = parseInt(limit);
 
+    // 1. Frequenti per questo pasto
     const rows = await db.all(`
       SELECT f.id, f.name, f.brand, f.kcal_100g, f.protein_100g, f.fat_100g, f.carbs_100g,
              f.portions, f.image_path, COUNT(de.id) as use_count,
@@ -270,7 +301,34 @@ router.get('/frequent', async (req, res) => {
       GROUP BY de.food_id
       ORDER BY use_count DESC
       LIMIT ?
-    `, meal_type, meal_type, parseInt(limit));
+    `, meal_type, meal_type, lim);
+
+    // 2. Se non bastano, riempi con frequenti da tutti i pasti
+    if (rows.length < lim) {
+      const foundIds = rows.map(r => r.id);
+      const remaining = lim - rows.length;
+      const exclude = foundIds.length > 0
+        ? `AND f.id NOT IN (${foundIds.map(() => '?').join(',')})`
+        : '';
+      const extra = await db.all(`
+        SELECT f.id, f.name, f.brand, f.kcal_100g, f.protein_100g, f.fat_100g, f.carbs_100g,
+               f.portions, f.image_path, COUNT(de.id) as use_count,
+               latest.quantity_g AS last_qty_g, latest.quantity_label AS last_qty_label
+        FROM diary_entries de
+        JOIN foods f ON f.id = de.food_id
+        JOIN (
+          SELECT food_id, quantity_g, quantity_label
+          FROM diary_entries WHERE id IN (
+            SELECT MAX(id) FROM diary_entries GROUP BY food_id
+          )
+        ) latest ON latest.food_id = de.food_id
+        WHERE f.is_quick = 0 ${exclude}
+        GROUP BY de.food_id
+        ORDER BY use_count DESC
+        LIMIT ?
+      `, ...foundIds, remaining);
+      rows.push(...extra);
+    }
 
     res.json(rows.map(r => ({
       ...r,
