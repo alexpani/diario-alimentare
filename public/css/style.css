@@ -1014,8 +1014,9 @@ input:focus, select:focus, textarea:focus {
 /* Modal full-screen (aggiunta alimento a pasto) */
 .modal-fullscreen {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  width: 100%; height: 100%;
+  top: 0; bottom: 0;
+  left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 430px; height: 100%;
   z-index: 200;
   display: -webkit-flex; display: flex;
   -webkit-flex-direction: column; flex-direction: column;
@@ -1073,7 +1074,7 @@ input:focus, select:focus, textarea:focus {
   position: relative; z-index: 201;
   background: var(--color-card);
   border-radius: 20px 20px 0 0;
-  width: 100%; max-width: 600px;
+  width: 100%; max-width: 430px;
   max-height: 90dvh; max-height: 90vh;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
@@ -1208,7 +1209,7 @@ input:focus, select:focus, textarea:focus {
 
 /* ── Modale crop ── */
 #modal-crop { z-index: 400; }
-.modal-sheet-crop { max-width: 480px; width: 100%; border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+.modal-sheet-crop { max-width: 430px; width: 100%; border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
 .cropper-view-box { outline-color: rgba(76,175,80,.85); }
 
 /* =========================================
