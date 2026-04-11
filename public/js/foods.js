@@ -686,7 +686,7 @@ window.FoodsTab = (() => {
   document.getElementById('catalog-query').addEventListener('input', (e) => {
     clearTimeout(catalogSearchTimeout);
     const q = e.target.value.trim();
-    if (q.length < 4) {
+    if (q.length < 2) {
       if (q.length === 0) document.getElementById('catalog-results').innerHTML = '';
       return;
     }

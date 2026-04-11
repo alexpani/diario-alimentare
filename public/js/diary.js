@@ -476,7 +476,7 @@ window.DiaryTab = (() => {
   document.getElementById('modal-food-search').addEventListener('input', (e) => {
     clearTimeout(searchTimeout);
     const q = e.target.value.trim();
-    if (q.length < 4) {
+    if (q.length < 2) {
       document.getElementById('modal-search-results').innerHTML = '';
       document.getElementById('modal-recent-section').classList.toggle('hidden', document.getElementById('modal-recent-foods').children.length === 0);
       return;
