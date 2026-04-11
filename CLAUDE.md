@@ -1,5 +1,8 @@
 # FoodDiary — Guida per Claude
 
+## Branch di lavoro
+Lavora sempre direttamente su `main`. Non creare feature branch separati.
+
 ## Stack
 - **Runtime**: Node.js 25 (⚠️ better-sqlite3 non funziona su Node 25 — usa `sqlite` + `sqlite3`)
 - **Framework**: Express 4
