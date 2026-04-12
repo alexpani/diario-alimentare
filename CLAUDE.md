@@ -32,29 +32,33 @@ node update_plans_kcal.js  # aggiorna kcal piani su TDEE personale
 ├── setup.js               # Inizializzazione DB (idempotente)
 ├── .env                   # Segreti (non in git)
 ├── database/
-│   ├── db.js              # Singleton SQLite + migrazioni automatiche
+│   ├── db.js              # Singleton SQLite + migrazioni automatiche + upsertDaySnapshot
 │   └── food_diary.sqlite  # DB (non in git)
 ├── services/
-│   └── vision.js          # Riconoscimento alimenti da foto (Claude / Gemini)
+│   └── vision.js          # Riconoscimento alimenti (foto e testo) — Claude / Gemini
 ├── routes/
 │   ├── auth.js            # Login / logout (session-based)
-│   ├── diary.js           # /api/diary — voci diario + riconoscimento foto
+│   ├── diary.js           # /api/diary — voci diario, riconoscimento foto, descrivi piatto
 │   ├── foods.js           # /api/foods — libreria alimenti + integrazione Food Tracker
-│   ├── plan.js            # /api/plan, /api/plans — piani nutrizionali
-│   └── settings.js        # /api/settings — password, sync Food Tracker
+│   ├── plan.js            # /api/plan, /api/plans — piani nutrizionali + snapshot giornaliero
+│   └── settings.js        # /api/settings — password, sync Food Tracker, prompt e modello IA
 ├── public/
 │   ├── index.html         # Shell SPA (tab bar: home, diario, alimenti, piano; impostazioni nell'header)
 │   ├── manifest.json      # Web App Manifest (PWA)
+│   ├── sw.js              # Service worker (shell cache, SWR asset, API read-only offline)
 │   ├── apple-touch-icon.png  # Icona 180x180 per iOS Home Screen
 │   ├── icons/             # Icone PWA (192x192, 512x512)
-│   ├── foods-table.html   # Spreadsheet alimenti (standalone)
+│   ├── img/logo.png       # Logo app (usato nell'header)
+│   ├── css/style.css      # Stili con dark mode e layout max 430px
+│   ├── foods-table.html   # Spreadsheet alimenti (standalone, con colonne Foto/Fonte/Data)
 │   └── js/
 │       ├── app.js         # Core: tab switching, sessione, utility globali, calendario con anelli colorati
-│       ├── diary.js       # Tab Home — diario del giorno
+│       ├── diary.js       # Tab Home — diario del giorno + flussi IA (riconosci / descrivi)
 │       ├── diarylog.js    # Tab Diario — storico e grafici
 │       ├── foods.js       # Tab Alimenti — CRUD alimenti, foto, barcode, catalogo
 │       ├── plan.js        # Tab Piano — multi-piano nutrizionale
-│       ├── settings.js    # Tab Impostazioni (sync Food Tracker)
+│       ├── settings.js    # Tab Impostazioni (sync Food Tracker, prompt IA, modello IA)
+│       ├── scanner-config.js  # Configurazione condivisa scanner html5-qrcode
 │       └── barcode.js     # Scanner barcode (html5-qrcode)
 └── uploads/               # Foto alimenti (non in git)
 ```
@@ -63,11 +67,12 @@ node update_plans_kcal.js  # aggiorna kcal piani su TDEE personale
 
 | Tabella | Descrizione |
 |---------|-------------|
-| `foods` | Libreria alimenti. `deleted_at` per soft-delete. `is_quick=1` per voci al volo. `source` = `app`/`openfoodfacts`/`crea` (origine del prodotto). |
-| `diary_entries` | Voci del diario: `food_id`, `meal` (colazione/pranzo/cena/snack), `quantity_g`, `date` |
+| `foods` | Libreria alimenti. `deleted_at` per soft-delete. `is_quick=1` per voci al volo. `source` = `app`/`openfoodfacts`/`crea` (origine del prodotto). `components` JSON per le ricette. `recipe_yield_g` lasciato NULL: il peso finale ricetta è sempre la somma dei componenti. |
+| `diary_entries` | Voci del diario: `food_id`, `meal_type` (colazione/pranzo/cena/snack), `quantity_g`, `date` |
 | `portions` | Porzioni nominate per alimento (es. "1 fetta = 30g") |
 | `plans` | Piani nutrizionali. `is_active=1` sul piano corrente (uno solo alla volta). |
-| `settings` | Coppia chiave/valore (es. `admin_password`) |
+| `daily_plan_snapshots` | Snapshot giornaliero del piano attivo (`date` PK, `plan_name`, `kcal_target`, macro %). Scritto in `upsertDaySnapshot()` a ogni attivazione/modifica piano e a ogni inserimento diario. Permette alla home di mostrare il piano associato al giorno visualizzato anche dopo un cambio/cancellazione piano. |
+| `settings` | Coppia chiave/valore: `admin_password`, `vision_provider`, `vision_model`, `vision_prompt` ecc. |
 
 ## API principali
 
@@ -82,12 +87,17 @@ node update_plans_kcal.js  # aggiorna kcal piani su TDEE personale
 - `GET /api/foods/proxy-image?url=<url>` — proxy immagini (pubblica, no auth)
 
 ### Diario `/api/diary`
-- `GET /api/diary?date=YYYY-MM-DD` — voci del giorno
-- `POST /api/diary` — aggiunge voce
+- `GET /api/diary?date=YYYY-MM-DD` — voci del giorno (join con `daily_plan_snapshots` per i totali del giorno)
+- `GET /api/diary/range?from=&to=` — kcal/macro per giorno (usato dal calendario)
+- `POST /api/diary` — aggiunge voce (scrive anche lo snapshot del giorno)
 - `PUT /api/diary/:id` — modifica quantità e/o pasto (`meal_type`)
 - `DELETE /api/diary/:id` — rimuove voce
 - `POST /api/diary/quick` — crea alimento `is_quick=1` + voce diario atomicamente
-- `GET /api/diary/recent?meal=<meal>` — ultimi alimenti usati per quel pasto
+- `GET /api/diary/recent?meal_type=<meal>` — ultimi alimenti usati per quel pasto
+- `GET /api/diary/frequent?meal_type=<meal>` — alimenti più frequenti per quel pasto
+- `POST /api/diary/recognize-photo` — riconoscimento piatto da foto (Claude/Gemini Vision)
+- `POST /api/diary/describe-dish` — analisi testuale di un piatto (solo sorgenti CREA)
+- `POST /api/diary/dish-as-recipe` — crea un food `is_quick=1` con `components` JSON + singola `diary_entry` atomicamente (usata dal flusso "Descrivi")
 
 ### Piani `/api/plan` e `/api/plans`
 - `GET /api/plan` — piano attivo (backward compat)
@@ -99,12 +109,19 @@ node update_plans_kcal.js  # aggiorna kcal piani su TDEE personale
 - `DELETE /api/plans/:id` — elimina (non il piano attivo)
 
 ### Impostazioni `/api/settings`
-- `GET /api/settings` — recupera impostazioni (password mascherata)
-- `PUT /api/settings/password` — cambia password
-- `POST /api/settings/sync-to-tracker` — sincronizza alimenti locali verso Food Tracker
+- `GET /api/settings/info` — versione app, descrizione, versione Node
+- `PATCH /api/settings/password` — cambia password (aggiorna `ADMIN_PASSWORD` nel `.env` e chiude la sessione)
+- `GET /api/settings/vision-model` — modello IA corrente + lista modelli supportati (Claude Sonnet/Haiku/Opus 4.x, Gemini 2.0/2.5 Flash/Pro)
+- `PUT /api/settings/vision-model` — imposta modello IA (scrive `VISION_MODEL` + `VISION_PROVIDER` nel `.env`)
+- `GET /api/settings/vision-prompt` — prompt IA corrente + prompt di default
+- `PUT /api/settings/vision-prompt` — salva un prompt personalizzato in `vision-prompt.txt`
+- `DELETE /api/settings/vision-prompt` — cancella il prompt personalizzato (torna al default)
+- `POST /api/settings/sync-tracker` — sincronizza alimenti locali verso Food Tracker
   - Invia tutti i foods (`is_quick=0`, non eliminati) tramite `POST /product` di Food Tracker
   - Foods senza barcode usano `external_id = app_<id>` per evitare duplicati
-  - Source: `app` per prodotti creati nell'app, altrimenti eredita dalla fonte originale
+  - Se il prodotto esiste già nel tracker, mantiene la `source` originale; prodotti nuovi vengono inviati come `app`
+  - Calcola l'URL immagine risolto (upload locale o proxy) perché sia accessibile dal tracker
+  - Skip se nome, brand, macro e immagine sono identici (nessuna scrittura inutile)
 
 ## Flusso barcode
 
@@ -151,55 +168,111 @@ Nei pasti vuoti appare il bottone "Copia [pasto] da ieri" con anteprima:
 
 ## Recenti e frequenti
 
-La modale "Aggiungi alimento" mostra fino a 12 alimenti recenti/frequenti per pasto (era 8).
+La modale "Aggiungi alimento" mostra fino a 12 alimenti recenti/frequenti per pasto. Se per quel pasto non ci sono abbastanza voci, la lista viene riempita con alimenti recenti/frequenti di altri pasti (fallback cross-meal).
+
+## Ricerca predittiva — soglia 2 caratteri
+
+Nella ricerca alimenti e nella ricerca inline ingredienti ("Descrivi" → aggiungi ingrediente) la soglia per attivare la ricerca predittiva è **2 caratteri** (era 4). Dà risultati molto più rapidi su nomi corti tipo "uova", "riso", "pane".
+
+## Foods table (`foods-table.html`)
+
+Spreadsheet standalone (full-width, fuori dal frame 430px) per la gestione bulk della libreria alimenti. Colonne: Foto (thumbnail), Nome, Brand, Barcode, Kcal/100g, Proteine/100g, Grassi/100g, Carbo/100g, **Fonte** (`app`/`crea`/`openfoodfacts`), **Data** (created_at), Azioni. Permette editing inline delle macro e upload foto drag-and-drop.
 
 ## PWA
 
-L'app è installabile come PWA su iOS (Home Screen):
+L'app è installabile come PWA su iOS (Home Screen) e funziona offline:
 - `public/manifest.json` — Web App Manifest
+- `public/sw.js` — service worker registrato in `index.html` dopo il `load`
 - `public/apple-touch-icon.png` — 180x180 (generata da `logo.png` con `sips`)
 - `public/icons/icon-192.png` e `icon-512.png` — icone manifest
 - Meta tag in `index.html`: `apple-mobile-web-app-capable`, `apple-mobile-web-app-title`, `apple-touch-icon`, `manifest`
 
+### Service worker — strategie di cache (`public/sw.js`)
+
+Cache suddivise in 4 bucket (`SHELL_CACHE`, `RUNTIME_CACHE`, `API_CACHE`, `UPLOADS_CACHE`) tutte taggate con `VERSION` per invalidazione atomica:
+- **Shell** (precache all'install): `/`, `/index.html`, `manifest.json`, icone, logo, CDN cross-origin (`chart.js`, `html5-qrcode`, `cropperjs`) come `no-cors` (response opaque accettate)
+- **Navigazioni HTML**: network-first con fallback a `/index.html` in cache
+- **Asset same-origin** (JS, CSS): stale-while-revalidate su `RUNTIME_CACHE`
+- **`/uploads/<foto>`**: stale-while-revalidate su `UPLOADS_CACHE`
+- **`/api/*` whitelist** (`/api/plan`, `/api/plan/all`, `/api/diary`, `/api/diary/range`, `/api/diary/days`, `/api/diary/recent`, `/api/diary/frequent`, tutto `/api/foods`): **network-first** con fallback cache per uso offline. Il network-first (non SWR) garantisce che online i dati siano sempre freschi — niente risposte stantie dalla cache.
+- **Altre `/api/*`** (snapshot piano, settings, login/logout): passano diritte alla rete (no cache).
+- **CDN cross-origin**: cache-first con fallback rete.
+
+Il banner **"Nuova versione disponibile"** compare quando un nuovo SW è `waiting`; il click su "Ricarica" invia il messaggio `SKIP_WAITING` al worker e ricarica la pagina. Nessuna `skipWaiting()` all'install.
+
+## Snapshot giornaliero del piano
+
+La tabella `daily_plan_snapshots` memorizza il piano attivo per ogni giorno (`date` PK, `plan_name`, `kcal_target`, macro %).
+- `database/db.js` esporta `upsertDaySnapshot(date)` che legge il piano con `is_active=1` e fa `INSERT OR REPLACE`.
+- Viene chiamata da `routes/plan.js` all'attivazione/modifica/creazione piano (`req.body.date` o oggi) e da `routes/diary.js` a ogni inserimento diario (con la data della voce).
+- `upsertDaySnapshot` è self-healing: crea la tabella con `IF NOT EXISTS` per non richiedere un restart se il server è già in esecuzione prima della migrazione.
+- Il `GET /api/diary/range` fa `LEFT JOIN daily_plan_snapshots` per restituire il target del giorno anche se il piano è stato cambiato o cancellato dopo.
+- L'header `Cache-Control: no-store` è applicato allo snapshot + cache-buster nell'URL per evitare letture stantie.
+
 ## Modifica ricetta dal diario
 
 Cliccando su un alimento di tipo ricetta nel pasto, il modal di modifica quantità mostra il bottone **"Modifica ricetta"**:
-- Visibile solo per alimenti con `components.length > 0`
+- Visibile solo per alimenti con `components.length > 0` **e** `is_quick=0` (le ricette generate da "Descrivi" sono `is_quick=1` e non vengono editate via food form)
 - Apre `FoodsTab.openFoodForm(foodId)` — lo stesso form della tab Alimenti
 - Se il food non è nella cache `allFoods` (es. tab Alimenti mai aperta), viene caricato via `GET /api/foods/:id`
 - Dopo il salvataggio, il diario si aggiorna automaticamente
 
-## Riconoscimento piatto con IA
+## Ricette — peso finale = somma ingredienti
 
-Bottone "Riconosci piatto" nella modale aggiungi alimento. L'utente fotografa un piatto, l'IA identifica gli alimenti.
+Il campo "peso finale ricetta" è stato rimosso dall'UI: il peso totale di una ricetta è sempre la somma dei grammi dei componenti.
+- `foods.recipe_yield_g` resta nello schema ma viene azzerato a `NULL` a ogni save (`POST`/`PUT /api/foods`).
+- Macro (`kcal_100g`, `protein_100g`, ecc.) sono sempre ricalcolate da `calcMacrosFromComponents()` sulla somma dei pesi.
+- `db.js` applica una migrazione all'avvio che ricalcola le macro di tutte le ricette esistenti azzerando `recipe_yield_g` stantio.
+
+## Layout max 430px
+
+L'intero frame dell'app (`.app`, header, tab bar, modali, popup, crop) è contenuto in `max-width: 430px` centrato. Su schermi desktop l'app appare come una colonna stretta centrata, rispecchiando l'esperienza mobile. Unica eccezione: la tabella `foods-table.html` resta full-width perché spreadsheet. I modal fullscreen usano `margin: 0 auto` (non `translateX(-50%)`) per restare allineati al frame.
+
+## Riconoscimento e descrizione piatto con IA
+
+Nella modale "Aggiungi alimento" due bottoni affiancati:
+- **"Riconosci"** — fotografa il piatto, l'IA identifica gli alimenti (flusso visuale).
+- **"Descrivi"** — digita una descrizione testuale (es. *"piatto medio di pasta al sugo"*) e l'IA scompone il piatto in ingredienti.
 
 ### Architettura
-- **`services/vision.js`** — modulo astratto che supporta Claude e Gemini
-- **`POST /api/diary/recognize-photo`** — endpoint che riceve la foto, la ridimensiona (sharp, max 1024px), chiama l'IA, matcha i risultati
-- Provider selezionato via `VISION_PROVIDER` env var (`claude` o `gemini`)
-- Modello configurabile via `VISION_MODEL` env var
+- **`services/vision.js`** — modulo astratto che supporta Claude e Gemini; espone `recognizeFood(base64)`, `describeDish(text)`, `getPrompt()`, `DEFAULT_PROMPT`.
+- **`routes/diary.js`** — helper condiviso `matchFoodsAgainstSources(db, foods, filter)` riusato dai due flussi con filtri di sorgente parametrici.
+- Provider selezionato via `VISION_PROVIDER` env var (`claude` o `gemini`).
+- Modello configurabile via `VISION_MODEL` env var.
+- Prompt personalizzabile: se esiste `vision-prompt.txt` nella root, viene usato al posto del `DEFAULT_PROMPT`.
 
 ### Env vars
 ```bash
 VISION_PROVIDER=claude          # o gemini
 ANTHROPIC_API_KEY=sk-ant-...    # per Claude
 GEMINI_API_KEY=...              # per Gemini
-VISION_MODEL=claude-sonnet-4-20250514  # opzionale
+VISION_MODEL=claude-sonnet-4-6  # o claude-haiku-4-5-20251001, gemini-2.5-flash, ecc.
 ```
 
-### Flusso
-1. Click "Riconosci piatto" → apre fotocamera (file input con `capture="environment"`)
-2. Foto ridimensionata client-side (canvas, max 1024px, JPEG 80%)
-3. Upload a `POST /api/diary/recognize-photo`
-4. Backend: resize con sharp → Claude/Gemini Vision → JSON con alimenti
-5. Per ogni alimento: ricerca DB locale (token LIKE) → catalogo Food Tracker
-6. Frontend: step `#modal-step-ai` con lista risultati, checkbox, quantità editabile, alternative
-7. "Aggiungi N alimenti" → batch POST /api/diary per ogni item selezionato
-8. Per match catalogo: auto-import via POST /api/foods (FormData)
-9. Per nessun match: voce rapida via POST /api/diary/quick
+### Flusso "Riconosci" (foto)
+1. Click "Riconosci" → apre fotocamera (file input con `capture="environment"`).
+2. Foto ridimensionata client-side (canvas, max 1024px, JPEG 80%).
+3. Upload a `POST /api/diary/recognize-photo`.
+4. Backend: resize con `sharp` → Claude/Gemini Vision → JSON con `dish_name` + `foods`.
+5. Per ogni alimento: ricerca DB locale (token LIKE) → catalogo Food Tracker (tutte le sorgenti).
+6. Frontend: step `#modal-step-ai` con nome piatto + lista risultati (checkbox, quantità editabile, alternative, kcal/macro stimati).
+7. "Aggiungi selezionati" → batch `POST /api/diary` per ogni item selezionato.
+8. Per match catalogo: auto-import via `POST /api/foods` (FormData).
+9. Per nessun match: voce rapida via `POST /api/diary/quick`.
+
+### Flusso "Descrivi" (testo)
+1. Click "Descrivi" → step `#modal-step-describe` con textarea.
+2. `POST /api/diary/describe-dish` con `{ text }`.
+3. Backend: `describeDish()` riusa lo stesso provider Claude/Gemini ma con input testuale; filtro **solo CREA** (no OpenFoodFacts, no `app`) per avere dati nutrizionali puliti.
+4. Frontend: step `#modal-step-describe-results` mostra nome ricetta editabile + lista ingredienti (nome, grammi, kcal/macro) con la possibilità di:
+   - Modificare grammi di ogni ingrediente
+   - Rimuovere ingredienti
+   - Aggiungere ingredienti via input con autocomplete (ricerca inline locale + CREA)
+5. "Aggiungi al pasto come ricetta" → `POST /api/diary/dish-as-recipe` crea **atomicamente** un food `is_quick=1` con `components` JSON + singola `diary_entry` (100% del peso totale).
+6. La voce nel diario appare come una ricetta unica; per is_quick il bottone "Modifica ricetta" è nascosto (niente edit di food rapidi).
 
 ### Prompt IA
-Il prompt chiede nomi italiani stile CREA/INRAN, stima grammi, e search_terms alternativi per migliorare il matching nel DB.
+Il prompt chiede nomi italiani stile CREA/INRAN, stima grammi, search_terms alternativi per migliorare il matching nel DB, scompone piatti compositi in ingredienti (forma cruda), esclude ingredienti a calorie trascurabili. Visibile e modificabile dalle impostazioni.
 
 ## Deduplicazione ricerca catalogo
 
@@ -302,9 +375,9 @@ if (!cols.find(c => c.name === 'nuova_colonna')) {
 }
 ```
 
-### Cache iOS Safari
-I file JS hanno `?v=N` nell'`<script src>` di `index.html`.
-Incrementa la versione ogni volta che modifichi un file JS per forzare il refresh su iOS.
+### Cache iOS Safari e service worker
+I file JS/CSS hanno `?v=N` nei `<script src>`/`<link href>` di `index.html`.
+**Incrementa la versione ogni volta che modifichi un file** per forzare il refresh su iOS **e** per far capire al service worker che c'è una nuova shell da cacheare. Parimenti, al primo commit di un cambio significativo in `sw.js`, bump anche `VERSION` in testa al file per invalidare i bucket cache (`fd-shell-v*`, `fd-runtime-v*`, `fd-api-v*`, `fd-uploads-v*`).
 
 ### Soft-delete alimenti
 `DELETE /api/foods/:id` non cancella la riga — imposta `deleted_at = datetime('now')`.
