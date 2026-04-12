@@ -563,9 +563,12 @@ router.post('/describe-dish', async (req, res) => {
   }
 });
 
-// POST /api/diary/dish-as-recipe — crea voce ricetta is_quick=1 da lista ingredienti
+// POST /api/diary/dish-as-recipe — crea voce ricetta da lista ingredienti
+// Se save_as_recipe=true, salva come ricetta riutilizzabile (is_quick=0)
+// importando come nuovi food gli ingredienti senza match locale.
+// Altrimenti crea una voce one-off (is_quick=1).
 router.post('/dish-as-recipe', async (req, res) => {
-  const { date, meal_type, name, components } = req.body;
+  const { date, meal_type, name, components, save_as_recipe = false } = req.body;
   if (!name?.trim() || !date || !meal_type || !Array.isArray(components) || components.length === 0) {
     return res.status(400).json({ error: 'Parametri mancanti (name, date, meal_type, components)' });
   }
@@ -574,23 +577,60 @@ router.post('/dish-as-recipe', async (req, res) => {
   try {
     await db.run('BEGIN');
 
-    const totalG = components.reduce((s, c) => s + (Number(c.quantity_g) || 0), 0) || 100;
-    const kcal_100g    = components.reduce((s, c) => s + (c.kcal_100g    || 0) * (Number(c.quantity_g) || 0), 0) / totalG;
-    const protein_100g = components.reduce((s, c) => s + (c.protein_100g || 0) * (Number(c.quantity_g) || 0), 0) / totalG;
-    const fat_100g     = components.reduce((s, c) => s + (c.fat_100g     || 0) * (Number(c.quantity_g) || 0), 0) / totalG;
-    const carbs_100g   = components.reduce((s, c) => s + (c.carbs_100g   || 0) * (Number(c.quantity_g) || 0), 0) / totalG;
+    // Risolvi i componenti: se save_as_recipe, importa come nuovi food
+    // gli ingredienti privi di food_id locale.
+    let resolvedComponents;
+    if (save_as_recipe) {
+      resolvedComponents = [];
+      for (const c of components) {
+        if (c.food_id) {
+          // Già nel DB locale: pulisci _origin e mantieni così com'è
+          const { _origin, ...clean } = c;
+          resolvedComponents.push(clean);
+        } else {
+          // Importa come nuovo alimento; source 'crea' per match catalogo,
+          // 'app' per stime AI senza match
+          const newSource = c._origin === 'crea' ? 'crea' : 'app';
+          const newFoodRes = await db.run(
+            `INSERT INTO foods (name, kcal_100g, protein_100g, fat_100g, carbs_100g,
+              portions, components, source, is_quick)
+             VALUES (?, ?, ?, ?, ?, '[]', '[]', ?, 0)`,
+            (c.name || '').toString().trim() || 'Ingrediente',
+            Number(c.kcal_100g) || 0,
+            Number(c.protein_100g) || 0,
+            Number(c.fat_100g) || 0,
+            Number(c.carbs_100g) || 0,
+            newSource
+          );
+          const { _origin, ...clean } = c;
+          resolvedComponents.push({ ...clean, food_id: newFoodRes.lastID });
+        }
+      }
+    } else {
+      // Comportamento esistente: rimuovi solo _origin se presente
+      resolvedComponents = components.map(({ _origin, ...rest }) => rest);
+    }
+
+    const totalG = resolvedComponents.reduce((s, c) => s + (Number(c.quantity_g) || 0), 0) || 100;
+    const kcal_100g    = resolvedComponents.reduce((s, c) => s + (c.kcal_100g    || 0) * (Number(c.quantity_g) || 0), 0) / totalG;
+    const protein_100g = resolvedComponents.reduce((s, c) => s + (c.protein_100g || 0) * (Number(c.quantity_g) || 0), 0) / totalG;
+    const fat_100g     = resolvedComponents.reduce((s, c) => s + (c.fat_100g     || 0) * (Number(c.quantity_g) || 0), 0) / totalG;
+    const carbs_100g   = resolvedComponents.reduce((s, c) => s + (c.carbs_100g   || 0) * (Number(c.quantity_g) || 0), 0) / totalG;
+
+    const isQuick = save_as_recipe ? 0 : 1;
 
     const foodRes = await db.run(
       `INSERT INTO foods (name, kcal_100g, protein_100g, fat_100g, carbs_100g,
         portions, components, recipe_yield_g, source, is_quick)
-       VALUES (?, ?, ?, ?, ?, '[]', ?, ?, 'app', 1)`,
+       VALUES (?, ?, ?, ?, ?, '[]', ?, ?, 'app', ?)`,
       name.trim(),
       Math.round(kcal_100g * 10) / 10,
       Math.round(protein_100g * 10) / 10,
       Math.round(fat_100g * 10) / 10,
       Math.round(carbs_100g * 10) / 10,
-      JSON.stringify(components),
-      totalG
+      JSON.stringify(resolvedComponents),
+      totalG,
+      isQuick
     );
     const food_id = foodRes.lastID;
 
@@ -601,7 +641,7 @@ router.post('/dish-as-recipe', async (req, res) => {
     );
 
     await db.run('COMMIT');
-    res.json({ entry_id: entryRes.lastID, food_id });
+    res.json({ entry_id: entryRes.lastID, food_id, saved_as_recipe: !!save_as_recipe });
   } catch (err) {
     await db.run('ROLLBACK');
     console.error('dish-as-recipe error:', err);

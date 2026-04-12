@@ -1258,7 +1258,22 @@ window.DiaryTab = (() => {
     document.getElementById('modal-step-ai').classList.add('hidden');
     document.getElementById('modal-step-describe').classList.remove('hidden');
     document.getElementById('describe-text').value = '';
+    // Reset spunta "salva come ricetta" e label bottone
+    const saveCheckbox = document.getElementById('describe-save-as-recipe');
+    if (saveCheckbox) {
+      saveCheckbox.checked = false;
+      const confirmBtn = document.getElementById('btn-describe-confirm');
+      if (confirmBtn) confirmBtn.textContent = 'Aggiungi al pasto come ricetta';
+    }
     setTimeout(() => document.getElementById('describe-text').focus(), 100);
+  });
+
+  // Listener checkbox: aggiorna label del bottone di conferma
+  document.getElementById('describe-save-as-recipe').addEventListener('change', (e) => {
+    const btn = document.getElementById('btn-describe-confirm');
+    btn.textContent = e.target.checked
+      ? 'Aggiungi al pasto e salva ricetta'
+      : 'Aggiungi al pasto come ricetta';
   });
 
   document.getElementById('btn-describe-back').addEventListener('click', () => {
@@ -1576,11 +1591,17 @@ window.DiaryTab = (() => {
     }, 150);
   });
 
-  // Conferma: aggiunge piatto come ricetta is_quick=1 (voce singola nel pasto)
+  // Conferma: aggiunge piatto come ricetta (voce singola nel pasto).
+  // Se la spunta "salva come ricetta" è attiva, salva anche in libreria
+  // (is_quick=0) importando come nuovi food gli ingredienti senza match locale.
   document.getElementById('btn-describe-confirm').addEventListener('click', async () => {
     if (_describeItems.length === 0) return;
 
     const btn = document.getElementById('btn-describe-confirm');
+    const saveAsRecipe = document.getElementById('describe-save-as-recipe').checked;
+    const defaultLabel = saveAsRecipe
+      ? 'Aggiungi al pasto e salva ricetta'
+      : 'Aggiungi al pasto come ricetta';
     btn.disabled = true;
     btn.textContent = 'Aggiunta in corso…';
 
@@ -1592,6 +1613,12 @@ window.DiaryTab = (() => {
         const local = item.local_matches?.[0];
         const cat = item.catalog_matches?.[0];
         const src = local || cat;
+
+        // Origine del componente: 'local' se in DB, 'crea' se da catalogo CREA, 'ai' altrimenti
+        let origin = 'ai';
+        if (local) origin = 'local';
+        else if (cat) origin = 'crea';
+
         return {
           food_id: local ? (local.id || null) : null,
           name: src ? src.name : item.ai_name,
@@ -1599,7 +1626,8 @@ window.DiaryTab = (() => {
           kcal_100g:    src ? (src.kcal_100g    || 0) : (item.ai_kcal_100g    || 0),
           protein_100g: src ? (src.protein_100g  || 0) : (item.ai_protein_100g || 0),
           fat_100g:     src ? (src.fat_100g      || 0) : (item.ai_fat_100g     || 0),
-          carbs_100g:   src ? (src.carbs_100g    || 0) : (item.ai_carbs_100g   || 0)
+          carbs_100g:   src ? (src.carbs_100g    || 0) : (item.ai_carbs_100g   || 0),
+          _origin: origin
         };
       });
 
@@ -1607,6 +1635,7 @@ window.DiaryTab = (() => {
         date: currentDate,
         meal_type: selectedMeal,
         name,
+        save_as_recipe: saveAsRecipe,
         components
       });
 
@@ -1617,9 +1646,15 @@ window.DiaryTab = (() => {
         document.getElementById('modal-food-search').value = '';
         document.getElementById('modal-search-results').innerHTML = '';
         document.getElementById('modal-add-food').classList.add('hidden');
+        // Reset checkbox dopo conferma
+        document.getElementById('describe-save-as-recipe').checked = false;
         loadRecentFoods(selectedMeal);
 
-        showAddedToast(`"${name}" aggiunto al pasto`);
+        if (saveAsRecipe) {
+          showAddedToast(`"${name}" aggiunto al pasto e salvato in libreria`);
+        } else {
+          showAddedToast(`"${name}" aggiunto al pasto`);
+        }
         openMealId = selectedMeal;
         await refresh();
       } else {
@@ -1630,7 +1665,7 @@ window.DiaryTab = (() => {
       alert(`Errore: ${err.message}`);
     } finally {
       btn.disabled = false;
-      btn.textContent = 'Aggiungi al pasto come ricetta';
+      btn.textContent = defaultLabel;
     }
   });
 

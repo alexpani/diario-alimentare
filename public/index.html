@@ -464,6 +464,10 @@
         <input id="describe-add-ingredient" type="text" class="form-input" placeholder="Aggiungi ingrediente…" autocomplete="off">
         <div id="describe-add-results" style="display:none;position:absolute;left:0;right:0;top:100%;z-index:20;background:var(--color-card);border:1px solid var(--color-border);border-radius:var(--radius-sm);max-height:200px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,.18)"></div>
       </div>
+      <label style="display:flex;align-items:center;gap:8px;margin-top:12px;padding:10px;background:var(--color-bg);border-radius:var(--radius-sm);cursor:pointer;font-size:13px">
+        <input type="checkbox" id="describe-save-as-recipe" style="width:16px;height:16px;accent-color:var(--color-primary);flex:0 0 auto">
+        <span>Salva anche come <strong>ricetta riutilizzabile</strong> in libreria</span>
+      </label>
       <div class="modal-actions" style="margin-top:12px">
         <button id="btn-describe-results-back" class="btn btn-outline" style="flex:0 0 auto;padding:0 18px">←</button>
         <button id="btn-describe-confirm" class="btn btn-primary btn-full">Aggiungi al pasto come ricetta</button>
@@ -729,7 +733,7 @@
 <script src="/js/scanner-config.js?v=2"></script>
 <script src="/js/barcode.js?v=2"></script>
 <script src="/js/foods.js?v=23"></script>
-<script src="/js/diary.js?v=47"></script>
+<script src="/js/diary.js?v=48"></script>
 <script src="/js/diarylog.js?v=6"></script>
 <script src="/js/plan.js?v=5"></script>
 <script src="/js/settings.js?v=7"></script>
