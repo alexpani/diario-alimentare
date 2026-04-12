@@ -789,9 +789,11 @@ window.DiaryTab = (() => {
     document.getElementById('modal-step-quick').classList.remove('hidden');
     document.getElementById('quick-kcal').value = '';
     document.getElementById('quick-desc').value = '';
-    document.getElementById('quick-protein-pct').value = 20;
-    document.getElementById('quick-fat-pct').value = 30;
-    document.getElementById('quick-carbs-pct').value = 50;
+    // Preimposta i macro % dal piano del giorno (snapshot) o dal piano attivo
+    const plan = dayPlan || App.plan || {};
+    document.getElementById('quick-protein-pct').value = plan.protein_pct ?? 20;
+    document.getElementById('quick-fat-pct').value     = plan.fat_pct     ?? 30;
+    document.getElementById('quick-carbs-pct').value   = plan.carbs_pct   ?? 50;
     updateQuickPreview();
     document.getElementById('quick-kcal').focus();
   }
