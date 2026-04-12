@@ -30,6 +30,7 @@ window.DiaryTab = (() => {
   let searchTimeout = null;
   let _recentFoods = [];
   let _frequentFoods = [];
+  let _recipeFoods = [];
   let _currentRecentMode = 'recent';
   let yesterdayEntries = [];
 
@@ -386,7 +387,9 @@ window.DiaryTab = (() => {
 
     list.querySelectorAll('.recent-food-item').forEach(item => {
       item.addEventListener('click', () => {
-        const src = _currentRecentMode === 'recent' ? _recentFoods : _frequentFoods;
+        const src = _currentRecentMode === 'recent'  ? _recentFoods
+                  : _currentRecentMode === 'frequent' ? _frequentFoods
+                  : _recipeFoods;
         const food = src.find(f => f.id === parseInt(item.dataset.recentFoodId));
         if (food) selectFood(food, { qty_g: food.last_qty_g, qty_label: food.last_qty_label });
       });
@@ -398,7 +401,10 @@ window.DiaryTab = (() => {
     document.querySelectorAll('#modal-recent-section .recent-tab').forEach(t => {
       t.classList.toggle('active', t.dataset.recentMode === mode);
     });
-    renderRecentList(mode === 'recent' ? _recentFoods : _frequentFoods);
+    const list = mode === 'recent'  ? _recentFoods
+               : mode === 'frequent' ? _frequentFoods
+               : _recipeFoods;
+    renderRecentList(list);
   }
 
   document.querySelectorAll('#modal-recent-section .recent-tab').forEach(t => {
@@ -407,17 +413,20 @@ window.DiaryTab = (() => {
 
   async function loadRecentFoods(meal) {
     const mealEnc = encodeURIComponent(meal);
-    const [recents, frequents] = await Promise.all([
+    const [recents, frequents, recipes] = await Promise.all([
       apiGet(`/api/diary/recent?meal_type=${mealEnc}&limit=12`),
-      apiGet(`/api/diary/frequent?meal_type=${mealEnc}&limit=12`)
+      apiGet(`/api/diary/frequent?meal_type=${mealEnc}&limit=12`),
+      apiGet(`/api/foods?recipes_only=1&limit=500`)
     ]);
 
-    // Escludi alimenti già presenti in questo pasto oggi
+    // Escludi alimenti già presenti in questo pasto oggi (solo per recenti/frequenti)
     const mealFoodIds = new Set(entries.filter(e => e.meal_type === meal).map(e => e.food?.id));
     _recentFoods = (recents || []).filter(f => !mealFoodIds.has(f.id)).slice(0, 12);
     _frequentFoods = (frequents || []).filter(f => !mealFoodIds.has(f.id)).slice(0, 12);
+    // Le ricette sono sempre disponibili, non filtrate per pasto
+    _recipeFoods = recipes || [];
 
-    if (_recentFoods.length === 0 && _frequentFoods.length === 0) return;
+    if (_recentFoods.length === 0 && _frequentFoods.length === 0 && _recipeFoods.length === 0) return;
 
     _currentRecentMode = 'recent';
     document.querySelectorAll('#modal-recent-section .recent-tab').forEach(t => {

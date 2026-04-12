@@ -115,10 +115,21 @@ router.get('/', async (req, res) => {
     }
 
     const raw = (req.query.q || '').trim();
+    const recipesOnly = req.query.recipes_only === '1';
     let foods;
 
     if (!raw) {
-      foods = await db.all('SELECT * FROM foods WHERE deleted_at IS NULL AND is_quick = 0 ORDER BY name ASC LIMIT ?', limit);
+      if (recipesOnly) {
+        foods = await db.all(
+          `SELECT * FROM foods
+           WHERE deleted_at IS NULL AND is_quick = 0
+             AND components IS NOT NULL AND components != '[]'
+           ORDER BY name COLLATE NOCASE ASC LIMIT ?`,
+          limit
+        );
+      } else {
+        foods = await db.all('SELECT * FROM foods WHERE deleted_at IS NULL AND is_quick = 0 ORDER BY name ASC LIMIT ?', limit);
+      }
     } else {
       // Spezza in token: tutti devono comparire nel nome O nel brand (in qualsiasi ordine)
       const tokens = raw.split(/\s+/).filter(Boolean);
