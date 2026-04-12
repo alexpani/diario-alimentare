@@ -508,6 +508,10 @@ window.DiaryTab = (() => {
         // Riapri la modale diario e seleziona il nuovo alimento
         document.getElementById('modal-add-food').classList.remove('hidden');
         selectFood(newFood);
+      },
+      onClosed: () => {
+        // Annullato: riapri la modale diario sullo step ricerca
+        document.getElementById('modal-add-food').classList.remove('hidden');
       }
     });
   }
@@ -633,6 +637,10 @@ window.DiaryTab = (() => {
           onSaved: (newFood) => {
             document.getElementById('modal-add-food').classList.remove('hidden');
             selectFood(newFood);
+          },
+          onClosed: () => {
+            // Annullato: riapri la modale diario sullo step ricerca
+            document.getElementById('modal-add-food').classList.remove('hidden');
           }
         });
       });
@@ -889,6 +897,9 @@ window.DiaryTab = (() => {
               onSaved: (newFood) => {
                 document.getElementById('modal-add-food').classList.remove('hidden');
                 selectFood(newFood);
+              },
+              onClosed: () => {
+                document.getElementById('modal-add-food').classList.remove('hidden');
               }
             });
             return;
@@ -906,6 +917,9 @@ window.DiaryTab = (() => {
           onSaved: (newFood) => {
             document.getElementById('modal-add-food').classList.remove('hidden');
             selectFood(newFood);
+          },
+          onClosed: () => {
+            document.getElementById('modal-add-food').classList.remove('hidden');
           }
         });
       });

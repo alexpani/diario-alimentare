@@ -105,10 +105,12 @@ window.FoodsTab = (() => {
 
   // ── Food form modal ──────────────────────
   let _onFoodSaved = null; // callback opzionale(food) dopo salvataggio
+  let _onFoodClosed = null; // callback opzionale dopo chiusura senza salvataggio
 
-  function openFoodForm(id = null, { prefillName = '', prefillBarcode = '', onSaved = null } = {}) {
+  function openFoodForm(id = null, { prefillName = '', prefillBarcode = '', onSaved = null, onClosed = null } = {}) {
     editingId = id;
     _onFoodSaved = onSaved || null;
+    _onFoodClosed = onClosed || null;
     const titleEl = document.getElementById('food-form-title');
     titleEl.textContent = id ? 'Modifica alimento' : 'Nuovo alimento';
 
@@ -200,6 +202,12 @@ window.FoodsTab = (() => {
     document.getElementById('modal-food-form').classList.add('hidden');
     document.body.style.overflow = '';
     editingId = null;
+    if (_onFoodClosed) {
+      const cb = _onFoodClosed;
+      _onFoodClosed = null;
+      _onFoodSaved = null;
+      cb();
+    }
   }
 
   document.getElementById('modal-food-form-close').addEventListener('click', closeFoodForm);
@@ -647,6 +655,8 @@ window.FoodsTab = (() => {
       return;
     }
 
+    // Salvataggio riuscito: la chiusura non è un "annullo", quindi disattiva il cb di chiusura
+    _onFoodClosed = null;
     closeFoodForm();
     if (_onFoodSaved) {
       const cb = _onFoodSaved;
@@ -759,8 +769,8 @@ window.FoodsTab = (() => {
   }
 
 
-  function openFoodFormWithData(product, { onSaved = null } = {}) {
-    openFoodForm(null, { onSaved });
+  function openFoodFormWithData(product, { onSaved = null, onClosed = null } = {}) {
+    openFoodForm(null, { onSaved, onClosed });
     document.getElementById('ff-name').value = product.name || '';
     document.getElementById('ff-brand').value = product.brand || '';
     document.getElementById('ff-barcode').value = product.barcode || '';
