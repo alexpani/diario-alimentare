@@ -515,8 +515,11 @@ router.post('/recognize-photo', aiUpload.single('image'), async (req, res) => {
       .jpeg({ quality: 80 })
       .toBuffer();
 
+    // Descrizione testuale opzionale per aiutare l'IA
+    const userDescription = (req.body.description || '').toString().trim();
+
     // Chiama il servizio AI
-    const result = await recognizeFood(resized, 'image/jpeg');
+    const result = await recognizeFood(resized, 'image/jpeg', userDescription);
     const foods = result.foods || result; // backward compat
     const dishName = result.dish_name || '';
 

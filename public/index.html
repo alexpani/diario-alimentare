@@ -370,7 +370,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;vertical-align:middle;margin-right:4px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           Descrivi
         </button>
-        <input type="file" id="ai-photo-input" accept="image/*" capture="environment" style="display:none">
+        <input type="file" id="ai-photo-input" accept="image/*" style="display:none">
       </div>
       <input type="file" id="barcode-file-input" accept="image/*" capture="environment" style="display:none">
       <button id="btn-scan-barcode-file" class="btn btn-outline btn-full mt-8 hidden">
@@ -429,6 +429,22 @@
       </div>
       <div class="modal-actions">
         <button id="btn-confirm-add" class="btn btn-primary btn-full">Aggiungi</button>
+      </div>
+    </div>
+
+    <!-- Step AI: Conferma foto + descrizione opzionale -->
+    <div id="modal-step-ai-confirm" class="hidden">
+      <div style="margin-bottom:12px;text-align:center">
+        <img id="ai-photo-preview" alt="Anteprima piatto" style="max-width:100%;max-height:240px;border-radius:var(--radius-sm);background:var(--color-bg)">
+      </div>
+      <div style="margin-bottom:12px">
+        <label class="form-label" style="font-weight:600;display:block;margin-bottom:4px">Descrizione (opzionale)</label>
+        <p style="font-size:12px;color:var(--color-text-secondary);margin:0 0 8px">Aggiungi dettagli per aiutare l'IA: es. "spaghetti al ragù di cinghiale", "porzione abbondante", "petto di pollo alla piastra"</p>
+        <textarea id="ai-description-text" class="form-input" placeholder="Descrivi il piatto…" rows="2" style="resize:none;font-size:15px;width:100%;box-sizing:border-box"></textarea>
+      </div>
+      <div class="modal-actions" style="margin-top:12px">
+        <button id="btn-ai-confirm-back" class="btn btn-outline" style="flex:0 0 auto;padding:0 18px">←</button>
+        <button id="btn-ai-analyze" class="btn btn-primary btn-full">Analizza</button>
       </div>
     </div>
 
@@ -733,7 +749,7 @@
 <script src="/js/scanner-config.js?v=2"></script>
 <script src="/js/barcode.js?v=2"></script>
 <script src="/js/foods.js?v=23"></script>
-<script src="/js/diary.js?v=48"></script>
+<script src="/js/diary.js?v=49"></script>
 <script src="/js/diarylog.js?v=6"></script>
 <script src="/js/plan.js?v=5"></script>
 <script src="/js/settings.js?v=7"></script>

@@ -903,29 +903,68 @@ window.DiaryTab = (() => {
   // ── AI: Riconosci piatto ──────────────────────────────────────────────────
   let _aiItems = []; // risultati AI correnti
   let _aiDishName = '';
+  let _aiPhotoBlob = null;       // blob ridimensionato in attesa di analisi
+  let _aiPhotoPreviewUrl = null; // object URL del preview corrente
 
   document.getElementById('btn-ai-recognize').addEventListener('click', () => {
     document.getElementById('ai-photo-input').click();
   });
 
+  // Selezione foto: mostra step preview + descrizione opzionale
   document.getElementById('ai-photo-input').addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file) return;
     e.target.value = ''; // reset per permettere ri-selezione stesso file
 
-    // Nascondi ricerca e recenti, mostra spinner
-    document.getElementById('modal-step-search').classList.add('hidden');
-    document.getElementById('modal-step-qty').classList.add('hidden');
+    try {
+      // Resize client-side per ridurre upload
+      _aiPhotoBlob = await resizeImage(file, 1024);
+
+      // Rilascia il preview precedente, se presente
+      if (_aiPhotoPreviewUrl) {
+        URL.revokeObjectURL(_aiPhotoPreviewUrl);
+        _aiPhotoPreviewUrl = null;
+      }
+      _aiPhotoPreviewUrl = URL.createObjectURL(_aiPhotoBlob);
+      document.getElementById('ai-photo-preview').src = _aiPhotoPreviewUrl;
+      document.getElementById('ai-description-text').value = '';
+
+      // Mostra step preview + descrizione
+      document.getElementById('modal-step-search').classList.add('hidden');
+      document.getElementById('modal-step-qty').classList.add('hidden');
+      document.getElementById('modal-step-ai').classList.add('hidden');
+      document.getElementById('modal-step-ai-confirm').classList.remove('hidden');
+    } catch (err) {
+      console.error('AI photo prepare error:', err);
+      alert('Errore nella preparazione della foto: ' + err.message);
+    }
+  });
+
+  // Back dallo step preview/descrizione → torna alla ricerca
+  document.getElementById('btn-ai-confirm-back').addEventListener('click', () => {
+    document.getElementById('modal-step-ai-confirm').classList.add('hidden');
+    document.getElementById('modal-step-search').classList.remove('hidden');
+    _aiPhotoBlob = null;
+    if (_aiPhotoPreviewUrl) {
+      URL.revokeObjectURL(_aiPhotoPreviewUrl);
+      _aiPhotoPreviewUrl = null;
+    }
+  });
+
+  // "Analizza" → invia foto + descrizione opzionale e mostra risultati
+  document.getElementById('btn-ai-analyze').addEventListener('click', async () => {
+    if (!_aiPhotoBlob) return;
+    const description = document.getElementById('ai-description-text').value.trim();
+
+    document.getElementById('modal-step-ai-confirm').classList.add('hidden');
     document.getElementById('modal-step-ai').classList.remove('hidden');
     document.getElementById('ai-results-list').innerHTML = '<div class="spinner"></div><p style="text-align:center;color:var(--color-text-secondary);margin-top:8px">Analisi in corso…</p>';
     document.getElementById('btn-ai-confirm').classList.add('hidden');
 
     try {
-      // Resize client-side per ridurre upload
-      const resized = await resizeImage(file, 1024);
-
       const formData = new FormData();
-      formData.append('image', resized, 'photo.jpg');
+      formData.append('image', _aiPhotoBlob, 'photo.jpg');
+      if (description) formData.append('description', description);
 
       const res = await fetch('/api/diary/recognize-photo', {
         method: 'POST',

@@ -91,26 +91,30 @@ async function describeWithGemini(text) {
  * Analizza un'immagine e restituisce gli alimenti riconosciuti
  * @param {Buffer} imageBuffer - Immagine come Buffer
  * @param {string} mimeType - Tipo MIME (image/jpeg, image/png, etc.)
- * @returns {Promise<Array<{name: string, quantity_g: number, search_terms: string[]}>>}
+ * @param {string} [userText] - Descrizione testuale opzionale che aiuta l'IA
+ * @returns {Promise<{dish_name: string, foods: Array}>}
  */
-async function recognizeFood(imageBuffer, mimeType = 'image/jpeg') {
+async function recognizeFood(imageBuffer, mimeType = 'image/jpeg', userText = '') {
   const provider = (process.env.VISION_PROVIDER || 'claude').toLowerCase();
 
   let result;
   if (provider === 'gemini') {
-    result = await recognizeWithGemini(imageBuffer, mimeType);
+    result = await recognizeWithGemini(imageBuffer, mimeType, userText);
   } else {
-    result = await recognizeWithClaude(imageBuffer, mimeType);
+    result = await recognizeWithClaude(imageBuffer, mimeType, userText);
   }
 
   return result;
 }
 
-async function recognizeWithClaude(imageBuffer, mimeType) {
+async function recognizeWithClaude(imageBuffer, mimeType, userText = '') {
   const Anthropic = require('@anthropic-ai/sdk');
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
   const base64 = imageBuffer.toString('base64');
+  const promptText = userText
+    ? getPrompt() + '\n\nDESCRIZIONE UTENTE: ' + userText
+    : getPrompt();
 
   const response = await client.messages.create({
     model: process.env.VISION_MODEL || 'claude-sonnet-4-6',
@@ -122,7 +126,7 @@ async function recognizeWithClaude(imageBuffer, mimeType) {
           type: 'image',
           source: { type: 'base64', media_type: mimeType, data: base64 }
         },
-        { type: 'text', text: getPrompt() }
+        { type: 'text', text: promptText }
       ]
     }]
   });
@@ -131,7 +135,7 @@ async function recognizeWithClaude(imageBuffer, mimeType) {
   return parseResponse(text);
 }
 
-async function recognizeWithGemini(imageBuffer, mimeType) {
+async function recognizeWithGemini(imageBuffer, mimeType, userText = '') {
   const { GoogleGenerativeAI } = require('@google/generative-ai');
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
   const model = genAI.getGenerativeModel({
@@ -139,9 +143,12 @@ async function recognizeWithGemini(imageBuffer, mimeType) {
   });
 
   const base64 = imageBuffer.toString('base64');
+  const promptText = userText
+    ? getPrompt() + '\n\nDESCRIZIONE UTENTE: ' + userText
+    : getPrompt();
 
   const result = await model.generateContent([
-    getPrompt(),
+    promptText,
     { inlineData: { mimeType, data: base64 } }
   ]);
 
