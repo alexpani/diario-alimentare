@@ -361,10 +361,14 @@
           Fotocamera
         </button>
       </div>
-      <div style="margin-top:8px">
+      <div style="margin-top:8px;display:flex;gap:8px">
         <button id="btn-ai-recognize" class="btn btn-outline btn-full" style="font-size:13px;padding:8px 0;border-color:var(--color-primary);color:var(--color-primary)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;vertical-align:middle;margin-right:4px"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-          Riconosci piatto
+          Riconosci
+        </button>
+        <button id="btn-describe-dish" class="btn btn-outline btn-full" style="font-size:13px;padding:8px 0;border-color:var(--color-primary);color:var(--color-primary)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;vertical-align:middle;margin-right:4px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Descrivi
         </button>
         <input type="file" id="ai-photo-input" accept="image/*" capture="environment" style="display:none">
       </div>
@@ -433,6 +437,36 @@
       <div id="ai-results-list"></div>
       <div class="modal-actions" style="margin-top:12px">
         <button id="btn-ai-confirm" class="btn btn-primary btn-full">Aggiungi selezionati</button>
+      </div>
+    </div>
+
+    <!-- Step Descrivi: input testo -->
+    <div id="modal-step-describe" class="hidden">
+      <div style="margin-bottom:12px">
+        <label class="form-label" style="font-weight:600;display:block;margin-bottom:4px">Descrivi cosa stai mangiando</label>
+        <p style="font-size:12px;color:var(--color-text-secondary);margin:0 0 10px">Es. "piatto medio di pasta al sugo", "insalata mista con tonno e uova"</p>
+        <textarea id="describe-text" class="form-input" placeholder="Descrivi il piatto…" rows="3" style="resize:none;font-size:15px;width:100%;box-sizing:border-box"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button id="btn-describe-back" class="btn btn-outline" style="flex:0 0 auto;padding:0 18px">←</button>
+        <button id="btn-describe-send" class="btn btn-primary btn-full">Analizza</button>
+      </div>
+    </div>
+
+    <!-- Step Descrivi: risultati (lista ingredienti editabile) -->
+    <div id="modal-step-describe-results" class="hidden">
+      <div style="margin-bottom:10px">
+        <label style="font-size:11px;text-transform:uppercase;color:var(--color-text-secondary);letter-spacing:.04em">Nome del piatto</label>
+        <input id="describe-dish-name" type="text" class="form-input" placeholder="Nome ricetta…" style="margin-top:4px">
+      </div>
+      <div id="describe-results-list"></div>
+      <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--color-border);position:relative">
+        <input id="describe-add-ingredient" type="text" class="form-input" placeholder="Aggiungi ingrediente…" autocomplete="off">
+        <div id="describe-add-results" style="display:none;position:absolute;left:0;right:0;top:100%;z-index:20;background:var(--color-card);border:1px solid var(--color-border);border-radius:var(--radius-sm);max-height:200px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,.18)"></div>
+      </div>
+      <div class="modal-actions" style="margin-top:12px">
+        <button id="btn-describe-results-back" class="btn btn-outline" style="flex:0 0 auto;padding:0 18px">←</button>
+        <button id="btn-describe-confirm" class="btn btn-primary btn-full">Aggiungi al pasto come ricetta</button>
       </div>
     </div>
 
@@ -695,7 +729,7 @@
 <script src="/js/scanner-config.js?v=2"></script>
 <script src="/js/barcode.js?v=2"></script>
 <script src="/js/foods.js?v=23"></script>
-<script src="/js/diary.js?v=46"></script>
+<script src="/js/diary.js?v=47"></script>
 <script src="/js/diarylog.js?v=6"></script>
 <script src="/js/plan.js?v=5"></script>
 <script src="/js/settings.js?v=7"></script>

@@ -6,9 +6,104 @@ const multer = require('multer');
 const sharp = require('sharp');
 const { getDb, upsertDaySnapshot } = require('../database/db');
 const { isAuth } = require('./auth');
-const { recognizeFood } = require('../services/vision');
+const { recognizeFood, describeDish } = require('../services/vision');
 
 const CATALOG_BASE = process.env.CATALOG_URL || 'http://192.168.68.153:3001';
+
+/**
+ * Matcha un array di alimenti (output IA) contro DB locale e catalogo.
+ * @param {object} db - Istanza SQLite
+ * @param {Array} foods - Output IA: [{name, quantity_g, kcal_100g, ..., search_terms}]
+ * @param {Function} catalogSourceFilter - Filtro sorgente catalogo: (product) => bool
+ * @returns {Promise<Array>} items con local_matches e catalog_matches
+ */
+async function matchFoodsAgainstSources(db, foods, catalogSourceFilter) {
+  const items = [];
+  for (const food of foods) {
+    const searchTerms = [food.name, ...(food.search_terms || [])];
+
+    // 1. Cerca nel DB locale
+    let localMatches = [];
+    for (const term of searchTerms) {
+      if (localMatches.length >= 3) break;
+      const tokens = term.split(/\s+/).filter(Boolean);
+      if (tokens.length === 0) continue;
+      const conditions = tokens.map(() => '(name LIKE ? OR brand LIKE ?)').join(' AND ');
+      const params = tokens.flatMap(t => [`%${t}%`, `%${t}%`]);
+      params.push(5);
+      const found = await db.all(
+        `SELECT * FROM foods WHERE deleted_at IS NULL AND is_quick = 0 AND ${conditions} ORDER BY name ASC LIMIT ?`,
+        ...params
+      );
+      const existingIds = new Set(localMatches.map(m => m.id));
+      for (const f of found) {
+        if (!existingIds.has(f.id)) {
+          localMatches.push({
+            id: f.id, name: f.name, brand: f.brand,
+            kcal_100g: f.kcal_100g, protein_100g: f.protein_100g,
+            fat_100g: f.fat_100g, carbs_100g: f.carbs_100g,
+            image_path: f.image_path, source: f.source,
+            portions: JSON.parse(f.portions || '[]')
+          });
+          existingIds.add(f.id);
+        }
+      }
+    }
+    localMatches = localMatches.slice(0, 5);
+
+    // 2. Cerca nel catalogo Food Tracker (se pochi risultati locali)
+    let catalogMatches = [];
+    if (localMatches.length < 3) {
+      try {
+        const fetch = (await import('node-fetch')).default;
+        for (const term of searchTerms) {
+          if (catalogMatches.length >= 5) break;
+          const url = `${CATALOG_BASE}/search?q=${encodeURIComponent(term)}&limit=10`;
+          const resp = await fetch(url, { timeout: 5000 });
+          if (resp.ok) {
+            const data = await resp.json();
+            const products = (data.results || []).filter(p =>
+              p.product_name && p.source && catalogSourceFilter(p)
+            );
+            const localBarcodes = new Set(localMatches.filter(m => m.barcode).map(m => m.barcode));
+            for (const p of products) {
+              if (catalogMatches.length >= 5) break;
+              const pBarcode = p.external_id || '';
+              if (pBarcode && localBarcodes.has(pBarcode)) continue;
+              let imageUrl = p.image_url || '';
+              if (imageUrl && !imageUrl.startsWith('http')) imageUrl = CATALOG_BASE + imageUrl;
+              if (imageUrl) imageUrl = `/api/foods/proxy-image?url=${encodeURIComponent(imageUrl)}`;
+              catalogMatches.push({
+                name: p.product_name, brand: p.brands || '',
+                barcode: pBarcode,
+                kcal_100g: p.energy_kcal || 0,
+                protein_100g: p.proteins_100g || 0,
+                fat_100g: p.fat_100g || 0,
+                carbs_100g: p.carbohydrates_100g || 0,
+                source: p.source || '',
+                image_url: imageUrl || null
+              });
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('Catalog search error in matchFoodsAgainstSources:', e.message);
+      }
+    }
+
+    items.push({
+      ai_name: food.name,
+      ai_quantity_g: food.quantity_g,
+      ai_kcal_100g: food.kcal_100g || 0,
+      ai_protein_100g: food.protein_100g || 0,
+      ai_fat_100g: food.fat_100g || 0,
+      ai_carbs_100g: food.carbs_100g || 0,
+      local_matches: localMatches,
+      catalog_matches: catalogMatches
+    });
+  }
+  return items;
+}
 
 // Multer per foto AI (temp)
 const aiUpload = multer({
@@ -429,101 +524,88 @@ router.post('/recognize-photo', aiUpload.single('image'), async (req, res) => {
       return res.json({ dish_name: dishName, items: [] });
     }
 
-    // Per ogni alimento riconosciuto, cerca match nel DB locale e nel catalogo
     const db = await getDb();
-    const items = [];
-
-    for (const food of foods) {
-      // Termini di ricerca: nome principale + alternative
-      const searchTerms = [food.name, ...food.search_terms];
-
-      // 1. Cerca nel DB locale
-      let localMatches = [];
-      for (const term of searchTerms) {
-        if (localMatches.length >= 3) break;
-        const tokens = term.split(/\s+/).filter(Boolean);
-        if (tokens.length === 0) continue;
-        const conditions = tokens.map(() => '(name LIKE ? OR brand LIKE ?)').join(' AND ');
-        const params = tokens.flatMap(t => [`%${t}%`, `%${t}%`]);
-        params.push(5);
-        const found = await db.all(
-          `SELECT * FROM foods WHERE deleted_at IS NULL AND is_quick = 0 AND ${conditions} ORDER BY name ASC LIMIT ?`,
-          ...params
-        );
-        // Aggiungi solo quelli non già trovati
-        const existingIds = new Set(localMatches.map(m => m.id));
-        for (const f of found) {
-          if (!existingIds.has(f.id)) {
-            localMatches.push({
-              id: f.id, name: f.name, brand: f.brand,
-              kcal_100g: f.kcal_100g, protein_100g: f.protein_100g,
-              fat_100g: f.fat_100g, carbs_100g: f.carbs_100g,
-              image_path: f.image_path, source: f.source,
-              portions: JSON.parse(f.portions || '[]')
-            });
-            existingIds.add(f.id);
-          }
-        }
-      }
-      localMatches = localMatches.slice(0, 5);
-
-      // 2. Cerca nel catalogo Food Tracker (se pochi risultati locali)
-      let catalogMatches = [];
-      if (localMatches.length < 3) {
-        try {
-          const fetch = (await import('node-fetch')).default;
-          for (const term of searchTerms) {
-            if (catalogMatches.length >= 5) break;
-            const url = `${CATALOG_BASE}/search?q=${encodeURIComponent(term)}&limit=10`;
-            const resp = await fetch(url, { timeout: 5000 });
-            if (resp.ok) {
-              const data = await resp.json();
-              // Filtra: solo CREA e APP (no OpenFoodFacts), e non già nel DB locale
-              const products = (data.results || []).filter(p =>
-                p.product_name && p.source && p.source !== 'openfoodfacts'
-              );
-              const localBarcodes = new Set(localMatches.filter(m => m.barcode).map(m => m.barcode));
-              for (const p of products) {
-                if (catalogMatches.length >= 5) break;
-                const pBarcode = p.external_id || '';
-                if (pBarcode && localBarcodes.has(pBarcode)) continue;
-                let imageUrl = p.image_url || '';
-                if (imageUrl && !imageUrl.startsWith('http')) imageUrl = CATALOG_BASE + imageUrl;
-                if (imageUrl) imageUrl = `/api/foods/proxy-image?url=${encodeURIComponent(imageUrl)}`;
-                catalogMatches.push({
-                  name: p.product_name, brand: p.brands || '',
-                  barcode: pBarcode,
-                  kcal_100g: p.energy_kcal || 0,
-                  protein_100g: p.proteins_100g || 0,
-                  fat_100g: p.fat_100g || 0,
-                  carbs_100g: p.carbohydrates_100g || 0,
-                  source: p.source || 'openfoodfacts',
-                  image_url: imageUrl || null
-                });
-              }
-            }
-          }
-        } catch (e) {
-          console.warn('Catalog search error in recognize:', e.message);
-        }
-      }
-
-      items.push({
-        ai_name: food.name,
-        ai_quantity_g: food.quantity_g,
-        ai_kcal_100g: food.kcal_100g || 0,
-        ai_protein_100g: food.protein_100g || 0,
-        ai_fat_100g: food.fat_100g || 0,
-        ai_carbs_100g: food.carbs_100g || 0,
-        local_matches: localMatches,
-        catalog_matches: catalogMatches
-      });
-    }
+    // Filtra: solo CREA e APP (no OpenFoodFacts)
+    const items = await matchFoodsAgainstSources(db, foods, p => p.source !== 'openfoodfacts');
 
     res.json({ dish_name: dishName, items });
   } catch (err) {
     console.error('Recognize photo error:', err);
     res.status(500).json({ error: err.message || 'Errore nel riconoscimento' });
+  }
+});
+
+// POST /api/diary/describe-dish — analisi testuale piatto con IA
+router.post('/describe-dish', async (req, res) => {
+  const { text } = req.body;
+  if (!text?.trim()) return res.status(400).json({ error: 'Descrizione mancante' });
+
+  const apiKey = process.env.ANTHROPIC_API_KEY || process.env.GEMINI_API_KEY;
+  if (!apiKey) return res.status(500).json({ error: 'API key IA non configurata' });
+
+  try {
+    const result = await describeDish(text.trim());
+    const foods = result.foods || [];
+    const dishName = result.dish_name || '';
+
+    if (foods.length === 0) {
+      return res.json({ dish_name: dishName, items: [] });
+    }
+
+    const db = await getDb();
+    // Filtro SOLO CREA (no OpenFoodFacts, no app)
+    const items = await matchFoodsAgainstSources(db, foods, p => p.source === 'crea');
+
+    res.json({ dish_name: dishName, items });
+  } catch (err) {
+    console.error('Describe dish error:', err);
+    res.status(500).json({ error: err.message || 'Errore analisi descrizione' });
+  }
+});
+
+// POST /api/diary/dish-as-recipe — crea voce ricetta is_quick=1 da lista ingredienti
+router.post('/dish-as-recipe', async (req, res) => {
+  const { date, meal_type, name, components } = req.body;
+  if (!name?.trim() || !date || !meal_type || !Array.isArray(components) || components.length === 0) {
+    return res.status(400).json({ error: 'Parametri mancanti (name, date, meal_type, components)' });
+  }
+
+  const db = await getDb();
+  try {
+    await db.run('BEGIN');
+
+    const totalG = components.reduce((s, c) => s + (Number(c.quantity_g) || 0), 0) || 100;
+    const kcal_100g    = components.reduce((s, c) => s + (c.kcal_100g    || 0) * (Number(c.quantity_g) || 0), 0) / totalG;
+    const protein_100g = components.reduce((s, c) => s + (c.protein_100g || 0) * (Number(c.quantity_g) || 0), 0) / totalG;
+    const fat_100g     = components.reduce((s, c) => s + (c.fat_100g     || 0) * (Number(c.quantity_g) || 0), 0) / totalG;
+    const carbs_100g   = components.reduce((s, c) => s + (c.carbs_100g   || 0) * (Number(c.quantity_g) || 0), 0) / totalG;
+
+    const foodRes = await db.run(
+      `INSERT INTO foods (name, kcal_100g, protein_100g, fat_100g, carbs_100g,
+        portions, components, recipe_yield_g, source, is_quick)
+       VALUES (?, ?, ?, ?, ?, '[]', ?, ?, 'app', 1)`,
+      name.trim(),
+      Math.round(kcal_100g * 10) / 10,
+      Math.round(protein_100g * 10) / 10,
+      Math.round(fat_100g * 10) / 10,
+      Math.round(carbs_100g * 10) / 10,
+      JSON.stringify(components),
+      totalG
+    );
+    const food_id = foodRes.lastID;
+
+    const entryRes = await db.run(
+      `INSERT INTO diary_entries (date, meal_type, food_id, quantity_g, quantity_label)
+       VALUES (?, ?, ?, ?, '1 porzione')`,
+      date, meal_type, food_id, totalG
+    );
+
+    await db.run('COMMIT');
+    res.json({ entry_id: entryRes.lastID, food_id });
+  } catch (err) {
+    await db.run('ROLLBACK');
+    console.error('dish-as-recipe error:', err);
+    res.status(500).json({ error: err.message });
   }
 });
 

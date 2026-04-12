@@ -55,6 +55,39 @@ function getPrompt() {
 }
 
 /**
+ * Analizza una descrizione testuale e restituisce gli alimenti identificati
+ * @param {string} text - Descrizione del piatto in testo libero
+ * @returns {Promise<{dish_name: string, foods: Array}>}
+ */
+async function describeDish(text) {
+  const provider = (process.env.VISION_PROVIDER || 'claude').toLowerCase();
+  return provider === 'gemini'
+    ? describeWithGemini(text)
+    : describeWithClaude(text);
+}
+
+async function describeWithClaude(text) {
+  const Anthropic = require('@anthropic-ai/sdk');
+  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  const response = await client.messages.create({
+    model: process.env.VISION_MODEL || 'claude-sonnet-4-6',
+    max_tokens: 1024,
+    messages: [{ role: 'user', content: getPrompt() + '\n\nDESCRIZIONE UTENTE: ' + text }]
+  });
+  return parseResponse(response.content[0]?.text || '{"foods":[]}');
+}
+
+async function describeWithGemini(text) {
+  const { GoogleGenerativeAI } = require('@google/generative-ai');
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+  const model = genAI.getGenerativeModel({
+    model: process.env.VISION_MODEL || 'gemini-2.5-flash'
+  });
+  const result = await model.generateContent([getPrompt() + '\n\nDESCRIZIONE UTENTE: ' + text]);
+  return parseResponse(result.response.text() || '{"foods":[]}');
+}
+
+/**
  * Analizza un'immagine e restituisce gli alimenti riconosciuti
  * @param {Buffer} imageBuffer - Immagine come Buffer
  * @param {string} mimeType - Tipo MIME (image/jpeg, image/png, etc.)
@@ -140,4 +173,4 @@ function parseResponse(text) {
   }
 }
 
-module.exports = { recognizeFood, getPrompt, DEFAULT_PROMPT };
+module.exports = { recognizeFood, describeDish, getPrompt, DEFAULT_PROMPT };

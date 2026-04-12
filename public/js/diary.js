@@ -330,8 +330,8 @@ window.DiaryTab = (() => {
     sel.value = '';
     document.getElementById('edit-meal-move-wrap').classList.remove('hidden');
 
-    // Mostra bottone "Modifica ricetta" solo per ricette
-    const isRecipe = Array.isArray(entry.food.components) && entry.food.components.length > 0;
+    // Mostra bottone "Modifica ricetta" solo per ricette di libreria (non is_quick)
+    const isRecipe = Array.isArray(entry.food.components) && entry.food.components.length > 0 && !entry.food.is_quick;
     document.getElementById('edit-recipe-wrap').classList.toggle('hidden', !isRecipe);
 
     document.getElementById('modal-step-search').classList.add('hidden');
@@ -1235,6 +1235,404 @@ window.DiaryTab = (() => {
       img.src = URL.createObjectURL(file);
     });
   }
+
+  // ── Descrivi piatto ────────────────────────────────────────────────────────
+  let _describeItems = [];
+  let _describeDishName = '';
+  let _describeAddTimeout = null;
+
+  // Helper condiviso: estrae nutrizione dal miglior match disponibile
+  function _pickNut(item) {
+    const m = item.local_matches?.[0] || item.catalog_matches?.[0] || null;
+    return m || {
+      kcal_100g: item.ai_kcal_100g || 0,
+      protein_100g: item.ai_protein_100g || 0,
+      fat_100g: item.ai_fat_100g || 0,
+      carbs_100g: item.ai_carbs_100g || 0
+    };
+  }
+
+  document.getElementById('btn-describe-dish').addEventListener('click', () => {
+    document.getElementById('modal-step-search').classList.add('hidden');
+    document.getElementById('modal-step-qty').classList.add('hidden');
+    document.getElementById('modal-step-ai').classList.add('hidden');
+    document.getElementById('modal-step-describe').classList.remove('hidden');
+    document.getElementById('describe-text').value = '';
+    setTimeout(() => document.getElementById('describe-text').focus(), 100);
+  });
+
+  document.getElementById('btn-describe-back').addEventListener('click', () => {
+    document.getElementById('modal-step-describe').classList.add('hidden');
+    document.getElementById('modal-step-search').classList.remove('hidden');
+  });
+
+  document.getElementById('btn-describe-results-back').addEventListener('click', () => {
+    document.getElementById('modal-step-describe-results').classList.add('hidden');
+    document.getElementById('modal-step-describe').classList.remove('hidden');
+  });
+
+  document.getElementById('btn-describe-send').addEventListener('click', submitDescribe);
+
+  document.getElementById('describe-text').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      submitDescribe();
+    }
+  });
+
+  async function submitDescribe() {
+    const text = document.getElementById('describe-text').value.trim();
+    if (!text) return;
+
+    const btn = document.getElementById('btn-describe-send');
+    btn.disabled = true;
+    btn.textContent = 'Analisi in corso…';
+
+    document.getElementById('modal-step-describe-results').classList.add('hidden');
+    document.getElementById('modal-step-describe').classList.remove('hidden');
+
+    try {
+      const res = await fetch('/api/diary/describe-dish', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text })
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'Errore nell\'analisi');
+      }
+
+      const data = await res.json();
+      _describeItems = data.items || [];
+      _describeDishName = data.dish_name || '';
+
+      document.getElementById('modal-step-describe').classList.add('hidden');
+      document.getElementById('modal-step-describe-results').classList.remove('hidden');
+
+      if (_describeItems.length === 0) {
+        document.getElementById('describe-results-list').innerHTML =
+          '<div class="empty-state"><p>Nessun ingrediente identificato. Riprova con una descrizione più dettagliata.</p></div>';
+        document.getElementById('describe-dish-name').value = _describeDishName;
+        return;
+      }
+
+      document.getElementById('describe-dish-name').value = _describeDishName;
+      renderDescribeResults();
+    } catch (err) {
+      console.error('Describe dish error:', err);
+      document.getElementById('modal-step-describe').classList.add('hidden');
+      document.getElementById('modal-step-describe-results').classList.remove('hidden');
+      document.getElementById('describe-results-list').innerHTML =
+        `<div class="empty-state"><p>${err.message}</p></div>`;
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Analizza';
+    }
+  }
+
+  function renderDescribeResults() {
+    const container = document.getElementById('describe-results-list');
+
+    // Riepilogo totale
+    let totKcal = 0, totP = 0, totFt = 0, totC = 0;
+    _describeItems.forEach((item, i) => {
+      const nut = _pickNut(item);
+      const qty = parseFloat(document.querySelector(`[data-describe-qty="${i}"]`)?.value) || item.ai_quantity_g;
+      totKcal += nut.kcal_100g / 100 * qty;
+      totP    += nut.protein_100g / 100 * qty;
+      totFt   += nut.fat_100g / 100 * qty;
+      totC    += nut.carbs_100g / 100 * qty;
+    });
+
+    let html = `
+      <div class="ai-total-summary" id="describe-total-summary">
+        <span class="ai-total-kcal">${Math.round(totKcal)} kcal</span>
+        <span class="ai-total-macros">
+          <span style="color:var(--color-protein)">P:${fmt(totP, 0)}g</span>
+          <span style="color:var(--color-fat)">G:${fmt(totFt, 0)}g</span>
+          <span style="color:var(--color-carbs)">C:${fmt(totC, 0)}g</span>
+        </span>
+      </div>
+    `;
+
+    _describeItems.forEach((item, i) => {
+      const localMatch = item.local_matches?.[0] || null;
+      const catalogMatch = item.catalog_matches?.[0] || null;
+      const match = localMatch || catalogMatch;
+
+      const matchName = match ? match.name : item.ai_name;
+      const nut = _pickNut(item);
+      const qty = parseFloat(document.querySelector(`[data-describe-qty="${i}"]`)?.value) || item.ai_quantity_g;
+      const estKcal = Math.round(nut.kcal_100g / 100 * qty);
+      const matchDetail = nut.kcal_100g > 0
+        ? `${estKcal} kcal · P:${fmt(nut.protein_100g/100*qty)}g G:${fmt(nut.fat_100g/100*qty)}g C:${fmt(nut.carbs_100g/100*qty)}g`
+        : '';
+      const matchSource = localMatch ? 'DB locale' : (catalogMatch ? _fmtSrc(catalogMatch.source) : (nut.kcal_100g > 0 ? 'stima IA' : ''));
+      const matchImg = match?.image_path || match?.image_url || null;
+      const hasAlternatives = (item.local_matches?.length || 0) + (item.catalog_matches?.length || 0) > 1;
+
+      html += `
+        <div class="ai-result-item" data-describe-idx="${i}">
+          <div class="ai-result-header">
+            <div class="ai-result-info">
+              <div class="ai-result-ai-name">${item.ai_name}</div>
+              <div class="ai-result-match">
+                ${matchImg ? `<img src="${matchImg}" class="ai-result-img" alt="">` : ''}
+                <div>
+                  <div class="ai-result-match-name">${matchName}${matchSource ? ` <span class="ai-result-source">${matchSource}</span>` : ''}</div>
+                  <div class="ai-result-match-detail">${matchDetail}</div>
+                </div>
+              </div>
+              ${!match ? '<div class="ai-result-no-match" style="font-size:11px;color:var(--color-text-secondary)">Stima IA — nessun match CREA</div>' : ''}
+              ${hasAlternatives ? `<button class="btn-ai-alternatives" data-describe-alt="${i}">Altre opzioni ▾</button>` : ''}
+              <div class="ai-alternatives-list hidden" id="describe-alt-${i}"></div>
+            </div>
+            <div class="ai-result-qty">
+              <input type="number" class="form-input" value="${Math.round(item.ai_quantity_g)}" data-describe-qty="${i}" style="width:70px;text-align:center" min="1">
+              <span style="font-size:11px;color:var(--color-text-secondary)">g</span>
+            </div>
+            <button class="btn-describe-del" data-describe-del="${i}" title="Rimuovi" style="background:none;border:none;cursor:pointer;padding:4px 6px;color:var(--color-text-secondary);font-size:18px;flex-shrink:0">✕</button>
+          </div>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+
+    // Listener quantità
+    container.querySelectorAll('[data-describe-qty]').forEach(inp => {
+      inp.addEventListener('input', updateDescribeTotalSummary);
+    });
+
+    // Listener rimozione
+    container.querySelectorAll('.btn-describe-del').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = parseInt(btn.dataset.describeDel);
+        _describeItems.splice(idx, 1);
+        renderDescribeResults();
+      });
+    });
+
+    // Listener alternative
+    container.querySelectorAll('.btn-ai-alternatives').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = parseInt(btn.dataset.describeAlt);
+        toggleDescribeAlternatives(idx);
+      });
+    });
+  }
+
+  function updateDescribeTotalSummary() {
+    const el = document.getElementById('describe-total-summary');
+    if (!el) return;
+    let totKcal = 0, totP = 0, totFt = 0, totC = 0;
+    _describeItems.forEach((item, i) => {
+      const nut = _pickNut(item);
+      const qty = parseFloat(document.querySelector(`[data-describe-qty="${i}"]`)?.value) || item.ai_quantity_g;
+      totKcal += nut.kcal_100g / 100 * qty;
+      totP    += nut.protein_100g / 100 * qty;
+      totFt   += nut.fat_100g / 100 * qty;
+      totC    += nut.carbs_100g / 100 * qty;
+    });
+    el.querySelector('.ai-total-kcal').textContent = `${Math.round(totKcal)} kcal`;
+    el.querySelector('.ai-total-macros').innerHTML = `
+      <span style="color:var(--color-protein)">P:${fmt(totP, 0)}g</span>
+      <span style="color:var(--color-fat)">G:${fmt(totFt, 0)}g</span>
+      <span style="color:var(--color-carbs)">C:${fmt(totC, 0)}g</span>
+    `;
+  }
+
+  function toggleDescribeAlternatives(idx) {
+    const listEl = document.getElementById(`describe-alt-${idx}`);
+    if (!listEl.classList.contains('hidden')) {
+      listEl.classList.add('hidden');
+      return;
+    }
+
+    const item = _describeItems[idx];
+    const allMatches = [
+      ...(item.local_matches || []).map((m, mi) => ({ ...m, _type: 'local', _idx: mi })),
+      ...(item.catalog_matches || []).map((m, mi) => ({ ...m, _type: 'catalog', _idx: mi }))
+    ];
+
+    listEl.innerHTML = allMatches.map((m, j) => `
+      <div class="ai-alt-option" data-describe-parent="${idx}" data-alt-idx="${j}" data-alt-type="${m._type}" data-alt-src-idx="${m._idx}">
+        <div class="ai-alt-name">${m.name}${m.brand ? ` <span style="color:var(--color-text-secondary)">${m.brand}</span>` : ''}</div>
+        <div class="ai-alt-detail">${Math.round(m.kcal_100g)} kcal/100g · ${m._type === 'local' ? 'DB locale' : _fmtSrc(m.source)}</div>
+      </div>
+    `).join('');
+
+    listEl.classList.remove('hidden');
+
+    listEl.querySelectorAll('.ai-alt-option').forEach(opt => {
+      opt.addEventListener('click', () => {
+        const parentIdx = parseInt(opt.dataset.describeParent);
+        const altType = opt.dataset.altType;
+        const srcIdx = parseInt(opt.dataset.altSrcIdx);
+
+        const parentItem = _describeItems[parentIdx];
+        if (altType === 'local') {
+          const selected = parentItem.local_matches.splice(srcIdx, 1)[0];
+          parentItem.local_matches.unshift(selected);
+        } else {
+          const selected = parentItem.catalog_matches.splice(srcIdx, 1)[0];
+          parentItem.catalog_matches = [selected, ...parentItem.catalog_matches.filter((_, k) => k !== srcIdx)];
+          parentItem.local_matches = [];
+        }
+
+        renderDescribeResults();
+      });
+    });
+  }
+
+  // Aggiungi ingrediente — ricerca locale + catalogo CREA
+  document.getElementById('describe-add-ingredient').addEventListener('input', (e) => {
+    clearTimeout(_describeAddTimeout);
+    const q = e.target.value.trim();
+    const resultsEl = document.getElementById('describe-add-results');
+
+    if (q.length < 2) {
+      resultsEl.style.display = 'none';
+      resultsEl.innerHTML = '';
+      return;
+    }
+
+    _describeAddTimeout = setTimeout(async () => {
+      try {
+        // 1. Cerca nel DB locale
+        const localRes = await fetch(`/api/foods?q=${encodeURIComponent(q)}&limit=8`);
+        const localFoods = localRes.ok ? await localRes.json() : [];
+
+        // 2. Se pochi risultati locali, cerca anche nel catalogo CREA
+        let catalogFoods = [];
+        if (localFoods.length < 3) {
+          try {
+            const catRes = await fetch('/api/foods/import-catalog', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ query: q })
+            });
+            if (catRes.ok) {
+              const all = await catRes.json();
+              catalogFoods = all.filter(p => p.source === 'crea').slice(0, 5);
+            }
+          } catch (e) { /* catalogo non disponibile */ }
+        }
+
+        // Deduplicazione locale vs catalogo per barcode
+        const localBarcodes = new Set(localFoods.filter(f => f.barcode).map(f => f.barcode));
+        catalogFoods = catalogFoods.filter(p => !p.barcode || !localBarcodes.has(p.barcode));
+
+        const allResults = [
+          ...localFoods.map(f => ({ name: f.name, brand: f.brand || '', kcal_100g: f.kcal_100g, protein_100g: f.protein_100g, fat_100g: f.fat_100g, carbs_100g: f.carbs_100g, source: 'local', food_id: f.id })),
+          ...catalogFoods.map(f => ({ name: f.name, brand: f.brand || '', kcal_100g: f.kcal_100g, protein_100g: f.protein_100g, fat_100g: f.fat_100g, carbs_100g: f.carbs_100g, source: f.source || 'crea', food_id: null }))
+        ];
+
+        if (allResults.length === 0) {
+          resultsEl.innerHTML = '<div style="padding:10px;font-size:13px;color:var(--color-text-secondary)">Nessun risultato</div>';
+          resultsEl.style.display = 'block';
+          return;
+        }
+
+        resultsEl.innerHTML = allResults.map((f, j) => `
+          <div class="describe-add-option" data-add-idx="${j}" style="padding:8px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--color-border)">
+            <div style="font-weight:600">${f.name}${f.brand ? ` <span style="color:var(--color-text-secondary);font-weight:400">${f.brand}</span>` : ''} <span style="font-size:10px;color:var(--color-text-secondary);font-weight:400">${f.source === 'local' ? 'DB' : 'CREA'}</span></div>
+            <div style="color:var(--color-text-secondary)">${Math.round(f.kcal_100g)} kcal/100g</div>
+          </div>
+        `).join('');
+        resultsEl.style.display = 'block';
+
+        // Associa dati agli elementi
+        resultsEl.querySelectorAll('.describe-add-option').forEach((el, j) => {
+          el.addEventListener('mousedown', (ev) => {
+            ev.preventDefault(); // evita blur prima del click
+            const f = allResults[j];
+            const newItem = {
+              ai_name: f.name,
+              ai_quantity_g: 100,
+              ai_kcal_100g: f.kcal_100g,
+              ai_protein_100g: f.protein_100g,
+              ai_fat_100g: f.fat_100g,
+              ai_carbs_100g: f.carbs_100g,
+              local_matches: f.source === 'local' ? [{ id: f.food_id, name: f.name, brand: f.brand, kcal_100g: f.kcal_100g, protein_100g: f.protein_100g, fat_100g: f.fat_100g, carbs_100g: f.carbs_100g }] : [],
+              catalog_matches: f.source !== 'local' ? [{ name: f.name, brand: f.brand, kcal_100g: f.kcal_100g, protein_100g: f.protein_100g, fat_100g: f.fat_100g, carbs_100g: f.carbs_100g, source: f.source }] : []
+            };
+            _describeItems.push(newItem);
+            document.getElementById('describe-add-ingredient').value = '';
+            resultsEl.style.display = 'none';
+            renderDescribeResults();
+          });
+        });
+      } catch (e) {
+        console.warn('Describe add-ingredient search error:', e);
+      }
+    }, 300);
+  });
+
+  document.getElementById('describe-add-ingredient').addEventListener('blur', () => {
+    setTimeout(() => {
+      document.getElementById('describe-add-results').style.display = 'none';
+    }, 150);
+  });
+
+  // Conferma: aggiunge piatto come ricetta is_quick=1 (voce singola nel pasto)
+  document.getElementById('btn-describe-confirm').addEventListener('click', async () => {
+    if (_describeItems.length === 0) return;
+
+    const btn = document.getElementById('btn-describe-confirm');
+    btn.disabled = true;
+    btn.textContent = 'Aggiunta in corso…';
+
+    try {
+      const name = document.getElementById('describe-dish-name').value.trim() || _describeDishName || 'Piatto descritto';
+
+      const components = _describeItems.map((item, i) => {
+        const qty = Math.max(1, parseInt(document.querySelector(`[data-describe-qty="${i}"]`)?.value) || item.ai_quantity_g);
+        const local = item.local_matches?.[0];
+        const cat = item.catalog_matches?.[0];
+        const src = local || cat;
+        return {
+          food_id: local ? (local.id || null) : null,
+          name: src ? src.name : item.ai_name,
+          quantity_g: qty,
+          kcal_100g:    src ? (src.kcal_100g    || 0) : (item.ai_kcal_100g    || 0),
+          protein_100g: src ? (src.protein_100g  || 0) : (item.ai_protein_100g || 0),
+          fat_100g:     src ? (src.fat_100g      || 0) : (item.ai_fat_100g     || 0),
+          carbs_100g:   src ? (src.carbs_100g    || 0) : (item.ai_carbs_100g   || 0)
+        };
+      });
+
+      const res = await apiPost('/api/diary/dish-as-recipe', {
+        date: currentDate,
+        meal_type: selectedMeal,
+        name,
+        components
+      });
+
+      if (res && !res.error) {
+        // Chiudi modal e torna alla ricerca
+        document.getElementById('modal-step-describe-results').classList.add('hidden');
+        document.getElementById('modal-step-search').classList.remove('hidden');
+        document.getElementById('modal-food-search').value = '';
+        document.getElementById('modal-search-results').innerHTML = '';
+        document.getElementById('modal-add-food').classList.add('hidden');
+        loadRecentFoods(selectedMeal);
+
+        showAddedToast(`"${name}" aggiunto al pasto`);
+        openMealId = selectedMeal;
+        await refresh();
+      } else {
+        throw new Error(res?.error || 'Errore sconosciuto');
+      }
+    } catch (err) {
+      console.error('dish-as-recipe error:', err);
+      alert(`Errore: ${err.message}`);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Aggiungi al pasto come ricetta';
+    }
+  });
 
   // ── Salva come ricetta ────────────────────────────────────────────────────
   let _recipeMealType = null;
