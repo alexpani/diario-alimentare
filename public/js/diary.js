@@ -153,10 +153,13 @@ window.DiaryTab = (() => {
             const yMeal = yesterdayEntries.filter(e => e.meal_type === meal.id);
             if (yMeal.length === 0) return '';
             const totalKcal = Math.round(yMeal.reduce((s, e) => s + e.kcal, 0));
-            const top = yMeal.reduce((a, b) => b.kcal > a.kcal ? b : a);
-            const topName = (top.food && top.food.name) || top.food_name || '?';
-            const others = yMeal.length - 1;
-            const desc = others > 0 ? `${topName} e ${others === 1 ? '1 altro' : others + ' altri'}` : topName;
+            // Mostra fino a 4 alimenti (i più calorici); se ce ne sono di più, "e N altri"
+            const sorted = [...yMeal].sort((a, b) => (b.kcal || 0) - (a.kcal || 0));
+            const shown = sorted.slice(0, 4).map(e => (e.food && e.food.name) || e.food_name || '?');
+            const extra = yMeal.length - shown.length;
+            const desc = extra > 0
+              ? `${shown.join(', ')} e ${extra === 1 ? '1 altro' : extra + ' altri'}`
+              : shown.join(', ');
             return `<button class="btn-copy-from-yesterday" data-meal="${meal.id}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
             <span class="copy-yesterday-label">Copia ${meal.label.toLowerCase()} da ieri</span>
