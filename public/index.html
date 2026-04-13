@@ -11,7 +11,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
   <link rel="manifest" href="/manifest.json">
   <title>FoodDiary</title>
-  <link rel="stylesheet" href="/css/style.css?v=40">
+  <link rel="stylesheet" href="/css/style.css?v=41">
 </head>
 <body>
 
@@ -167,20 +167,31 @@
     <!-- TAB: ALIMENTI -->
     <section id="tab-alimenti" class="tab-pane">
       <div class="foods-toolbar">
-        <div class="search-wrap">
-          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" id="foods-search" placeholder="Cerca alimenti..." class="search-input">
+        <div class="foods-toolbar-row">
+          <div class="search-wrap">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="foods-search" placeholder="Cerca nella libreria..." class="search-input">
+          </div>
+          <button id="btn-scan-barcode-foods" class="btn-icon" title="Scansiona barcode" style="color:var(--color-primary)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><rect x="3" y="3" width="6" height="18"/><rect x="13" y="3" width="2" height="18"/><rect x="17" y="3" width="4" height="18"/></svg>
+          </button>
         </div>
-        <button id="btn-scan-barcode-foods" class="btn-icon" title="Scansiona barcode" style="color:var(--color-primary)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><rect x="3" y="3" width="6" height="18"/><rect x="13" y="3" width="2" height="18"/><rect x="17" y="3" width="4" height="18"/></svg>
-        </button>
-        <button id="btn-new-food" class="btn btn-primary">+ Nuovo</button>
+        <div class="foods-toolbar-row">
+          <div class="search-wrap">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="catalog-query" placeholder="Cerca nel catalogo..." class="search-input" autocomplete="off">
+          </div>
+          <button id="btn-new-food" class="btn-icon btn-icon-plus" title="Nuovo alimento">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+          </button>
+        </div>
       </div>
       <div id="barcode-scanner-foods-wrap" class="hidden" style="padding:12px">
         <div id="barcode-reader-foods"></div>
         <button id="btn-stop-scan-foods" class="btn btn-outline btn-full mt-8">Ferma scanner</button>
       </div>
       <input type="file" id="barcode-file-input-foods" accept="image/*" capture="environment" style="display:none">
+      <div id="catalog-results" class="catalog-results hidden"></div>
       <div id="foods-list" class="foods-list"></div>
     </section>
 
@@ -704,23 +715,6 @@
   </div>
 </div>
 
-<!-- MODAL: Import Catalogo locale (food-tracker) -->
-<div id="modal-catalog" class="modal-fullscreen hidden">
-  <div class="modal-fullscreen-header">
-    <h2>Catalogo</h2>
-    <div style="display:flex;gap:8px;align-items:center;flex:1;margin-left:12px">
-      <div class="search-wrap" style="flex:1">
-        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" id="catalog-query" placeholder="Nome prodotto o barcode..." class="search-input" autocomplete="off">
-      </div>
-      <button id="modal-catalog-close" class="btn btn-primary btn-sm" style="font-size:20px;line-height:1;padding:4px 12px">&times;</button>
-    </div>
-  </div>
-  <div class="modal-fullscreen-body">
-    <div id="catalog-results" class="catalog-results"></div>
-  </div>
-</div>
-
 <!-- MODAL: Conferma eliminazione -->
 <div id="modal-confirm" class="modal hidden">
   <div class="modal-backdrop" id="modal-confirm-backdrop"></div>
@@ -763,7 +757,7 @@
 <script src="/js/app.js?v=13"></script>
 <script src="/js/scanner-config.js?v=2"></script>
 <script src="/js/barcode.js?v=2"></script>
-<script src="/js/foods.js?v=24"></script>
+<script src="/js/foods.js?v=25"></script>
 <script src="/js/diary.js?v=54"></script>
 <script src="/js/diarylog.js?v=6"></script>
 <script src="/js/plan.js?v=5"></script>
