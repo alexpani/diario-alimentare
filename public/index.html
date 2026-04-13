@@ -11,7 +11,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
   <link rel="manifest" href="/manifest.json">
   <title>FoodDiary</title>
-  <link rel="stylesheet" href="/css/style.css?v=39">
+  <link rel="stylesheet" href="/css/style.css?v=40">
 </head>
 <body>
 
@@ -417,6 +417,20 @@
         <p class="qty-calculated">= <strong id="qty-calculated-g">0</strong> g</p>
       </div>
       <div class="kcal-preview" id="kcal-preview">~0 kcal</div>
+      <div class="macros-preview" id="macros-preview">
+        <div class="macro-chip macro-chip-protein">
+          <span class="macro-chip-label">P</span>
+          <span class="macro-chip-value" id="macro-preview-protein">0g</span>
+        </div>
+        <div class="macro-chip macro-chip-fat">
+          <span class="macro-chip-label">G</span>
+          <span class="macro-chip-value" id="macro-preview-fat">0g</span>
+        </div>
+        <div class="macro-chip macro-chip-carbs">
+          <span class="macro-chip-label">C</span>
+          <span class="macro-chip-value" id="macro-preview-carbs">0g</span>
+        </div>
+      </div>
       <div id="edit-meal-move-wrap" class="hidden" style="margin-bottom:12px">
         <select id="edit-meal-move-select" class="select-input">
           <option value="">Cambia pasto…</option>
@@ -750,7 +764,7 @@
 <script src="/js/scanner-config.js?v=2"></script>
 <script src="/js/barcode.js?v=2"></script>
 <script src="/js/foods.js?v=24"></script>
-<script src="/js/diary.js?v=53"></script>
+<script src="/js/diary.js?v=54"></script>
 <script src="/js/diarylog.js?v=6"></script>
 <script src="/js/plan.js?v=5"></script>
 <script src="/js/settings.js?v=7"></script>

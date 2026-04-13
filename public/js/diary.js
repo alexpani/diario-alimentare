@@ -729,8 +729,15 @@ window.DiaryTab = (() => {
   function updateKcalPreview() {
     if (!selectedFood) return;
     const { quantity_g, label } = getQuantity();
-    const kcal = (selectedFood.kcal_100g / 100) * quantity_g;
+    const factor = quantity_g / 100;
+    const kcal    = (selectedFood.kcal_100g    || 0) * factor;
+    const protein = (selectedFood.protein_100g || 0) * factor;
+    const fat     = (selectedFood.fat_100g     || 0) * factor;
+    const carbs   = (selectedFood.carbs_100g   || 0) * factor;
     document.getElementById('kcal-preview').textContent = `~${Math.round(kcal)} kcal`;
+    document.getElementById('macro-preview-protein').textContent = `${fmt(protein)}g`;
+    document.getElementById('macro-preview-fat').textContent     = `${fmt(fat)}g`;
+    document.getElementById('macro-preview-carbs').textContent   = `${fmt(carbs)}g`;
     if (document.querySelector('.qty-tab[data-mode="portions"]').classList.contains('active')) {
       document.getElementById('qty-calculated-g').textContent = fmt(quantity_g, 0);
     }
