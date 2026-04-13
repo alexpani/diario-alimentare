@@ -1144,8 +1144,34 @@ input:focus, select:focus, textarea:focus {
   padding: 12px;
   background: var(--color-primary-light);
   border-radius: var(--radius-sm);
-  margin: 12px 0;
+  margin: 12px 0 8px;
 }
+
+.macros-preview {
+  display: flex; gap: 8px;
+  margin: 0 0 12px;
+}
+.macro-chip {
+  flex: 1;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 2px;
+  padding: 8px 6px;
+  background: var(--color-bg);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+}
+.macro-chip-label {
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.macro-chip-value {
+  font-size: 15px; font-weight: 700;
+  color: var(--color-text);
+}
+.macro-chip-protein .macro-chip-label { color: var(--color-protein); }
+.macro-chip-fat     .macro-chip-label { color: var(--color-fat); }
+.macro-chip-carbs   .macro-chip-label { color: var(--color-carbs); }
 
 .selected-food-preview {
   display: flex; align-items: center; gap: 10px;
