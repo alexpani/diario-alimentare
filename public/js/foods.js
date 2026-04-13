@@ -88,6 +88,24 @@ window.FoodsTab = (() => {
     searchTimeout = setTimeout(() => refresh(q), 300);
   });
 
+  // Reset mutuo: cliccando in una delle due caselle, l'altra viene svuotata
+  document.getElementById('foods-search').addEventListener('focus', () => {
+    const catalogInput = document.getElementById('catalog-query');
+    if (catalogInput.value !== '') {
+      catalogInput.value = '';
+      clearTimeout(catalogSearchTimeout);
+      hideCatalogResults();
+    }
+  });
+  document.getElementById('catalog-query').addEventListener('focus', () => {
+    const libInput = document.getElementById('foods-search');
+    if (libInput.value !== '') {
+      libInput.value = '';
+      clearTimeout(searchTimeout);
+      refresh('');
+    }
+  });
+
   // ── Delete ──────────────────────────────
   async function deleteFood(id, name) {
     const countRes = await apiGet(`/api/foods/${id}/diary-count`);
