@@ -667,37 +667,26 @@ window.FoodsTab = (() => {
     }
   });
 
-  // ── Import Catalogo locale (food-tracker) ──────────────────────────────────
-  const toolbar = document.querySelector('.foods-toolbar');
+  // ── Ricerca Catalogo inline (food-tracker) ──────────────────────────────────
+  const catalogResultsEl = document.getElementById('catalog-results');
 
-  const catalogBtn = document.createElement('button');
-  catalogBtn.id = 'btn-import-catalog';
-  catalogBtn.className = 'btn btn-outline btn-sm';
-  catalogBtn.title = 'Cerca nel catalogo locale (265K+ prodotti)';
-  catalogBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;vertical-align:-2px"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> Catalogo`;
-  toolbar.insertBefore(catalogBtn, document.getElementById('btn-new-food'));
-
-  catalogBtn.addEventListener('click', () => {
-    document.getElementById('catalog-query').value = '';
-    document.getElementById('catalog-results').innerHTML = '';
-    document.getElementById('modal-catalog').classList.remove('hidden');
-    setTimeout(() => document.getElementById('catalog-query').focus(), 100);
-  });
-
-  const closeCatalogModal = () => {
-    document.getElementById('modal-catalog').classList.add('hidden');
-  };
-  document.getElementById('modal-catalog-close').addEventListener('click', closeCatalogModal);
+  function showCatalogResults() {
+    catalogResultsEl.classList.remove('hidden');
+  }
+  function hideCatalogResults() {
+    catalogResultsEl.classList.add('hidden');
+    catalogResultsEl.innerHTML = '';
+  }
 
   document.getElementById('catalog-query').addEventListener('keydown', e => { if (e.key === 'Enter') searchCatalog(); });
 
-  // Ricerca predittiva catalogo (4+ caratteri)
+  // Ricerca predittiva catalogo (2+ caratteri)
   let catalogSearchTimeout = null;
   document.getElementById('catalog-query').addEventListener('input', (e) => {
     clearTimeout(catalogSearchTimeout);
     const q = e.target.value.trim();
     if (q.length < 2) {
-      if (q.length === 0) document.getElementById('catalog-results').innerHTML = '';
+      if (q.length === 0) hideCatalogResults();
       return;
     }
     catalogSearchTimeout = setTimeout(() => searchCatalog(), 400);
@@ -705,9 +694,10 @@ window.FoodsTab = (() => {
 
   async function searchCatalog() {
     const q = document.getElementById('catalog-query').value.trim();
-    if (!q) return;
+    if (!q) { hideCatalogResults(); return; }
 
-    const resultsEl = document.getElementById('catalog-results');
+    const resultsEl = catalogResultsEl;
+    showCatalogResults();
     resultsEl.innerHTML = '<div class="spinner"></div>';
 
     // Determina se è un barcode
@@ -762,7 +752,8 @@ window.FoodsTab = (() => {
     resultsEl.querySelectorAll('.btn-catalog-import').forEach(btn => {
       btn.addEventListener('click', () => {
         const product = products[parseInt(btn.dataset.idx)];
-        closeCatalogModal();
+        document.getElementById('catalog-query').value = '';
+        hideCatalogResults();
         openFoodFormWithData(product);
       });
     });

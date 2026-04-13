@@ -907,11 +907,24 @@ input:focus, select:focus, textarea:focus {
    FOODS TAB
    ========================================= */
 .foods-toolbar {
-  display: flex; gap: 10px; align-items: center;
+  display: flex; flex-direction: column; gap: 8px;
   padding: 12px; background: var(--color-card);
   border-bottom: 1px solid var(--color-border);
   position: sticky; top: 0; z-index: 5;
 }
+.foods-toolbar-row {
+  display: flex; gap: 10px; align-items: center;
+}
+.foods-toolbar-row .search-wrap { flex: 1; }
+.btn-icon.btn-icon-plus {
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+.btn-icon.btn-icon-plus svg {
+  width: 28px; height: 28px;
+  stroke-width: 2.5;
+}
+.btn-icon.btn-icon-plus:active { background: var(--color-primary-light); }
 
 .foods-list { padding: 8px 12px; display: flex; flex-direction: column; gap: 8px; }
 
@@ -1257,7 +1270,7 @@ input:focus, select:focus, textarea:focus {
 }
 .catalog-tab.active { background: var(--color-primary); color: var(--color-text-on-primary); }
 
-.catalog-results { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+.catalog-results { padding: 12px; display: flex; flex-direction: column; gap: 8px; }
 .catalog-result-item img { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
 .catalog-result-info { flex: 1; min-width: 0; }
 .catalog-result-name { font-weight: 700; font-size: 14px; }
