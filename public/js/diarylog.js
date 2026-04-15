@@ -233,7 +233,6 @@ window.DiaryLog = (() => {
     const carbsPct = totalKcal > 0 ? 100 - proteinPct - fatPct : 0;
 
     // Legenda con grammi e percentuali
-    const legendEl = document.getElementById('chart-macros-legend');
     if (legendEl) {
       legendEl.innerHTML = `
         <div class="macros-legend-item"><span class="macros-legend-dot" style="background:${cssColor('--color-protein')}"></span>Proteine: ${Math.round(avgProtein)}g · ${proteinPct}%</div>
@@ -244,7 +243,6 @@ window.DiaryLog = (() => {
 
     // Scostamento dal piano
     const plan = App.plan;
-    const devEl = document.getElementById('chart-macros-deviation');
     if (devEl && plan) {
       const diffP = proteinPct - (plan.protein_pct || 0);
       const diffF = fatPct - (plan.fat_pct || 0);
