@@ -1164,6 +1164,11 @@ input:focus, select:focus, textarea:focus {
 .macros-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-3); margin-top: var(--space-3); }
 .macros-legend-item { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); color: var(--color-text-secondary); }
 .macros-legend-dot { width: 10px; height: 10px; border-radius: var(--radius-full); flex-shrink: 0; }
+/* Stato vuoto grafico macro */
+.chart-empty { text-align: center; padding: var(--space-5) var(--space-3); color: var(--color-text-secondary); }
+.chart-empty-icon { font-size: 36px; margin-bottom: var(--space-2); opacity: 0.5; }
+.chart-empty-msg { font-size: var(--text-sm); margin-bottom: var(--space-3); }
+.chart-empty-btn { font-size: var(--text-sm); padding: var(--space-2) var(--space-4); }
 /* Scostamento dal piano */
 .macros-deviation { margin-top: var(--space-3); text-align: center; }
 .macros-deviation-title { font-size: var(--text-xs); color: var(--color-text-secondary); margin-bottom: var(--space-1); }

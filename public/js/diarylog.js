@@ -177,11 +177,11 @@ window.DiaryLog = (() => {
     }
     const data = _rangeCache[numDays];
 
-    const card = document.getElementById('chart-macros').parentElement;
-    if (!data || data.length === 0) {
-      card.style.display = 'none';
-      return;
-    }
+    const canvasEl = document.getElementById('chart-macros');
+    const card = canvasEl.parentElement;
+    const legendEl = document.getElementById('chart-macros-legend');
+    const devEl = document.getElementById('chart-macros-deviation');
+    const emptyEl = document.getElementById('chart-macros-empty');
     card.style.display = '';
 
     // Aggiorna tab attivo e titolo
@@ -190,6 +190,34 @@ window.DiaryLog = (() => {
     });
     const titleMacros = document.getElementById('chart-macros-title');
     if (titleMacros) titleMacros.textContent = `Macro medi ultimi ${numDays} giorni`;
+
+    // Stato vuoto: nessun dato nel periodo
+    if (!data || data.length === 0) {
+      if (macrosChart) { macrosChart.destroy(); macrosChart = null; }
+      canvasEl.classList.add('hidden');
+      if (legendEl) { legendEl.innerHTML = ''; legendEl.classList.add('hidden'); }
+      if (devEl) { devEl.innerHTML = ''; devEl.classList.add('hidden'); }
+      if (emptyEl) {
+        const otherDays = numDays === 7 ? 30 : 7;
+        emptyEl.classList.remove('hidden');
+        emptyEl.innerHTML = `
+          <div class="chart-empty-icon">📊</div>
+          <div class="chart-empty-msg">Nessuna voce negli ultimi ${numDays} giorni.</div>
+          <button class="btn btn-outline chart-empty-btn" data-switch-days="${otherDays}">
+            Prova ultimi ${otherDays} giorni
+          </button>
+        `;
+        const switchBtn = emptyEl.querySelector('[data-switch-days]');
+        if (switchBtn) switchBtn.addEventListener('click', () => loadMacrosChart(otherDays));
+      }
+      return;
+    }
+
+    // Dati presenti: mostra chart e nascondi empty state
+    canvasEl.classList.remove('hidden');
+    if (legendEl) legendEl.classList.remove('hidden');
+    if (devEl) devEl.classList.remove('hidden');
+    if (emptyEl) { emptyEl.classList.add('hidden'); emptyEl.innerHTML = ''; }
 
     const avgProtein = data.reduce((s, d) => s + d.protein, 0) / data.length;
     const avgFat = data.reduce((s, d) => s + d.fat, 0) / data.length;
