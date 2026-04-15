@@ -1,5 +1,4 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80">
-  <circle cx="40" cy="40" r="40" fill="#1A1A1A"/>
   <!-- apple body -->
   <path d="M40 28 C26 28, 20 46, 30 58 C35 63, 46 63, 51 58 C60 46, 54 28, 40 28 Z" fill="#E53935"/>
   <!-- highlight -->

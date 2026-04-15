@@ -863,7 +863,11 @@ input:focus, select:focus, textarea:focus {
   border-radius: var(--radius-full);
   flex-shrink: 0;
   display: block;
+  background-color: #3E2723;
   box-shadow: 0 0 0 1px var(--color-border-subtle);
+}
+[data-theme="dark"] .meal-illustration {
+  background-color: #1A1A1A;
 }
 .meal-name { font-size: var(--text-lg); font-weight: var(--font-weight-bold); letter-spacing: -0.005em; }
 .meal-macros {
