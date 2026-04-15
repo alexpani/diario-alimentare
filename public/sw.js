@@ -6,7 +6,7 @@
 // - Asset same-origin: stale-while-revalidate
 // - CDN cross-origin: network-first con fallback alla cache
 
-const VERSION = 'v5';
+const VERSION = 'v6';
 const SHELL_CACHE = `fd-shell-${VERSION}`;
 const RUNTIME_CACHE = `fd-runtime-${VERSION}`;
 const API_CACHE = `fd-api-${VERSION}`;
@@ -33,6 +33,8 @@ const CDN_ASSETS = [
   'https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js',
   'https://cdn.jsdelivr.net/npm/cropperjs@1.6.1/dist/cropper.min.css',
   'https://cdn.jsdelivr.net/npm/cropperjs@1.6.1/dist/cropper.min.js',
+  // Inter font: CSS + family entry point (i file woff2 vengono risolti run-time)
+  'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap',
 ];
 
 // Helper: true se la response è valida da cacheare (incluse opaque dei CDN)

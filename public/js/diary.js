@@ -162,17 +162,17 @@ window.DiaryTab = (() => {
               ? `${shown.join(', ')} e ${extra === 1 ? '1 altro' : extra + ' altri'}`
               : shown.join(', ');
             return `<button class="btn-copy-from-yesterday" data-meal="${meal.id}">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
             <span class="copy-yesterday-label">Copia ${meal.label.toLowerCase()} da ieri</span>
             <span class="copy-yesterday-detail">${desc} — ${totalKcal} kcal</span>
           </button>`;
           })() : ''}
           ${mealEntries.length >= 2 ? `<button class="btn-save-as-recipe" data-meal="${meal.id}">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
             Salva come ricetta
           </button>` : ''}
           <button class="btn-add-to-meal" data-meal="${meal.id}">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:18px;height:18px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            <svg class="icon-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
             Aggiungi alimento
           </button>
         </div>
@@ -656,7 +656,7 @@ window.DiaryTab = (() => {
     // Mostra anteprima
     const preview = document.getElementById('selected-food-preview');
     preview.innerHTML = `
-      ${food.image_path ? `<img src="${food.image_path}" alt="" style="width:42px;height:42px;border-radius:8px;object-fit:cover">` : '<div style="width:42px;height:42px;background:var(--color-bg);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px">🥗</div>'}
+      ${food.image_path ? `<img src="${food.image_path}" alt="">` : '<div class="sfp-placeholder">🥗</div>'}
       <div class="sfp-info">
         <div class="sfp-name">${food.name}</div>
         <div class="sfp-macros">${Math.round(food.kcal_100g)} kcal · P:${fmt(food.protein_100g)}g G:${fmt(food.fat_100g)}g C:${fmt(food.carbs_100g)}g per 100g</div>

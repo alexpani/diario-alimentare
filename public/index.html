@@ -11,7 +11,10 @@
   <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
   <link rel="manifest" href="/manifest.json">
   <title>FoodDiary</title>
-  <link rel="stylesheet" href="/css/style.css?v=41">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="/css/style.css?v=42">
 </head>
 <body>
 
@@ -67,11 +70,11 @@
         <div id="cal-popup" class="cal-popup">
           <div class="cal-header">
             <button id="cal-prev-month" class="cal-nav-btn">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:18px;height:18px"><polyline points="15,18 9,12 15,6"/></svg>
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15,18 9,12 15,6"/></svg>
             </button>
             <span id="cal-month-label" class="cal-month-label"></span>
             <button id="cal-next-month" class="cal-nav-btn">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:18px;height:18px"><polyline points="9,18 15,12 9,6"/></svg>
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,18 15,12 9,6"/></svg>
             </button>
           </div>
           <div class="cal-weekdays">
@@ -87,14 +90,14 @@
         <!-- Date navigation -->
         <div class="date-nav">
           <button id="prev-day" class="btn-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" width="24" height="24"><polyline points="15,18 9,12 15,6"/></svg>
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15,18 9,12 15,6"/></svg>
           </button>
           <button id="current-date-btn" class="date-label">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;vertical-align:-2px;margin-right:4px"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             <span id="current-date-text">Oggi</span>
           </button>
           <button id="next-day" class="btn-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" width="24" height="24"><polyline points="9,18 15,12 9,6"/></svg>
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,18 15,12 9,6"/></svg>
           </button>
         </div>
         <!-- Riga gauge -->
@@ -182,7 +185,7 @@
             <input type="text" id="catalog-query" placeholder="Cerca nel catalogo..." class="search-input" autocomplete="off">
           </div>
           <button id="btn-new-food" class="btn-icon btn-icon-plus" title="Nuovo alimento">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
           </button>
         </div>
       </div>
@@ -367,25 +370,25 @@
         <button id="btn-open-quick-entry" class="btn btn-outline" style="flex:1;border-color:var(--color-primary);color:var(--color-primary);font-size:13px;padding:8px 0">
           ⚡ Voce rapida
         </button>
-        <button id="btn-scan-barcode" class="btn btn-outline" style="flex:1;font-size:13px;padding:8px 0">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;vertical-align:middle;margin-right:4px"><rect x="3" y="3" width="6" height="18"/><rect x="13" y="3" width="2" height="18"/><rect x="17" y="3" width="4" height="18"/></svg>
+        <button id="btn-scan-barcode" class="btn btn-outline btn-action">
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="6" height="18"/><rect x="13" y="3" width="2" height="18"/><rect x="17" y="3" width="4" height="18"/></svg>
           Fotocamera
         </button>
       </div>
-      <div style="margin-top:8px;display:flex;gap:8px">
-        <button id="btn-ai-recognize" class="btn btn-outline btn-full" style="font-size:13px;padding:8px 0;border-color:var(--color-primary);color:var(--color-primary)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;vertical-align:middle;margin-right:4px"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+      <div class="modal-action-row">
+        <button id="btn-ai-recognize" class="btn btn-outline btn-action btn-action-primary">
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
           Riconosci
         </button>
-        <button id="btn-describe-dish" class="btn btn-outline btn-full" style="font-size:13px;padding:8px 0;border-color:var(--color-primary);color:var(--color-primary)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;vertical-align:middle;margin-right:4px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <button id="btn-describe-dish" class="btn btn-outline btn-action btn-action-primary">
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           Descrivi
         </button>
-        <input type="file" id="ai-photo-input" accept="image/*" style="display:none">
+        <input type="file" id="ai-photo-input" accept="image/*" class="hidden">
       </div>
-      <input type="file" id="barcode-file-input" accept="image/*" capture="environment" style="display:none">
+      <input type="file" id="barcode-file-input" accept="image/*" capture="environment" class="hidden">
       <button id="btn-scan-barcode-file" class="btn btn-outline btn-full mt-8 hidden">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;vertical-align:middle;margin-right:6px"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
         Fotografa barcode (iOS)
       </button>
       <div id="barcode-scanner-wrap" class="hidden">
@@ -447,9 +450,9 @@
           <option value="">Cambia pasto…</option>
         </select>
       </div>
-      <div id="edit-recipe-wrap" class="hidden" style="margin-bottom:12px">
-        <button id="btn-edit-recipe" class="btn btn-outline btn-full" style="font-size:13px">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;vertical-align:-3px;margin-right:4px"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      <div id="edit-recipe-wrap" class="hidden edit-recipe-wrap">
+        <button id="btn-edit-recipe" class="btn btn-outline btn-full btn-edit-recipe">
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           Modifica ricetta
         </button>
       </div>
@@ -579,9 +582,9 @@
   <div class="modal-sheet modal-sheet-full">
     <div class="modal-header">
       <h2 id="food-form-title">Nuovo alimento</h2>
-      <button type="button" id="btn-clone-recipe" class="btn btn-outline btn-sm hidden" style="margin-left:auto;margin-right:8px;font-size:0.78rem;padding:4px 10px">Clona</button>
+      <button type="button" id="btn-clone-recipe" class="btn btn-outline btn-sm btn-clone-recipe hidden">Clona</button>
       <button class="btn-icon modal-close" id="modal-food-form-close">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
     <div class="modal-body">
@@ -601,12 +604,12 @@
         <div class="form-group">
           <label>Barcode</label>
           <input type="text" id="ff-barcode">
-          <button type="button" id="btn-ff-scan-barcode" class="btn btn-outline btn-full mt-8">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;vertical-align:middle;margin-right:6px"><rect x="3" y="3" width="6" height="18"/><rect x="13" y="3" width="2" height="18"/><rect x="17" y="3" width="4" height="18"/></svg>
+          <button type="button" id="btn-ff-scan-barcode" class="btn btn-outline btn-full mt-8 btn-with-icon">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="6" height="18"/><rect x="13" y="3" width="2" height="18"/><rect x="17" y="3" width="4" height="18"/></svg>
             Scansiona con fotocamera
           </button>
-          <button type="button" id="btn-ff-scan-barcode-file" class="btn btn-outline btn-full mt-8 hidden">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;vertical-align:middle;margin-right:6px"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          <button type="button" id="btn-ff-scan-barcode-file" class="btn btn-outline btn-full mt-8 btn-with-icon hidden">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
             Fotografa barcode
           </button>
           <input type="file" id="ff-barcode-file-input" accept="image/*" capture="environment" style="display:none">
@@ -757,8 +760,8 @@
 <script src="/js/app.js?v=13"></script>
 <script src="/js/scanner-config.js?v=2"></script>
 <script src="/js/barcode.js?v=2"></script>
-<script src="/js/foods.js?v=26"></script>
-<script src="/js/diary.js?v=54"></script>
+<script src="/js/foods.js?v=27"></script>
+<script src="/js/diary.js?v=55"></script>
 <script src="/js/diarylog.js?v=6"></script>
 <script src="/js/plan.js?v=5"></script>
 <script src="/js/settings.js?v=7"></script>
