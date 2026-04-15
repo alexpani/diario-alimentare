@@ -730,7 +730,7 @@ input:focus, select:focus, textarea:focus {
 .ds-gauge-bg {
   fill: none;
   stroke: var(--color-gauge-bg);
-  stroke-width: 14;
+  stroke-width: 9;
   stroke-linecap: round;
   /* circ = 2π*80 ≈ 502.65 | 270° = 376.99 | gap 90° = 125.66 */
   stroke-dasharray: 376.99 125.66;
@@ -741,7 +741,7 @@ input:focus, select:focus, textarea:focus {
 .ds-gauge-fill {
   fill: none;
   stroke: var(--color-primary);
-  stroke-width: 14;
+  stroke-width: 9;
   stroke-linecap: round;
   stroke-dasharray: 0 502.65;
   transform: rotate(135deg);
