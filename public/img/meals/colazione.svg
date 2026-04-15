@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80">
+  <circle cx="40" cy="40" r="40" fill="#1A1A1A"/>
+  <!-- egg white -->
+  <ellipse cx="40" cy="42" rx="24" ry="18" fill="#FDF6E3"/>
+  <ellipse cx="42" cy="44" rx="22" ry="16" fill="#FFFCF0"/>
+  <!-- yolk -->
+  <circle cx="40" cy="40" r="9" fill="#F9A825"/>
+  <ellipse cx="37" cy="37" rx="3" ry="2" fill="#FFE082" opacity="0.85"/>
+  <!-- pepper specks -->
+  <circle cx="28" cy="34" r="0.8" fill="#424242"/>
+  <circle cx="52" cy="48" r="0.8" fill="#424242"/>
+  <circle cx="48" cy="32" r="0.8" fill="#424242"/>
+</svg>

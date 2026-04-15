@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80">
+  <circle cx="40" cy="40" r="40" fill="#1A1A1A"/>
+  <!-- plate inner -->
+  <circle cx="40" cy="40" r="32" fill="#2C2C2E"/>
+  <!-- salmon fillet -->
+  <path d="M22 40 Q32 30, 42 34 Q55 38, 58 44 Q50 52, 40 50 Q28 50, 22 40 Z" fill="#FF7043"/>
+  <!-- salmon darker stripes -->
+  <path d="M28 40 Q36 36, 44 40" stroke="#BF360C" stroke-width="1.5" fill="none" opacity="0.55"/>
+  <path d="M30 44 Q38 40, 46 44" stroke="#BF360C" stroke-width="1.5" fill="none" opacity="0.55"/>
+  <!-- lemon wedge -->
+  <path d="M58 30 A8 8 0 0 1 62 42 L58 36 Z" fill="#FFEB3B"/>
+  <path d="M58 30 A8 8 0 0 1 62 42" stroke="#F9A825" stroke-width="1" fill="none"/>
+  <!-- herbs -->
+  <circle cx="26" cy="54" r="2" fill="#66BB6A"/>
+  <circle cx="30" cy="56" r="1.5" fill="#43A047"/>
+  <circle cx="50" cy="30" r="1.8" fill="#66BB6A"/>
+</svg>

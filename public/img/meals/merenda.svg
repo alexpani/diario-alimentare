@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80">
+  <circle cx="40" cy="40" r="40" fill="#1A1A1A"/>
+  <!-- yogurt cup body -->
+  <path d="M24 28 L26 60 Q26 64 30 64 L50 64 Q54 64 54 60 L56 28 Z" fill="#F5F5F5"/>
+  <path d="M26 30 L28 58 Q28 60 30 60 L50 60 Q52 60 52 58 L54 30 Z" fill="#FAFAFA"/>
+  <!-- cup rim -->
+  <ellipse cx="40" cy="28" rx="16" ry="3.5" fill="#EEEEEE"/>
+  <ellipse cx="40" cy="28" rx="14" ry="2.5" fill="#FFFFFF"/>
+  <!-- berries on top -->
+  <circle cx="34" cy="27" r="2.5" fill="#C2185B"/>
+  <circle cx="40" cy="26" r="3" fill="#4527A0"/>
+  <circle cx="46" cy="27" r="2.5" fill="#C2185B"/>
+  <circle cx="37" cy="28" r="1.5" fill="#C2185B" opacity="0.7"/>
+  <!-- highlight on blueberry -->
+  <circle cx="39" cy="25" r="0.8" fill="#B39DDB" opacity="0.8"/>
+</svg>

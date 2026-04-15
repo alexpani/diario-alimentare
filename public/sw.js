@@ -6,7 +6,7 @@
 // - Asset same-origin: stale-while-revalidate
 // - CDN cross-origin: network-first con fallback alla cache
 
-const VERSION = 'v11';
+const VERSION = 'v12';
 const SHELL_CACHE = `fd-shell-${VERSION}`;
 const RUNTIME_CACHE = `fd-runtime-${VERSION}`;
 const API_CACHE = `fd-api-${VERSION}`;
@@ -22,6 +22,12 @@ const SHELL_ASSETS = [
   '/icons/icon-192.png',
   '/icons/icon-512.png',
   '/img/logo.png',
+  '/img/meals/colazione.svg',
+  '/img/meals/spuntino.svg',
+  '/img/meals/pranzo.svg',
+  '/img/meals/merenda.svg',
+  '/img/meals/cena.svg',
+  '/img/meals/extra.svg',
 ];
 
 // CDN cross-origin usati da index.html (Chart.js, html5-qrcode, cropper).

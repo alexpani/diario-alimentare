@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80">
+  <circle cx="40" cy="40" r="40" fill="#1A1A1A"/>
+  <!-- apple body -->
+  <path d="M40 28 C26 28, 20 46, 30 58 C35 63, 46 63, 51 58 C60 46, 54 28, 40 28 Z" fill="#E53935"/>
+  <!-- highlight -->
+  <ellipse cx="33" cy="38" rx="3.5" ry="6" fill="#FFCDD2" opacity="0.55"/>
+  <!-- stem -->
+  <rect x="39" y="22" width="2.5" height="7" rx="1" fill="#5D4037"/>
+  <!-- leaf -->
+  <path d="M41 24 Q49 21, 52 25 Q47 30, 41 26 Z" fill="#43A047"/>
+</svg>

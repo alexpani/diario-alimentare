@@ -3,12 +3,12 @@
    ========================================== */
 
 const MEALS = [
-  { id: 'colazione',          label: 'Colazione',          icon: '☀️' },
-  { id: 'spuntino_mattino',   label: 'Spuntino',            icon: '🍎' },
-  { id: 'pranzo',             label: 'Pranzo',             icon: '🍽️' },
-  { id: 'spuntino_pomeriggio',label: 'Merenda',            icon: '🧃' },
-  { id: 'cena',               label: 'Cena',               icon: '🌙' },
-  { id: 'extra',              label: 'Extra',              icon: '🍬' }
+  { id: 'colazione',          label: 'Colazione', image: 'colazione.svg' },
+  { id: 'spuntino_mattino',   label: 'Spuntino',  image: 'spuntino.svg'  },
+  { id: 'pranzo',             label: 'Pranzo',    image: 'pranzo.svg'    },
+  { id: 'spuntino_pomeriggio',label: 'Merenda',   image: 'merenda.svg'   },
+  { id: 'cena',               label: 'Cena',      image: 'cena.svg'      },
+  { id: 'extra',              label: 'Extra',     image: 'extra.svg'     }
 ];
 
 function _fmtSrc(src, components) {
@@ -144,6 +144,7 @@ window.DiaryTab = (() => {
       section.innerHTML = `
         <div class="meal-header" data-meal="${meal.id}">
           <div class="meal-header-left">
+            <img class="meal-illustration" src="/img/meals/${meal.image}" alt="" aria-hidden="true">
             <span class="meal-name">${meal.label}</span>
           </div>
           ${macrosHtml}

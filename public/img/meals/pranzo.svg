@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80">
+  <circle cx="40" cy="40" r="40" fill="#1A1A1A"/>
+  <!-- bowl body -->
+  <path d="M16 34 A24 24 0 0 0 64 34 Z" fill="#424242"/>
+  <!-- bowl rim -->
+  <ellipse cx="40" cy="34" rx="24" ry="5" fill="#616161"/>
+  <ellipse cx="40" cy="34" rx="22" ry="3.5" fill="#2C2C2E"/>
+  <!-- lettuce leaves -->
+  <circle cx="28" cy="30" r="6" fill="#66BB6A"/>
+  <circle cx="36" cy="27" r="7" fill="#81C784"/>
+  <circle cx="45" cy="28" r="6.5" fill="#4CAF50"/>
+  <circle cx="52" cy="31" r="5.5" fill="#66BB6A"/>
+  <!-- tomato -->
+  <circle cx="32" cy="33" r="3" fill="#E53935"/>
+  <circle cx="48" cy="33" r="3" fill="#E53935"/>
+  <!-- highlight on tomato -->
+  <circle cx="31" cy="32" r="0.8" fill="#FFCDD2" opacity="0.8"/>
+  <circle cx="47" cy="32" r="0.8" fill="#FFCDD2" opacity="0.8"/>
+  <!-- olive -->
+  <ellipse cx="40" cy="33" rx="2" ry="1.5" fill="#3E2723"/>
+</svg>

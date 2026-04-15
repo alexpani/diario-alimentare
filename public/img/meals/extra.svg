@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80">
+  <circle cx="40" cy="40" r="40" fill="#1A1A1A"/>
+  <!-- cupcake wrapper -->
+  <path d="M22 42 L26 62 Q26 64 28 64 L52 64 Q54 64 54 62 L58 42 Z" fill="#A1887F"/>
+  <!-- wrapper ridges -->
+  <line x1="28" y1="44" x2="30" y2="62" stroke="#6D4C41" stroke-width="1.2"/>
+  <line x1="34" y1="44" x2="34" y2="63" stroke="#6D4C41" stroke-width="1.2"/>
+  <line x1="40" y1="44" x2="40" y2="63" stroke="#6D4C41" stroke-width="1.2"/>
+  <line x1="46" y1="44" x2="46" y2="63" stroke="#6D4C41" stroke-width="1.2"/>
+  <line x1="52" y1="44" x2="50" y2="62" stroke="#6D4C41" stroke-width="1.2"/>
+  <!-- frosting swirl -->
+  <path d="M22 44 Q22 28, 40 22 Q58 28, 58 44 Z" fill="#F48FB1"/>
+  <path d="M26 40 Q30 30, 40 28 Q50 30, 54 40" stroke="#F06292" stroke-width="1.5" fill="none" opacity="0.7"/>
+  <!-- cherry -->
+  <circle cx="40" cy="22" r="3.5" fill="#E53935"/>
+  <ellipse cx="39" cy="20.5" rx="0.8" ry="1" fill="#FFCDD2" opacity="0.9"/>
+  <!-- cherry stem -->
+  <path d="M40 19 Q42 16, 44 15" stroke="#4CAF50" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+</svg>

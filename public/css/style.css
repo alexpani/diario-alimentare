@@ -858,6 +858,13 @@ input:focus, select:focus, textarea:focus {
 }
 
 .meal-header-left { display: flex; align-items: center; gap: var(--space-3); flex-shrink: 0; }
+.meal-illustration {
+  width: 44px; height: 44px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+  display: block;
+  box-shadow: 0 0 0 1px var(--color-border-subtle);
+}
 .meal-name { font-size: var(--text-lg); font-weight: var(--font-weight-bold); letter-spacing: -0.005em; }
 .meal-macros {
   display: flex; align-items: center; gap: var(--space-2);
