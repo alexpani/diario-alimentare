@@ -764,29 +764,41 @@ window.DiaryTab = (() => {
     if (!selectedFood) return;
     const { quantity_g, label } = getQuantity();
     const btn = document.getElementById('btn-confirm-add');
+    if (btn.disabled) return;
+    const originalText = btn.textContent;
     btn.disabled = true;
+    btn.textContent = editingEntryId ? 'Aggiorno…' : 'Aggiungo…';
 
     let res;
-    if (editingEntryId) {
-      const moveTo = document.getElementById('edit-meal-move-select').value;
-      const body = { quantity_g, quantity_label: label };
-      if (moveTo) body.meal_type = moveTo;
-      res = await apiPut(`/api/diary/${editingEntryId}`, body);
-    } else {
-      res = await apiPost('/api/diary', {
-        date: currentDate,
-        meal_type: selectedMeal,
-        food_id: selectedFood.id,
-        quantity_g,
-        quantity_label: label
-      });
+    try {
+      if (editingEntryId) {
+        const moveTo = document.getElementById('edit-meal-move-select').value;
+        const body = { quantity_g, quantity_label: label };
+        if (moveTo) body.meal_type = moveTo;
+        res = await apiPut(`/api/diary/${editingEntryId}`, body);
+      } else {
+        res = await apiPost('/api/diary', {
+          date: currentDate,
+          meal_type: selectedMeal,
+          food_id: selectedFood.id,
+          quantity_g,
+          quantity_label: label
+        });
+      }
+    } catch (e) {
+      res = null;
     }
 
-    btn.disabled = false;
     if (res && !res.error) {
-      // Chiudi la modale e torna alla Home col pasto aggiornato
+      // Chiudi subito la modale per feedback immediato; aggiorna la Home in background
       closeAddModal();
-      await refresh();
+      btn.disabled = false;
+      btn.textContent = originalText;
+      refresh();
+    } else {
+      btn.disabled = false;
+      btn.textContent = originalText;
+      alert(res?.error || 'Impossibile salvare l\'alimento. Controlla la connessione e riprova.');
     }
   });
 
