@@ -30,6 +30,9 @@ node update_plans_kcal.js  # aggiorna kcal piani su TDEE personale
 ```
 ├── server.js              # Entry point Express
 ├── setup.js               # Inizializzazione DB (idempotente)
+├── install.sh             # Bootstrap iniziale dell'LXC (clone, deps, DB, PM2)
+├── update.sh              # Deploy aggiornamento su LXC (pull + restart PM2)
+├── rotate-lxc-token.sh    # Rotazione PAT GitHub sull'LXC di produzione
 ├── .env                   # Segreti (non in git)
 ├── database/
 │   ├── db.js              # Singleton SQLite + migrazioni automatiche + upsertDaySnapshot
@@ -48,7 +51,9 @@ node update_plans_kcal.js  # aggiorna kcal piani su TDEE personale
 │   ├── sw.js              # Service worker (shell cache, SWR asset, API read-only offline)
 │   ├── apple-touch-icon.png  # Icona 180x180 per iOS Home Screen
 │   ├── icons/             # Icone PWA (192x192, 512x512)
-│   ├── img/logo.png       # Logo app (usato nell'header)
+│   ├── img/
+│   │   ├── logo.png       # Logo app (usato nell'header)
+│   │   └── meals/         # Illustrazioni SVG dei 6 pasti (colazione, spuntino, pranzo, merenda, cena, extra)
 │   ├── css/style.css      # Stili con dark mode e layout max 430px
 │   ├── foods-table.html   # Spreadsheet alimenti (standalone, con colonne Foto/Fonte/Data)
 │   └── js/
@@ -68,7 +73,7 @@ node update_plans_kcal.js  # aggiorna kcal piani su TDEE personale
 | Tabella | Descrizione |
 |---------|-------------|
 | `foods` | Libreria alimenti. `deleted_at` per soft-delete. `is_quick=1` per voci al volo. `source` = `app`/`openfoodfacts`/`crea` (origine del prodotto). `components` JSON per le ricette. `recipe_yield_g` lasciato NULL: il peso finale ricetta è sempre la somma dei componenti. |
-| `diary_entries` | Voci del diario: `food_id`, `meal_type` (colazione/pranzo/cena/snack), `quantity_g`, `date` |
+| `diary_entries` | Voci del diario: `food_id`, `meal_type` (6 pasti: `colazione`, `spuntino_mattino`, `pranzo`, `spuntino_pomeriggio`, `cena`, `extra`), `quantity_g`, `date` |
 | `portions` | Porzioni nominate per alimento (es. "1 fetta = 30g") |
 | `plans` | Piani nutrizionali. `is_active=1` sul piano corrente (uno solo alla volta). |
 | `daily_plan_snapshots` | Snapshot giornaliero del piano attivo (`date` PK, `plan_name`, `kcal_target`, macro %). Scritto in `upsertDaySnapshot()` a ogni attivazione/modifica piano e a ogni inserimento diario. Permette alla home di mostrare il piano associato al giorno visualizzato anche dopo un cambio/cancellazione piano. |
@@ -157,6 +162,16 @@ Quando le kcal consumate superano il target del piano, il gauge mostra:
 - Label: "Oltre" (invece di "Rimanenti")
 - Valore: "+XXX" (kcal in eccesso)
 - Il colore del testo rimane invariato (non cambia in rosso)
+
+L'anello del gauge ha tratto sottile per un look più pulito. I chip dei macronutrienti sotto il gauge sono senza bordo né sfondo, con label per esteso (Proteine / Grassi / Carboidrati).
+
+## Illustrazioni SVG dei pasti
+
+Ogni pasto nella Home ha un'illustrazione dedicata in `public/img/meals/` (`colazione.svg`, `spuntino.svg`, `pranzo.svg`, `merenda.svg`, `cena.svg`, `extra.svg`). L'array `MEALS` in `public/js/diary.js` associa ciascun `meal_type` al file SVG. In light mode il piatto delle illustrazioni è ammorbidito per ridurre il contrasto.
+
+## Feedback immediato aggiunta al pasto
+
+Quando l'utente aggiunge un alimento a un pasto, la UI aggiorna la card del pasto e i totali del giorno senza attendere il ricarico completo, dando un riscontro visivo istantaneo.
 
 ## Copia da ieri
 

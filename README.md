@@ -50,6 +50,9 @@ GEMINI_API_KEY=...                        # se VISION_PROVIDER=gemini
 food-diary/
 ├── server.js           # Entry point Express
 ├── setup.js            # Script di inizializzazione DB
+├── install.sh          # Bootstrap iniziale dell'LXC (clone, deps, DB, PM2)
+├── update.sh           # Deploy aggiornamento su LXC (pull + restart PM2)
+├── rotate-lxc-token.sh # Rotazione PAT GitHub sull'LXC di produzione
 ├── .env                # Configurazione (non committare!)
 ├── logo.png            # Logo app (sorgente per icone PWA)
 ├── vision-prompt.txt   # Prompt IA personalizzato (opzionale, non committato)
@@ -72,7 +75,9 @@ food-diary/
 │   ├── icons/
 │   │   ├── icon-192.png      # Icona 192x192 (manifest)
 │   │   └── icon-512.png      # Icona 512x512 (manifest/splash)
-│   ├── img/logo.png    # Logo usato nell'header
+│   ├── img/
+│   │   ├── logo.png    # Logo usato nell'header
+│   │   └── meals/      # Illustrazioni SVG dei 6 pasti (colazione, spuntino, pranzo, merenda, cena, extra)
 │   ├── foods-table.html # Spreadsheet alimenti (gestione bulk con colonne Foto/Fonte/Data)
 │   ├── css/style.css   # Stili con dark mode e layout max 430px
 │   └── js/
@@ -91,7 +96,7 @@ food-diary/
 
 ## Funzionalità
 
-- **Home**: diario del giorno con navigazione data, aggiunta alimenti per pasto (6 pasti), riepilogo kcal/macros con gauge (mostra "Oltre +XXX" in eccesso), spostamento alimenti tra pasti; il bottone "Aggiungi" mostra `Aggiungo…` durante il salvataggio e la modale si chiude subito al successo (refresh in background), con alert esplicito in caso di errore
+- **Home**: diario del giorno con navigazione data, aggiunta alimenti per 6 pasti (colazione, spuntino, pranzo, merenda, cena, extra) con illustrazioni SVG dedicate, riepilogo kcal/macros con gauge a tratto sottile (mostra "Oltre +XXX" in eccesso), chip macro per esteso (Proteine / Grassi / Carboidrati), spostamento alimenti tra pasti; il bottone "Aggiungi" mostra `Aggiungo…` durante il salvataggio e la modale si chiude subito al successo (refresh in background), con alert esplicito in caso di errore
 - **Calendario**: anelli colorati semaforo (verde/giallo/rosso) sui giorni in base alle kcal vs target del piano del giorno (via snapshot); il giorno selezionato usa il colore dell'anello come sfondo
 - **Snapshot piano giornaliero**: il target kcal del giorno è memorizzato alla scrittura delle voci, così la home mostra sempre il piano corretto anche se il piano attivo viene cambiato in seguito
 - **Copia da ieri**: nei pasti vuoti mostra anteprima con alimento top + conteggio + kcal (es. "Copia colazione da ieri — Muffin e 1 altro — 450 kcal")
@@ -128,6 +133,9 @@ bash /opt/diario-alimentare/update.sh
 su -s /bin/bash fooddiary -c "pm2 logs food-diary --lines 50"
 su -s /bin/bash fooddiary -c "pm2 restart food-diary"
 su -s /bin/bash fooddiary -c "pm2 status"
+
+# Rotazione PAT GitHub sull'LXC (dal Mac)
+bash rotate-lxc-token.sh
 ```
 
 Il workflow è: Mac → commit+push → GitHub → `update.sh` su LXC.
