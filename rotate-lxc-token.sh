@@ -51,7 +51,7 @@ echo "⚠  Prima di continuare, assicurati che il VECCHIO token sia stato"
 echo "   REVOCATO su https://github.com/settings/tokens"
 echo
 read -rp "Procedere? [y/N] " confirm
-[[ "${confirm,,}" == "y" ]] || { echo "Annullato."; exit 1; }
+case "${confirm}" in [yY]|[yY][eE][sS]) ;; *) echo "Annullato."; exit 1;; esac
 
 # Prompt silenzioso: il token non viene mai mostrato, né salvato in history.
 read -rsp "Incolla il nuovo GitHub PAT (input nascosto): " NEW_TOKEN
@@ -61,7 +61,7 @@ echo
 # Sanity check del formato (classic ghp_… o fine-grained github_pat_…)
 if ! [[ "${NEW_TOKEN}" =~ ^(ghp_|github_pat_)[A-Za-z0-9_]+$ ]]; then
   read -rp "Il token non sembra un PAT GitHub (manca prefisso ghp_/github_pat_). Continuo comunque? [y/N] " c
-  [[ "${c,,}" == "y" ]] || { echo "Annullato."; exit 1; }
+  case "${c}" in [yY]|[yY][eE][sS]) ;; *) echo "Annullato."; exit 1;; esac
 fi
 
 # Script eseguito sull'LXC. Non contiene segreti: il token viaggia su stdin
