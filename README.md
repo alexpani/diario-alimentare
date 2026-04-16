@@ -91,7 +91,7 @@ food-diary/
 
 ## Funzionalità
 
-- **Home**: diario del giorno con navigazione data, aggiunta alimenti per pasto (6 pasti), riepilogo kcal/macros con gauge (mostra "Oltre +XXX" in eccesso), spostamento alimenti tra pasti
+- **Home**: diario del giorno con navigazione data, aggiunta alimenti per pasto (6 pasti), riepilogo kcal/macros con gauge (mostra "Oltre +XXX" in eccesso), spostamento alimenti tra pasti; il bottone "Aggiungi" mostra `Aggiungo…` durante il salvataggio e la modale si chiude subito al successo (refresh in background), con alert esplicito in caso di errore
 - **Calendario**: anelli colorati semaforo (verde/giallo/rosso) sui giorni in base alle kcal vs target del piano del giorno (via snapshot); il giorno selezionato usa il colore dell'anello come sfondo
 - **Snapshot piano giornaliero**: il target kcal del giorno è memorizzato alla scrittura delle voci, così la home mostra sempre il piano corretto anche se il piano attivo viene cambiato in seguito
 - **Copia da ieri**: nei pasti vuoti mostra anteprima con alimento top + conteggio + kcal (es. "Copia colazione da ieri — Muffin e 1 altro — 450 kcal")

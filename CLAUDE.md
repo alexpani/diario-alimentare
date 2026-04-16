@@ -174,6 +174,14 @@ La modale "Aggiungi alimento" mostra fino a 12 alimenti recenti/frequenti per pa
 
 Nella ricerca alimenti e nella ricerca inline ingredienti ("Descrivi" → aggiungi ingrediente) la soglia per attivare la ricerca predittiva è **2 caratteri** (era 4). Dà risultati molto più rapidi su nomi corti tipo "uova", "riso", "pane".
 
+## Feedback aggiunta al diario
+
+Il bottone "Aggiungi" della modale alimento (`btn-confirm-add` in `public/js/diary.js`) deve sempre dare feedback immediato, altrimenti su rete lenta l'utente non capisce se il salvataggio è in corso. Pattern da mantenere:
+
+- Durante la richiesta il testo del bottone diventa `Aggiungo…` (o `Aggiorno…` in edit) e il bottone è disabilitato.
+- Appena la POST/PUT risponde OK la modale si chiude **subito**; `refresh()` gira in background (niente `await`), così il ritorno alla Home è istantaneo anche con 3 chiamate API in cascata (`/api/diary`, `/api/plan/snapshot`, `/api/diary` di ieri).
+- Su errore o rete KO (`res` null o `res.error`) il bottone torna allo stato iniziale e viene mostrato un `alert` esplicito — mai fallimento silenzioso.
+
 ## Foods table (`foods-table.html`)
 
 Spreadsheet standalone (full-width, fuori dal frame 430px) per la gestione bulk della libreria alimenti. Colonne: Foto (thumbnail), Nome, Brand, Barcode, Kcal/100g, Proteine/100g, Grassi/100g, Carbo/100g, **Fonte** (`app`/`crea`/`openfoodfacts`), **Data** (created_at), Azioni. Permette editing inline delle macro e upload foto drag-and-drop.
