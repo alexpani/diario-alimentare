@@ -17,7 +17,7 @@ const CATALOG_BASE = process.env.CATALOG_URL || 'http://192.168.68.153:3001';
  * @param {Function} catalogSourceFilter - Filtro sorgente catalogo: (product) => bool
  * @returns {Promise<Array>} items con local_matches e catalog_matches
  */
-async function matchFoodsAgainstSources(db, foods, catalogSourceFilter) {
+async function matchFoodsAgainstSources(db, foods, catalogSourceFilter, options = {}) {
   const items = [];
   for (const food of foods) {
     const searchTerms = [food.name, ...(food.search_terms || [])];
@@ -29,10 +29,19 @@ async function matchFoodsAgainstSources(db, foods, catalogSourceFilter) {
       const tokens = term.split(/\s+/).filter(Boolean);
       if (tokens.length === 0) continue;
       const conditions = tokens.map(() => '(name LIKE ? OR brand LIKE ?)').join(' AND ');
+      const compoundFilter = options.preferBaseIngredients
+        ? " AND (components IS NULL OR components = '[]')" : '';
       const params = tokens.flatMap(t => [`%${t}%`, `%${t}%`]);
-      params.push(5);
+      params.push(term.toLowerCase());
+      params.push(10);
       const found = await db.all(
-        `SELECT * FROM foods WHERE deleted_at IS NULL AND is_quick = 0 AND ${conditions} ORDER BY name ASC LIMIT ?`,
+        `SELECT *,
+           (CASE WHEN LOWER(name) = ? THEN 0 ELSE 1 END) AS exact_match,
+           LENGTH(name) AS name_len
+         FROM foods
+         WHERE deleted_at IS NULL AND is_quick = 0 AND ${conditions}${compoundFilter}
+         ORDER BY exact_match ASC, name_len ASC
+         LIMIT ?`,
         ...params
       );
       const existingIds = new Set(localMatches.map(m => m.id));
@@ -556,8 +565,8 @@ router.post('/describe-dish', async (req, res) => {
     }
 
     const db = await getDb();
-    // Filtro SOLO CREA (no OpenFoodFacts, no app)
-    const items = await matchFoodsAgainstSources(db, foods, p => p.source === 'crea');
+    // Filtro SOLO CREA (no OpenFoodFacts, no app); preferisci ingredienti base
+    const items = await matchFoodsAgainstSources(db, foods, p => p.source === 'crea', { preferBaseIngredients: true });
 
     res.json({ dish_name: dishName, items });
   } catch (err) {
