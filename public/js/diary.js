@@ -662,7 +662,28 @@ window.DiaryTab = (() => {
         <div class="sfp-name">${food.name}</div>
         <div class="sfp-macros">${Math.round(food.kcal_100g)} kcal · P:${fmt(food.protein_100g)}g G:${fmt(food.fat_100g)}g C:${fmt(food.carbs_100g)}g per 100g</div>
       </div>
+      ${food.id ? `<button class="btn-icon sfp-edit-btn" title="Modifica alimento">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      </button>` : ''}
     `;
+
+    // Listener icona modifica alimento
+    const editBtn = preview.querySelector('.sfp-edit-btn');
+    if (editBtn) {
+      editBtn.addEventListener('click', () => {
+        const currentQty = getQuantity();
+        document.getElementById('modal-add-food').classList.add('hidden');
+        FoodsTab.openFoodForm(food.id, {
+          onSaved: (updatedFood) => {
+            document.getElementById('modal-add-food').classList.remove('hidden');
+            selectFood(updatedFood, { qty_g: currentQty.quantity_g });
+          },
+          onClosed: () => {
+            document.getElementById('modal-add-food').classList.remove('hidden');
+          }
+        });
+      });
+    }
 
     // Gestione porzioni
     const portionsTab = document.getElementById('qty-tab-portions');
