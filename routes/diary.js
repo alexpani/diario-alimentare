@@ -37,10 +37,11 @@ async function matchFoodsAgainstSources(db, foods, catalogSourceFilter, options 
       const found = await db.all(
         `SELECT *,
            (CASE WHEN LOWER(name) = ? THEN 0 ELSE 1 END) AS exact_match,
+           (CASE WHEN source IN ('app', 'crea') THEN 0 ELSE 1 END) AS source_priority,
            LENGTH(name) AS name_len
          FROM foods
          WHERE deleted_at IS NULL AND is_quick = 0 AND ${conditions}${compoundFilter}
-         ORDER BY exact_match ASC, name_len ASC
+         ORDER BY exact_match ASC, source_priority ASC, name_len ASC
          LIMIT ?`,
         ...params
       );
