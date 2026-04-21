@@ -41,8 +41,14 @@ async function matchFoodsAgainstSources(db, foods, catalogSourceFilter, options 
       const tokens = term.split(/\s+/).filter(Boolean);
       if (tokens.length === 0) continue;
       const conditions = tokens.map(() => '(name LIKE ? OR brand LIKE ?)').join(' AND ');
+      // Per gli ingredienti base: escludi ricette, OpenFoodFacts e nomi
+      // con troppi token estranei (es. "Pizza perle di pomodoro e basilico"
+      // matcha "pomodoro" ma è chiaramente un prodotto composto).
+      const maxTokens = tokens.length + 2;
       const baseIngredientFilter = options.preferBaseIngredients
-        ? " AND (components IS NULL OR components = '[]') AND source != 'openfoodfacts'"
+        ? ` AND (components IS NULL OR components = '[]')
+           AND source != 'openfoodfacts'
+           AND (LENGTH(name) - LENGTH(REPLACE(name, ' ', '')) + 1) <= ${maxTokens}`
         : '';
       const params = tokens.flatMap(t => [`%${t}%`, `%${t}%`]);
       params.push(term.toLowerCase());
