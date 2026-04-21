@@ -20,7 +20,19 @@ const CATALOG_BASE = process.env.CATALOG_URL || 'http://192.168.68.153:3001';
 async function matchFoodsAgainstSources(db, foods, catalogSourceFilter, options = {}) {
   const items = [];
   for (const food of foods) {
-    const searchTerms = [food.name, ...(food.search_terms || [])];
+    // Quando preferBaseIngredients è attivo, usa solo il nome primario e
+    // scarta i search_terms che sono sottoinsiemi (più generici). Così
+    // "olio extravergine di oliva" non ricade su "olio di oliva".
+    const primaryTokens = new Set((food.name || '').toLowerCase().split(/\s+/).filter(Boolean));
+    const rawSearchTerms = [food.name, ...(food.search_terms || [])];
+    const searchTerms = options.preferBaseIngredients
+      ? rawSearchTerms.filter(t => {
+          if (t === food.name) return true;
+          const tTokens = (t || '').toLowerCase().split(/\s+/).filter(Boolean);
+          const isSubset = tTokens.every(tok => primaryTokens.has(tok));
+          return !isSubset;
+        })
+      : rawSearchTerms;
 
     // 1. Cerca nel DB locale
     let localMatches = [];
@@ -29,8 +41,9 @@ async function matchFoodsAgainstSources(db, foods, catalogSourceFilter, options 
       const tokens = term.split(/\s+/).filter(Boolean);
       if (tokens.length === 0) continue;
       const conditions = tokens.map(() => '(name LIKE ? OR brand LIKE ?)').join(' AND ');
-      const compoundFilter = options.preferBaseIngredients
-        ? " AND (components IS NULL OR components = '[]')" : '';
+      const baseIngredientFilter = options.preferBaseIngredients
+        ? " AND (components IS NULL OR components = '[]') AND source != 'openfoodfacts'"
+        : '';
       const params = tokens.flatMap(t => [`%${t}%`, `%${t}%`]);
       params.push(term.toLowerCase());
       params.push(10);
@@ -40,7 +53,7 @@ async function matchFoodsAgainstSources(db, foods, catalogSourceFilter, options 
            (CASE WHEN source IN ('app', 'crea') THEN 0 ELSE 1 END) AS source_priority,
            LENGTH(name) AS name_len
          FROM foods
-         WHERE deleted_at IS NULL AND is_quick = 0 AND ${conditions}${compoundFilter}
+         WHERE deleted_at IS NULL AND is_quick = 0 AND ${conditions}${baseIngredientFilter}
          ORDER BY exact_match ASC, source_priority ASC, name_len ASC
          LIMIT ?`,
         ...params
