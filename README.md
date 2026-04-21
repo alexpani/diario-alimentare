@@ -114,6 +114,13 @@ food-diary/
 - **PWA offline**: service worker con pre-cache shell + CDN, stale-while-revalidate per asset e uploads, network-first con fallback cache per le API read-only. Banner "Nuova versione disponibile" quando il SW si aggiorna
 - **Layout mobile-first**: l'intero frame è contenuto in max-width 430px anche su desktop, per rispecchiare l'esperienza mobile
 
+## API esterne (Health Tracker)
+
+Food Diary espone due endpoint read-only **senza autenticazione** sotto `/api/external/*`, pensati per il consumo da app terze in LAN (es. Health Tracker). Documentazione completa: [docs/EXTERNAL_API.md](docs/EXTERNAL_API.md).
+
+- `GET /api/external/daily-totals?from=YYYY-MM-DD&to=YYYY-MM-DD` — totali kcal + macro per giorno nel range (con `kcal_target` dal daily snapshot).
+- `GET /api/external/active-plan` — piano attivo con percentuali e grammi target calcolati.
+
 ## Integrazione Food Tracker
 
 L'app usa **Food Tracker** come unica fonte dati esterna — un catalogo locale di 210.000+ prodotti italiani (OFF + CREA + APP).

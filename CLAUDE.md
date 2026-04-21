@@ -114,7 +114,7 @@ node update_plans_kcal.js  # aggiorna kcal piani su TDEE personale
 - `DELETE /api/plans/:id` — elimina (non il piano attivo)
 
 ### API esterne `/api/external` (Health Tracker)
-Endpoint read-only **pubblici** (nessun auth — uso in LAN dall'app Health Tracker). Definiti in `routes/external.js`.
+Endpoint read-only **pubblici** (nessun auth — uso in LAN dall'app Health Tracker). Definiti in `routes/external.js`. Documentazione completa in `docs/EXTERNAL_API.md`.
 - `GET /api/external/daily-totals?from=YYYY-MM-DD&to=YYYY-MM-DD` — totali kcal + macro (`protein_g`, `fat_g`, `carbs_g`) per giorno nel range, con `kcal_target` dal daily snapshot. Stessa logica di `/api/diary/range`.
 - `GET /api/external/active-plan` — piano attivo: `name, kcal_target, protein_pct/fat_pct/carbs_pct` + grammi calcolati `protein_g/fat_g/carbs_g` (4/9/4 kcal per grammo). 404 `{ error: "no_active_plan" }` se nessun piano è attivo.
 
