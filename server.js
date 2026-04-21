@@ -8,6 +8,7 @@ const diaryRoutes = require('./routes/diary');
 const foodsRoutes = require('./routes/foods');
 const planRoutes = require('./routes/plan');
 const settingsRoutes = require('./routes/settings');
+const externalRoutes = require('./routes/external');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -40,6 +41,7 @@ app.use('/api/diary', diaryRoutes);
 app.use('/api/foods', foodsRoutes);
 app.use('/api/plan', planRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/external', externalRoutes);
 
 // Fallback: serve index.html per tutte le route non-API
 app.get('*', (req, res) => {
