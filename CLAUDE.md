@@ -232,6 +232,15 @@ La tabella `daily_plan_snapshots` memorizza il piano attivo per ogni giorno (`da
 - Il `GET /api/diary/range` fa `LEFT JOIN daily_plan_snapshots` per restituire il target del giorno anche se il piano è stato cambiato o cancellato dopo.
 - L'header `Cache-Control: no-store` è applicato allo snapshot + cache-buster nell'URL per evitare letture stantie.
 
+## Modifica alimento al volo dalla modale di aggiunta
+
+Nello step quantità della modale "Aggiungi alimento", un'icona matita (`.sfp-edit-btn`) appare a destra del nome dell'alimento selezionato:
+- Visibile per tutti gli alimenti con `food.id` (non per food temporanei senza ID)
+- Click → nasconde la modale diario, apre `FoodsTab.openFoodForm(food.id)` con callbacks
+- `onSaved(updatedFood)` → riapre la modale e chiama `selectFood()` con i dati aggiornati e la quantità preservata
+- `onClosed()` → riapre la modale senza modifiche
+- Permette di correggere macro, nome, porzioni ecc. senza uscire dal flusso di aggiunta al pasto
+
 ## Modifica ricetta dal diario
 
 Cliccando su un alimento di tipo ricetta nel pasto, il modal di modifica quantità mostra il bottone **"Modifica ricetta"**:
