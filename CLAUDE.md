@@ -171,7 +171,9 @@ In cima al tab Diario c'è la card **"Media 7 giorni"** con una lettura più rea
 - **Semaforo** (pallino a destra): stessa soglia del calendario Home — verde se ≤ target, giallo fino a +200 kcal, rosso oltre.
 - **Hint**: sotto la card, una nota interpretativa converte il bilancio settimanale in grammi di grasso equivalenti (≈ 7700 kcal/kg) oppure avvisa se i giorni con voci sono meno di 7.
 
-Implementazione: `loadWeeklyAvg()` in `public/js/diarylog.js`, chiamata da `refresh()`. Usa `/api/diary/range` con `from = oggi−6`.
+La finestra è **ieri-6 … ieri** (7 giorni completi). Il giorno corrente è escluso perché potenzialmente incompleto.
+
+Implementazione: `loadWeeklyAvg()` in `public/js/diarylog.js`, chiamata da `refresh()`. Usa `/api/diary/range` con `from = ieri−6`, `to = ieri`.
 
 ## Gauge — "Oltre" in eccesso
 

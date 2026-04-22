@@ -26,10 +26,14 @@ window.DiaryLog = (() => {
   }
 
   // ── Media 7 giorni (rolling) ───────────────
+  // Esclude il giorno corrente perché potenzialmente non completo.
+  // Intervallo: da ieri-6 a ieri (7 giorni completi).
   async function loadWeeklyAvg() {
-    const to = todayStr();
+    const toDate = new Date();
+    toDate.setDate(toDate.getDate() - 1);
+    const to = toDate.toISOString().slice(0, 10);
     const fromDate = new Date();
-    fromDate.setDate(fromDate.getDate() - 6);
+    fromDate.setDate(fromDate.getDate() - 7);
     const from = fromDate.toISOString().slice(0, 10);
 
     const data = await apiGet(`/api/diary/range?from=${from}&to=${to}`);
@@ -37,7 +41,7 @@ window.DiaryLog = (() => {
 
     // Costruisce 7 giorni consecutivi: kcal effettive + target del giorno (snapshot → fallback piano attivo)
     const days = [];
-    for (let i = 6; i >= 0; i--) {
+    for (let i = 7; i >= 1; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);
       const dateStr = d.toISOString().slice(0, 10);
