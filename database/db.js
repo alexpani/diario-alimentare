@@ -57,6 +57,20 @@ async function getDb() {
       }
     }
 
+    // Migrazione tabella plans — aggiungi user_id
+    const planCols = await _db.all("PRAGMA table_info(plans)");
+    if (!planCols.map(c => c.name).includes('user_id')) {
+      await _db.run("ALTER TABLE plans ADD COLUMN user_id INTEGER NOT NULL DEFAULT 1");
+      await _db.run("CREATE INDEX IF NOT EXISTS idx_plans_user_active ON plans(user_id, is_active)");
+    }
+
+    // Migrazione tabella diary_entries — aggiungi user_id
+    const diaryCols = await _db.all("PRAGMA table_info(diary_entries)");
+    if (!diaryCols.map(c => c.name).includes('user_id')) {
+      await _db.run("ALTER TABLE diary_entries ADD COLUMN user_id INTEGER NOT NULL DEFAULT 1");
+      await _db.run("CREATE INDEX IF NOT EXISTS idx_diary_user_date ON diary_entries(user_id, date)");
+    }
+
     // Migrazione tabella daily_plan_snapshots
     if (!tables.includes('daily_plan_snapshots')) {
       await _db.run(`CREATE TABLE daily_plan_snapshots (
@@ -66,8 +80,16 @@ async function getDb() {
         protein_pct REAL NOT NULL DEFAULT 30,
         fat_pct     REAL NOT NULL DEFAULT 30,
         carbs_pct   REAL NOT NULL DEFAULT 40,
+        user_id     INTEGER NOT NULL DEFAULT 1,
         updated_at  TEXT DEFAULT (datetime('now'))
       )`);
+    } else {
+      // Migrazione daily_plan_snapshots — aggiungi user_id se tabella esiste
+      const snapshotCols = await _db.all("PRAGMA table_info(daily_plan_snapshots)");
+      if (!snapshotCols.map(c => c.name).includes('user_id')) {
+        await _db.run("ALTER TABLE daily_plan_snapshots ADD COLUMN user_id INTEGER NOT NULL DEFAULT 1");
+        await _db.run("CREATE INDEX IF NOT EXISTS idx_snapshot_user_date ON daily_plan_snapshots(user_id, date)");
+      }
     }
 
     // Fix macro ricette: ricalcola kcal/macro da componenti per ricette con recipe_yield_g stantio

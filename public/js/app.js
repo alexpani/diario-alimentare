@@ -385,14 +385,24 @@ const Cal = (() => {
 
     grid.querySelectorAll('.cal-cell[data-date]').forEach(cell => {
       cell.addEventListener('click', () => {
-        window.DiaryTab?.setDate(cell.dataset.date);
-        close();
+        if (_pickResolve) {
+          const r = _pickResolve; _pickResolve = null;
+          overlay.classList.add('hidden');
+          overlay.style.zIndex = '';
+          r(cell.dataset.date);
+        } else {
+          window.DiaryTab?.setDate(cell.dataset.date);
+          close();
+        }
       });
     });
   }
 
-  async function open() {
-    const cur = window.DiaryTab?.currentDate || todayStr();
+  // Modalità "picker": se attiva, il click su un giorno risolve la Promise invece di chiamare setDate.
+  let _pickResolve = null;
+
+  async function open(initialDate) {
+    const cur = initialDate || window.DiaryTab?.currentDate || todayStr();
     const [y, m] = cur.split('-').map(Number);
     viewYear  = y;
     viewMonth = m - 1;
@@ -404,6 +414,15 @@ const Cal = (() => {
 
   function close() {
     overlay.classList.add('hidden');
+    overlay.style.zIndex = '';
+    if (_pickResolve) { const r = _pickResolve; _pickResolve = null; r(null); }
+  }
+
+  // Apre il calendario come picker: ritorna Promise<string|null> con la data scelta o null se annullato.
+  async function pick(initialDate) {
+    overlay.style.zIndex = '500'; // sopra ai modali (z-index 201)
+    await open(initialDate);
+    return new Promise(resolve => { _pickResolve = resolve; });
   }
 
   async function changeMonth(delta) {
@@ -418,16 +437,24 @@ const Cal = (() => {
   document.getElementById('cal-next-month').addEventListener('click', (e) => { e.stopPropagation(); changeMonth(+1); });
   document.getElementById('cal-today').addEventListener('click', (e) => {
     e.stopPropagation();
-    window.DiaryTab?.setDate(todayStr());
-    close();
+    if (_pickResolve) {
+      const r = _pickResolve; _pickResolve = null;
+      overlay.classList.add('hidden');
+      overlay.style.zIndex = '';
+      r(todayStr());
+    } else {
+      window.DiaryTab?.setDate(todayStr());
+      close();
+    }
   });
   overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
   popup.addEventListener('click', (e) => e.stopPropagation());
 
   document.getElementById('current-date-btn').addEventListener('click', open);
 
-  return { open, close, refresh: () => { daysData = {}; loadDaysWithEntries(viewYear, viewMonth).then(render); } };
+  return { open, close, pick, refresh: () => { daysData = {}; loadDaysWithEntries(viewYear, viewMonth).then(render); } };
 })();
+window.Cal = Cal;
 
 // ── Theme ──────────────────────────────────
 const Theme = (() => {

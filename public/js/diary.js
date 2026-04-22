@@ -27,6 +27,7 @@ window.DiaryTab = (() => {
   let selectedMeal = null;
   let selectedFood = null;
   let editingEntryId = null;
+  let _pickedDate = null;
   let searchTimeout = null;
   let _recentFoods = [];
   let _frequentFoods = [];
@@ -334,22 +335,11 @@ window.DiaryTab = (() => {
     });
     sel.value = '';
 
-    // Mostra dropdown cambio giorno (avantieri / ieri / domani / dopodomani)
-    const daySel = document.getElementById('edit-day-move-select');
-    daySel.innerHTML = '<option value="">Cambia giorno…</option>';
-    const baseDate = entry.date || currentDate;
-    [
-      { label: 'Avantieri',   offset: -2 },
-      { label: 'Ieri',        offset: -1 },
-      { label: 'Domani',      offset:  1 },
-      { label: 'Dopodomani',  offset:  2 }
-    ].forEach(d => {
-      const opt = document.createElement('option');
-      opt.value = shiftDate(baseDate, d.offset);
-      opt.textContent = d.label;
-      daySel.appendChild(opt);
-    });
-    daySel.value = '';
+    // Reset picker giorno: nessuna data scelta → etichetta "Cambia giorno…"
+    _pickedDate = null;
+    const dayBtn = document.getElementById('edit-day-move-btn');
+    dayBtn.textContent = 'Cambia giorno…';
+    dayBtn.dataset.baseDate = entry.date || currentDate;
 
     document.getElementById('edit-meal-move-wrap').classList.remove('hidden');
 
@@ -460,6 +450,7 @@ window.DiaryTab = (() => {
     document.getElementById('modal-step-quick').classList.add('hidden');
     BarcodeScanner?.stop();
     editingEntryId = null;
+    _pickedDate = null;
   }
 
   function showAddedToast(name) {
@@ -799,6 +790,21 @@ window.DiaryTab = (() => {
     }
   }
 
+  // Picker giorno: apre il calendario (sopra la modale) per scegliere qualsiasi data.
+  document.getElementById('edit-day-move-btn').addEventListener('click', async () => {
+    const btn = document.getElementById('edit-day-move-btn');
+    const base = btn.dataset.baseDate || currentDate;
+    const picked = await window.Cal.pick(_pickedDate || base);
+    if (!picked) return; // annullato
+    if (picked === base) {
+      _pickedDate = null;
+      btn.textContent = 'Cambia giorno…';
+    } else {
+      _pickedDate = picked;
+      btn.textContent = `📅 ${formatDate(picked)}`;
+    }
+  });
+
   document.getElementById('btn-confirm-add').addEventListener('click', async () => {
     if (!selectedFood) return;
     const { quantity_g, label } = getQuantity();
@@ -812,7 +818,7 @@ window.DiaryTab = (() => {
     try {
       if (editingEntryId) {
         const moveTo = document.getElementById('edit-meal-move-select').value;
-        const moveDate = document.getElementById('edit-day-move-select').value;
+        const moveDate = _pickedDate;
         const body = { quantity_g, quantity_label: label };
         if (moveTo) body.meal_type = moveTo;
         if (moveDate) body.date = moveDate;
