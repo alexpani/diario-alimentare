@@ -468,15 +468,21 @@ router.get('/frequent', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const db = await getDb();
-    const { quantity_g, quantity_label, meal_type } = req.body;
+    const { quantity_g, quantity_label, meal_type, date } = req.body;
     const entry = await db.get('SELECT * FROM diary_entries WHERE id = ?', req.params.id);
     if (!entry) return res.status(404).json({ error: 'Voce non trovata' });
     const validMeals = ['colazione','spuntino_mattino','pranzo','spuntino_pomeriggio','cena','extra'];
     const newMeal = meal_type && validMeals.includes(meal_type) ? meal_type : entry.meal_type;
+    const dateRe = /^\d{4}-\d{2}-\d{2}$/;
+    const newDate = date && dateRe.test(date) ? date : entry.date;
     await db.run(
-      'UPDATE diary_entries SET quantity_g = ?, quantity_label = ?, meal_type = ? WHERE id = ?',
-      parseFloat(quantity_g), quantity_label || null, newMeal, req.params.id
+      'UPDATE diary_entries SET quantity_g = ?, quantity_label = ?, meal_type = ?, date = ? WHERE id = ?',
+      parseFloat(quantity_g), quantity_label || null, newMeal, newDate, req.params.id
     );
+    if (newDate !== entry.date) {
+      await upsertDaySnapshot(entry.date);
+      await upsertDaySnapshot(newDate);
+    }
     res.json({ ok: true });
   } catch (err) {
     console.error(err);

@@ -333,6 +333,24 @@ window.DiaryTab = (() => {
       }
     });
     sel.value = '';
+
+    // Mostra dropdown cambio giorno (avantieri / ieri / domani / dopodomani)
+    const daySel = document.getElementById('edit-day-move-select');
+    daySel.innerHTML = '<option value="">Cambia giorno…</option>';
+    const baseDate = entry.date || currentDate;
+    [
+      { label: 'Avantieri',   offset: -2 },
+      { label: 'Ieri',        offset: -1 },
+      { label: 'Domani',      offset:  1 },
+      { label: 'Dopodomani',  offset:  2 }
+    ].forEach(d => {
+      const opt = document.createElement('option');
+      opt.value = shiftDate(baseDate, d.offset);
+      opt.textContent = d.label;
+      daySel.appendChild(opt);
+    });
+    daySel.value = '';
+
     document.getElementById('edit-meal-move-wrap').classList.remove('hidden');
 
     // Mostra bottone "Modifica ricetta" solo per ricette di libreria (non is_quick)
@@ -794,9 +812,14 @@ window.DiaryTab = (() => {
     try {
       if (editingEntryId) {
         const moveTo = document.getElementById('edit-meal-move-select').value;
+        const moveDate = document.getElementById('edit-day-move-select').value;
         const body = { quantity_g, quantity_label: label };
         if (moveTo) body.meal_type = moveTo;
+        if (moveDate) body.date = moveDate;
         res = await apiPut(`/api/diary/${editingEntryId}`, body);
+        // In caso di spostamento, memorizza pasto/giorno destinazione per navigare dopo il successo
+        res && !res.error && (res._moveTo = moveTo || null);
+        res && !res.error && (res._moveDate = moveDate || null);
       } else {
         res = await apiPost('/api/diary', {
           date: currentDate,
@@ -812,10 +835,18 @@ window.DiaryTab = (() => {
 
     if (res && !res.error) {
       // Chiudi subito la modale per feedback immediato; aggiorna la Home in background
+      const moveDate = res._moveDate;
+      const moveTo = res._moveTo;
       closeAddModal();
       btn.disabled = false;
       btn.textContent = originalText;
-      refresh();
+      if (moveDate) {
+        // Spostamento a un altro giorno: apri il pasto di destinazione e naviga alla data
+        if (moveTo) openMealId = moveTo;
+        setDate(moveDate);
+      } else {
+        refresh();
+      }
     } else {
       btn.disabled = false;
       btn.textContent = originalText;
