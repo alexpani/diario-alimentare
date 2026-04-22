@@ -106,6 +106,7 @@ food-diary/
 - **Barcode**: se non trovato nel DB locale né nel catalogo, mostra "Crea questo alimento" con barcode precompilato
 - **Ricette**: il peso finale è sempre la somma degli ingredienti; modifica ricetta direttamente dal diario cliccando sull'alimento nel pasto
 - **Modifica alimento al volo**: dalla modale di aggiunta al pasto, icona matita per modificare l'alimento (macro, nome, porzioni) senza uscire dal flusso; al salvataggio/annullamento si torna alla modale con quantità preservata
+- **Sposta voce del diario**: dalla modale "Modifica quantità" due controlli affiancati — "Cambia pasto…" (dropdown) e "Cambia giorno…" (apre il calendario della Home come picker su qualsiasi data, anche futura). Alla conferma la Home naviga automaticamente al giorno/pasto di destinazione
 - **Riconosci piatto IA** (foto): fotografa un piatto, l'IA identifica gli alimenti con stima quantità, match automatico nel DB locale e catalogo Food Tracker
 - **Descrivi piatto IA** (testo): descrivi a parole cosa stai mangiando (es. "piatto medio di pasta al sugo"), l'IA scompone il piatto in ingredienti (solo dati CREA) e lo aggiunge come ricetta unica al pasto
 - **IA configurabile**: selezione modello (Claude Sonnet/Haiku/Opus 4.x, Gemini 2.0/2.5 Flash/Pro) e prompt editabile dalle impostazioni

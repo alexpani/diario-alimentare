@@ -95,7 +95,7 @@ node update_plans_kcal.js  # aggiorna kcal piani su TDEE personale
 - `GET /api/diary?date=YYYY-MM-DD` — voci del giorno (join con `daily_plan_snapshots` per i totali del giorno)
 - `GET /api/diary/range?from=&to=` — kcal/macro per giorno (usato dal calendario)
 - `POST /api/diary` — aggiunge voce (scrive anche lo snapshot del giorno)
-- `PUT /api/diary/:id` — modifica quantità e/o pasto (`meal_type`)
+- `PUT /api/diary/:id` — modifica quantità, pasto (`meal_type`) e/o giorno (`date`, formato `YYYY-MM-DD`). Se `date` cambia, aggiorna gli snapshot del piano sia per il giorno di origine sia per quello di destinazione.
 - `DELETE /api/diary/:id` — rimuove voce
 - `POST /api/diary/quick` — crea alimento `is_quick=1` + voce diario atomicamente
 - `GET /api/diary/recent?meal_type=<meal>` — ultimi alimenti usati per quel pasto
@@ -253,6 +253,18 @@ Cliccando su un alimento di tipo ricetta nel pasto, il modal di modifica quantit
 - Apre `FoodsTab.openFoodForm(foodId)` — lo stesso form della tab Alimenti
 - Se il food non è nella cache `allFoods` (es. tab Alimenti mai aperta), viene caricato via `GET /api/foods/:id`
 - Dopo il salvataggio, il diario si aggiorna automaticamente
+
+## Modifica voce diario — sposta pasto e giorno
+
+Aprendo una voce del diario (click sul nome/dettaglio), la modale "Modifica quantità" mostra due controlli affiancati:
+- **Select "Cambia pasto…"** — dropdown con i pasti diversi da quello corrente; invia `meal_type` nel `PUT /api/diary/:id`.
+- **Bottone "Cambia giorno…"** (`.select-like-btn`) — apre lo stesso calendario della Home in **modalità picker** (`Cal.pick(initialDate)`). Ritorna una `Promise<string|null>` con la data scelta o `null` se annullato. La data scelta viene mostrata nel bottone (con classe `.has-value`); invia `date` nel `PUT /api/diary/:id`. Se la data scelta coincide con quella attuale, la selezione viene azzerata.
+
+Al click su **Aggiorna**: se è stato scelto un nuovo giorno, la Home naviga automaticamente alla data destinazione (`setDate`) e apre il pasto destinazione (`openMealId`). Al click su **Chiudi** si resta sul giorno/pasto correnti.
+
+### `Cal.pick()` e fix iOS
+- `Cal` è esposto su `window.Cal`. `pick(initialDate)` apre l'overlay con `z-index: 500` (sopra ai modali a 200) e aggiunge la classe `.cal-pick-mode` all'overlay, che sblocca `pointer-events` sui giorni futuri (`.cal-future`) permettendo la selezione libera.
+- L'elemento `#cal-overlay` viene spostato a `document.body` all'init del modulo. Serve a far funzionare `position: fixed` su iOS Safari: dentro `.tab-content` (che ha `-webkit-overflow-scrolling: touch`) gli elementi fixed vengono ancorati al contenitore scrollabile invece che al viewport, rendendo l'overlay invisibile quando un modale è aperto.
 
 ## Ricette — peso finale = somma ingredienti
 
