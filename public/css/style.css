@@ -1132,6 +1132,53 @@ input:focus, select:focus, textarea:focus {
   font-weight: var(--font-weight-semibold);
 }
 
+/* ── Card "Media 7 giorni" ─────────────────────────────── */
+.weekly-avg-main {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+.weekly-avg-kcal { display: flex; flex-direction: column; }
+.weekly-avg-value {
+  font-size: 32px; font-weight: var(--font-weight-bold);
+  color: var(--color-text); letter-spacing: -0.02em; line-height: 1;
+}
+.weekly-avg-unit {
+  font-size: var(--text-sm); color: var(--color-text-secondary);
+  margin-top: 4px;
+}
+.weekly-avg-dot {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--color-border);
+  flex-shrink: 0;
+  box-shadow: 0 0 0 3px var(--color-card), 0 0 0 4px var(--color-border-subtle);
+}
+.weekly-avg-dot.green  { background: var(--color-ring-green); }
+.weekly-avg-dot.yellow { background: var(--color-ring-yellow); }
+.weekly-avg-dot.red    { background: var(--color-ring-red); }
+.weekly-avg-details {
+  display: flex; flex-direction: column; gap: 6px;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border-subtle);
+}
+.weekly-avg-row {
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-size: var(--text-sm);
+}
+.weekly-avg-label { color: var(--color-text-secondary); }
+.weekly-avg-target, .weekly-avg-diff, .weekly-avg-cum {
+  font-weight: var(--font-weight-semibold); color: var(--color-text);
+}
+.weekly-avg-diff.under, .weekly-avg-cum.under  { color: var(--color-ring-green); }
+.weekly-avg-diff.over,  .weekly-avg-cum.over   { color: var(--color-ring-red); }
+.weekly-avg-diff.mild,  .weekly-avg-cum.mild   { color: var(--color-warning, #E65100); }
+.weekly-avg-hint {
+  margin-top: var(--space-2);
+  font-size: 12px; color: var(--color-text-secondary);
+  line-height: 1.35;
+}
+.weekly-avg-hint:empty { display: none; }
+
 .diary-list { padding: 0 var(--space-3) var(--space-3); display: flex; flex-direction: column; gap: var(--space-2); }
 .diary-day-card {
   background: var(--color-card); border-radius: var(--radius-lg);

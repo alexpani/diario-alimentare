@@ -100,7 +100,7 @@ food-diary/
 - **Calendario**: anelli colorati semaforo (verde/giallo/rosso) sui giorni in base alle kcal vs target del piano del giorno (via snapshot); il giorno selezionato usa il colore dell'anello come sfondo
 - **Snapshot piano giornaliero**: il target kcal del giorno è memorizzato alla scrittura delle voci, così la home mostra sempre il piano corretto anche se il piano attivo viene cambiato in seguito
 - **Copia da ieri**: nei pasti vuoti mostra anteprima con alimento top + conteggio + kcal (es. "Copia colazione da ieri — Muffin e 1 altro — 450 kcal")
-- **Diario**: storico giorni, grafici settimanali e mensili (Chart.js)
+- **Diario**: storico giorni, grafici settimanali e mensili (Chart.js), card **"Media 7 giorni"** con media mobile kcal, bilancio settimanale vs target (convertito in grammi di grasso equivalenti) e semaforo a colori
 - **Alimenti**: database personale con ricerca (soglia 2 caratteri), import dal catalogo Food Tracker, barcode scanner, upload foto, porzioni decimali; recenti/frequenti fino a 12 alimenti con fallback cross-meal
 - **Gestione alimenti avanzata** (`foods-table.html`): spreadsheet full-width con colonne Foto, Fonte e Data, editing inline
 - **Barcode**: se non trovato nel DB locale né nel catalogo, mostra "Crea questo alimento" con barcode precompilato

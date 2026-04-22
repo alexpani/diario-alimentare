@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
-  <link rel="stylesheet" href="/css/style.css?v=49">
+  <link rel="stylesheet" href="/css/style.css?v=50">
 </head>
 <body>
 
@@ -148,6 +148,31 @@
     <!-- TAB: DIARIO -->
     <section id="tab-diario" class="tab-pane">
       <div class="charts-section">
+        <div class="chart-card weekly-avg-card" id="weekly-avg-card">
+          <h3>Media 7 giorni</h3>
+          <div class="weekly-avg-main">
+            <div class="weekly-avg-kcal">
+              <span class="weekly-avg-value" id="weekly-avg-kcal">—</span>
+              <span class="weekly-avg-unit">kcal/giorno</span>
+            </div>
+            <div class="weekly-avg-dot" id="weekly-avg-dot" aria-hidden="true"></div>
+          </div>
+          <div class="weekly-avg-details">
+            <div class="weekly-avg-row">
+              <span class="weekly-avg-label">Target medio</span>
+              <span class="weekly-avg-target" id="weekly-avg-target">—</span>
+            </div>
+            <div class="weekly-avg-row">
+              <span class="weekly-avg-label" id="weekly-avg-diff-label">Scostamento</span>
+              <span class="weekly-avg-diff" id="weekly-avg-diff">—</span>
+            </div>
+            <div class="weekly-avg-row">
+              <span class="weekly-avg-label" id="weekly-avg-cum-label">Bilancio settimanale</span>
+              <span class="weekly-avg-cum" id="weekly-avg-cum">—</span>
+            </div>
+          </div>
+          <div class="weekly-avg-hint" id="weekly-avg-hint"></div>
+        </div>
         <div class="chart-card">
           <h3 id="chart-weekly-title">Calorie ultimi 7 giorni</h3>
           <canvas id="chart-weekly"></canvas>
@@ -765,7 +790,7 @@
 <script src="/js/barcode.js?v=2"></script>
 <script src="/js/foods.js?v=27"></script>
 <script src="/js/diary.js?v=61"></script>
-<script src="/js/diarylog.js?v=8"></script>
+<script src="/js/diarylog.js?v=9"></script>
 <script src="/js/plan.js?v=5"></script>
 <script src="/js/settings.js?v=7"></script>
 

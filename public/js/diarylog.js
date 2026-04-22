@@ -19,9 +19,90 @@ window.DiaryLog = (() => {
     _rangeCache = {};
     await Promise.all([
       loadDays(),
+      loadWeeklyAvg(),
       loadWeeklyChart(),
       loadMacrosChart()
     ]);
+  }
+
+  // ── Media 7 giorni (rolling) ───────────────
+  async function loadWeeklyAvg() {
+    const to = todayStr();
+    const fromDate = new Date();
+    fromDate.setDate(fromDate.getDate() - 6);
+    const from = fromDate.toISOString().slice(0, 10);
+
+    const data = await apiGet(`/api/diary/range?from=${from}&to=${to}`);
+    const plan = App.plan || {};
+
+    // Costruisce 7 giorni consecutivi: kcal effettive + target del giorno (snapshot → fallback piano attivo)
+    const days = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().slice(0, 10);
+      const entry = data?.find(e => e.date === dateStr);
+      days.push({
+        date: dateStr,
+        kcal: entry ? entry.kcal : 0,
+        target: entry?.kcal_target || plan.kcal_target || 0,
+        hasEntry: !!entry
+      });
+    }
+
+    const daysWithEntries = days.filter(d => d.hasEntry).length;
+    const avgKcal = days.reduce((s, d) => s + d.kcal, 0) / 7;
+    const avgTarget = days.reduce((s, d) => s + d.target, 0) / 7;
+    const cumDiff = days.reduce((s, d) => s + (d.kcal - d.target), 0);
+    const dailyDiff = avgKcal - avgTarget;
+
+    // Semaforo (stessa logica del calendario Home)
+    let dotClass = '';
+    let diffClass = 'under';
+    if (avgTarget > 0) {
+      if (dailyDiff <= 0)       { dotClass = 'green';  diffClass = 'under'; }
+      else if (dailyDiff <= 200) { dotClass = 'yellow'; diffClass = 'mild';  }
+      else                       { dotClass = 'red';    diffClass = 'over';  }
+    }
+
+    const fmtSigned = v => (v > 0 ? '+' : '') + Math.round(v);
+
+    document.getElementById('weekly-avg-kcal').textContent = avgTarget > 0 ? Math.round(avgKcal) : '—';
+    document.getElementById('weekly-avg-target').textContent = avgTarget > 0
+      ? `${Math.round(avgTarget)} kcal`
+      : '—';
+
+    const diffEl = document.getElementById('weekly-avg-diff');
+    diffEl.className = 'weekly-avg-diff ' + diffClass;
+    diffEl.textContent = avgTarget > 0 ? `${fmtSigned(dailyDiff)} kcal/giorno` : '—';
+
+    const cumEl = document.getElementById('weekly-avg-cum');
+    // Bilancio settimanale: stessa classe di scostamento
+    cumEl.className = 'weekly-avg-cum ' + diffClass;
+    cumEl.textContent = avgTarget > 0 ? `${fmtSigned(cumDiff)} kcal` : '—';
+
+    const dot = document.getElementById('weekly-avg-dot');
+    dot.className = 'weekly-avg-dot ' + dotClass;
+
+    // Hint interpretativo: converte il bilancio in grammi di grasso (~7700 kcal/kg)
+    const hint = document.getElementById('weekly-avg-hint');
+    if (avgTarget > 0 && daysWithEntries > 0) {
+      const kgEq = Math.abs(cumDiff) / 7700;
+      const grams = Math.round(kgEq * 1000);
+      let msg = '';
+      if (daysWithEntries < 7) {
+        msg = `Dati da ${daysWithEntries}/7 giorni: i giorni senza voci contano come 0 kcal.`;
+      } else if (Math.abs(cumDiff) < 300) {
+        msg = 'Settimana in linea col target.';
+      } else if (cumDiff < 0) {
+        msg = `Deficit settimanale ≈ ${grams} g di grasso.`;
+      } else {
+        msg = `Surplus settimanale ≈ ${grams} g di grasso.`;
+      }
+      hint.textContent = msg;
+    } else {
+      hint.textContent = '';
+    }
   }
 
   // ── Lista giorni ────────────────────────

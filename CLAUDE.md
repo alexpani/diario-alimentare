@@ -161,6 +161,18 @@ Il calendario nella Home mostra anelli colorati (semaforo) intorno ai giorni con
 Il giorno selezionato usa il colore dell'anello come sfondo (non sempre verde).
 I dati vengono da `/api/diary/range` che restituisce kcal per giorno.
 
+## Media 7 giorni (tab Diario)
+
+In cima al tab Diario c'è la card **"Media 7 giorni"** con una lettura più realistica del piano: invece di guardare il singolo giorno, guarda la media mobile a 7 giorni.
+- **Media kcal/giorno**: somma delle kcal degli ultimi 7 giorni / 7 (i giorni senza voci contano come 0).
+- **Target medio**: media dei `kcal_target` dallo snapshot giornaliero (fallback al piano attivo). Tiene conto di eventuali cambi di piano nel periodo.
+- **Scostamento**: `media − target` per giorno.
+- **Bilancio settimanale**: somma di `kcal − target` sui 7 giorni. Positivo = surplus, negativo = deficit.
+- **Semaforo** (pallino a destra): stessa soglia del calendario Home — verde se ≤ target, giallo fino a +200 kcal, rosso oltre.
+- **Hint**: sotto la card, una nota interpretativa converte il bilancio settimanale in grammi di grasso equivalenti (≈ 7700 kcal/kg) oppure avvisa se i giorni con voci sono meno di 7.
+
+Implementazione: `loadWeeklyAvg()` in `public/js/diarylog.js`, chiamata da `refresh()`. Usa `/api/diary/range` con `from = oggi−6`.
+
 ## Gauge — "Oltre" in eccesso
 
 Quando le kcal consumate superano il target del piano, il gauge mostra:
