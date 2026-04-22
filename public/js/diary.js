@@ -339,6 +339,7 @@ window.DiaryTab = (() => {
     _pickedDate = null;
     const dayBtn = document.getElementById('edit-day-move-btn');
     dayBtn.textContent = 'Cambia giorno…';
+    dayBtn.classList.remove('has-value');
     dayBtn.dataset.baseDate = entry.date || currentDate;
 
     document.getElementById('edit-meal-move-wrap').classList.remove('hidden');
@@ -799,9 +800,11 @@ window.DiaryTab = (() => {
     if (picked === base) {
       _pickedDate = null;
       btn.textContent = 'Cambia giorno…';
+      btn.classList.remove('has-value');
     } else {
       _pickedDate = picked;
-      btn.textContent = `📅 ${formatDate(picked)}`;
+      btn.textContent = formatDate(picked);
+      btn.classList.add('has-value');
     }
   });
 

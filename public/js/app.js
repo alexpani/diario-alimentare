@@ -333,6 +333,12 @@ const Cal = (() => {
   const grid     = document.getElementById('cal-grid');
   const monthLbl = document.getElementById('cal-month-label');
 
+  // Fix iOS: position:fixed non funziona bene dentro contenitori con
+  // -webkit-overflow-scrolling: touch (.tab-content). Lo spostiamo al body.
+  if (overlay && overlay.parentElement !== document.body) {
+    document.body.appendChild(overlay);
+  }
+
   const MONTHS_IT = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno',
                      'Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
 
@@ -388,6 +394,7 @@ const Cal = (() => {
         if (_pickResolve) {
           const r = _pickResolve; _pickResolve = null;
           overlay.classList.add('hidden');
+          overlay.classList.remove('cal-pick-mode');
           overlay.style.zIndex = '';
           r(cell.dataset.date);
         } else {
@@ -414,13 +421,15 @@ const Cal = (() => {
 
   function close() {
     overlay.classList.add('hidden');
+    overlay.classList.remove('cal-pick-mode');
     overlay.style.zIndex = '';
     if (_pickResolve) { const r = _pickResolve; _pickResolve = null; r(null); }
   }
 
   // Apre il calendario come picker: ritorna Promise<string|null> con la data scelta o null se annullato.
   async function pick(initialDate) {
-    overlay.style.zIndex = '500'; // sopra ai modali (z-index 201)
+    overlay.style.zIndex = '500'; // sopra ai modali (z-index 200)
+    overlay.classList.add('cal-pick-mode'); // sblocca giorni futuri
     await open(initialDate);
     return new Promise(resolve => { _pickResolve = resolve; });
   }
