@@ -409,6 +409,8 @@ const Cal = (() => {
   let _pickResolve = null;
 
   async function open(initialDate) {
+    // Se chiamato come event listener, initialDate può essere un MouseEvent → ignora
+    if (typeof initialDate !== 'string') initialDate = null;
     const cur = initialDate || window.DiaryTab?.currentDate || todayStr();
     const [y, m] = cur.split('-').map(Number);
     viewYear  = y;
