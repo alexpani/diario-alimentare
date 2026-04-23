@@ -858,6 +858,329 @@ input:focus, select:focus, textarea:focus {
 .progress-bar.warning { background: var(--color-gauge-over); }
 .progress-bar.over    { background: var(--color-danger); }
 
+/* ─────────── V4 EDITORIAL LAYOUT ─────────── */
+
+/* Date navigation V4 */
+.v4-date-nav {
+  display: grid;
+  grid-template-columns: 38px 1fr 38px;
+  align-items: center;
+  gap: 8px;
+  padding: 10px var(--space-4) 14px;
+}
+.v4-date-btn {
+  width: 38px; height: 38px;
+  border-radius: 999px;
+  background: var(--color-bg);
+  border: none;
+  color: var(--color-text-secondary);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+.v4-date-btn:active { background: var(--color-border-subtle); transform: scale(0.95); }
+.v4-date-btn svg { width: 16px; height: 16px; }
+.v4-date-center {
+  background: transparent; border: none;
+  text-align: center; cursor: pointer;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.v4-date-weekday {
+  font-size: 10.5px;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.v4-date-full {
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+}
+
+/* Hero V4 - kcal a sinistra + ring a destra (override hero variants) */
+.daily-summary.v4-hero,
+.daily-summary.v4-hero[data-hero-style] {
+  background: var(--v4p-tint);
+  border: 1px solid var(--v4p-tintBorder);
+  border-radius: 18px;
+  padding: 22px 18px;
+  margin: 0 var(--space-4) var(--space-3);
+}
+.v4-hero-content {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+}
+.v4-hero-left {
+  flex: 1; min-width: 0;
+}
+.v4-hero-label {
+  font-size: 10.5px;
+  color: var(--v4p-accent-dark);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 600;
+  opacity: 0.75;
+}
+.v4-hero-main {
+  display: flex; align-items: baseline; gap: 6px; margin-top: 4px;
+}
+.v4-hero-value {
+  font-size: 48px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: var(--v4p-accent-dark);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.v4-hero-unit {
+  font-size: 13px;
+  color: var(--v4p-accent-dark);
+  opacity: 0.6;
+  font-weight: 500;
+}
+.v4-hero-sub {
+  font-size: 11.5px;
+  color: var(--v4p-accent-dark);
+  opacity: 0.7;
+  margin-top: 8px;
+  font-variant-numeric: tabular-nums;
+}
+.v4-hero-plan {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--v4p-accent);
+  margin-top: 4px;
+}
+.v4-hero-right {
+  flex-shrink: 0;
+}
+.v4-hero-right .ds-gauge-wrap {
+  width: 96px; position: relative;
+}
+.v4-hero-right .ds-gauge-svg {
+  width: 96px; height: 96px;
+}
+.v4-hero-right .ds-gauge-bg {
+  stroke-width: 6;
+  stroke: var(--color-border-subtle);
+}
+.v4-hero-right .ds-gauge-fill {
+  stroke: var(--v4p-accent);
+  stroke-width: 6;
+}
+.v4-hero-right .ds-gauge-inner {
+  inset: 0; padding-top: 0;
+}
+.v4-hero-pct {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--v4p-accent-dark);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Macro chips V4 - senza card, hairline */
+.v4-macro-row {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+  padding: 0 var(--space-4) var(--space-4);
+}
+.v4-macro-chip {
+  background: var(--color-card);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+.v4-macro-label {
+  font-size: 9.5px;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.v4-macro-values {
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 6px;
+}
+.v4-macro-cur {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+}
+.v4-macro-tgt {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+.v4-macro-bar {
+  height: 3px;
+  background: var(--color-border-subtle);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.v4-macro-bar-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  transition: width 0.5s ease;
+}
+
+/* Section header pasti */
+.v4-meals-header {
+  display: flex; align-items: baseline; justify-content: space-between;
+  padding: 8px var(--space-4) 8px;
+}
+.v4-meals-title {
+  font-size: 10px;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.v4-meals-add {
+  background: transparent; border: none;
+  color: var(--v4p-accent);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  padding: 0;
+  display: flex; align-items: center; gap: 4px;
+  font-family: inherit;
+  text-transform: uppercase;
+}
+.v4-meals-add:active { opacity: 0.6; }
+
+/* Meal card V4 (photo style) */
+.v4-meal {
+  display: grid;
+  grid-template-columns: 60px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  background: var(--color-card);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 14px;
+  padding: 10px;
+  margin: 0 var(--space-4) 8px;
+  cursor: pointer;
+  transition: transform 0.18s cubic-bezier(0.2, 0.7, 0.3, 1), box-shadow 0.18s;
+}
+.v4-meal:active { transform: scale(0.98); }
+.v4-meal:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+.v4-meal-photo {
+  width: 60px; height: 60px;
+  border-radius: 11px;
+  background: var(--v4p-tint);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  position: relative;
+}
+.v4-meal-photo img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+}
+.v4-meal-photo .v4-meal-icon {
+  width: 32px; height: 32px;
+}
+.v4-meal-info { min-width: 0; }
+.v4-meal-name {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  color: var(--color-text);
+  margin-bottom: 2px;
+}
+.v4-meal-items {
+  font-size: 11.5px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 3px;
+}
+.v4-meal-macros {
+  font-size: 10.5px;
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+.v4-meal-macros .p { color: var(--color-protein); }
+.v4-meal-macros .c { color: var(--color-carbs); }
+.v4-meal-macros .f { color: var(--color-fat); }
+.v4-meal-right {
+  text-align: right;
+  flex-shrink: 0;
+  padding-right: 6px;
+}
+.v4-meal-kcal {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.v4-meal-kcal-label {
+  font-size: 9.5px;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.04em;
+  font-weight: 600;
+  margin-top: 2px;
+}
+.v4-meal-empty {
+  border-style: dashed;
+  border-color: var(--color-border);
+  background: transparent;
+}
+.v4-meal-empty .v4-meal-photo {
+  opacity: 0.5;
+}
+.v4-meal-empty .v4-meal-right { display: none; }
+.v4-meal-empty .v4-meal-action {
+  font-size: 12px;
+  color: var(--v4p-accent);
+  font-weight: 600;
+  display: flex; align-items: center; gap: 4px;
+  margin-top: 2px;
+}
+
+/* FAB - Floating Action Button */
+.v4-fab {
+  position: fixed;
+  right: 18px;
+  bottom: calc(var(--tab-bar-height) + 18px);
+  width: 56px; height: 56px;
+  border-radius: 999px;
+  background: var(--v4p-accent);
+  color: white;
+  border: none;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 16px var(--v4p-shadow);
+  cursor: pointer;
+  z-index: 100;
+  transition: transform 0.18s cubic-bezier(0.2, 0.7, 0.3, 1), box-shadow 0.18s;
+}
+.v4-fab:active { transform: scale(0.94); }
+.v4-fab svg { width: 24px; height: 24px; }
+@media (min-width: 600px) {
+  .v4-fab { right: calc(50% - 215px + 18px); }
+}
+
+/* Hide old daily-summary internals when v4-hero is active */
+.daily-summary.v4-hero .ds-gauge-row,
+.daily-summary.v4-hero .ds-side,
+.daily-summary.v4-hero .ds-macro-cards,
+.daily-summary.v4-hero .ds-side-value,
+.daily-summary.v4-hero .ds-side-label,
+.daily-summary.v4-hero .ds-target,
+.daily-summary.v4-hero .ds-remaining-label {
+  display: none !important;
+}
+
+/* Hide old date-nav since we have v4-date-nav */
+.daily-summary.v4-hero .date-nav { display: none; }
+
 /* ─────────── HERO VARIANTS (V4) ─────────── */
 /* Hero variant: "green" - Solid tinted background */
 .daily-summary[data-hero-style="green"] {

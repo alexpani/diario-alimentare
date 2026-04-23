@@ -225,6 +225,10 @@ function switchTab(tab) {
   document.querySelectorAll('.tab-pane').forEach(p => p.classList.toggle('active', p.id === `tab-${tab}`));
   document.getElementById('header-title').textContent = tabTitles[tab] || 'FoodDiary';
 
+  // FAB visibile solo su Home
+  const fab = document.getElementById('v4-fab');
+  if (fab) fab.classList.toggle('hidden', tab !== 'home');
+
   // Refresh del tab attivato
   if (tab === 'home') window.DiaryTab?.refresh();
   if (tab === 'diario') window.DiaryLog?.refresh();
@@ -313,6 +317,27 @@ async function initApp() {
 
   // Avvia tab home
   switchTab('home');
+
+  // FAB → apre modal aggiungi (sceglie pasto in base all'ora)
+  const fab = document.getElementById('v4-fab');
+  if (fab) {
+    fab.addEventListener('click', () => {
+      const h = new Date().getHours();
+      let m = 'extra';
+      if (h < 10) m = 'colazione';
+      else if (h < 12) m = 'spuntino_mattino';
+      else if (h < 15) m = 'pranzo';
+      else if (h < 17) m = 'spuntino_pomeriggio';
+      else if (h < 22) m = 'cena';
+      window.DiaryTab?.openAddModal?.(m);
+    });
+  }
+
+  // "+ Nuovo" header pasti
+  const addNewBtn = document.getElementById('btn-fab-add');
+  if (addNewBtn) {
+    addNewBtn.addEventListener('click', () => fab?.click());
+  }
 
   // Pre-cache di tutto il contenuto per uso offline (background, non bloccante)
   setTimeout(() => { warmCache().catch(() => {}); }, 1500);
