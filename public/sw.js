@@ -6,7 +6,7 @@
 // - Asset same-origin: stale-while-revalidate
 // - CDN cross-origin: network-first con fallback alla cache
 
-const VERSION = 'v21';
+const VERSION = 'v24';
 const SHELL_CACHE = `fd-shell-${VERSION}`;
 const RUNTIME_CACHE = `fd-runtime-${VERSION}`;
 const API_CACHE = `fd-api-${VERSION}`;
