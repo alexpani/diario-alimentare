@@ -60,6 +60,26 @@ window.DiaryTab = (() => {
     document.getElementById('current-date-text').textContent = formatDate(currentDate);
   }
 
+  // Helper to animate a number from 0 to target
+  function animateNumber(el, target, duration = 600) {
+    const start = performance.now();
+    const startValue = 0;
+    const diff = target - startValue;
+
+    function frame(now) {
+      const progress = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3); // ease-out-cubic
+      const value = Math.round(startValue + diff * eased);
+      el.textContent = value;
+
+      if (progress < 1) {
+        requestAnimationFrame(frame);
+      }
+    }
+
+    requestAnimationFrame(frame);
+  }
+
   function renderSummary() {
     const plan = dayPlan || App.plan;
     let totalKcal = 0, totalProtein = 0, totalFat = 0, totalCarbs = 0;
@@ -95,17 +115,21 @@ window.DiaryTab = (() => {
       summary?.classList.remove('over-target');
     }
 
-    document.getElementById('total-kcal').textContent  = Math.round(totalKcal);
+    // Animate total kcal
+    const totalKcalEl = document.getElementById('total-kcal');
+    animateNumber(totalKcalEl, Math.round(totalKcal), 600);
+
     const remaining = Math.round(targetKcal - totalKcal);
     const remainingEl = document.getElementById('ds-remaining');
     const remainingLabel = document.querySelector('.ds-remaining-label');
     if (remaining >= 0) {
       remainingLabel.textContent = 'Rimanenti';
-      remainingEl.textContent = remaining;
+      animateNumber(remainingEl, remaining, 600);
       remainingEl.classList.remove('ds-over');
     } else {
       remainingLabel.textContent = 'Oltre';
-      remainingEl.textContent = '+' + Math.abs(remaining);
+      // For "over" state, animate to positive value
+      animateNumber(remainingEl, Math.abs(remaining), 600);
       remainingEl.classList.add('ds-over');
     }
     document.getElementById('target-kcal').textContent  = Math.round(targetKcal);
@@ -150,7 +174,8 @@ window.DiaryTab = (() => {
 
       const section = document.createElement('div');
       const mealStyle = localStorage.getItem('fd-meal-style') || 'photo';
-      section.className = 'meal-section';
+      section.className = `meal-section v4p-fade`;
+      section.style.animationDelay = `${MEALS.indexOf(meal) * 30}ms`;
       section.setAttribute('data-meal-style', mealStyle);
       section.innerHTML = `
         <div class="meal-header" data-meal="${meal.id}">

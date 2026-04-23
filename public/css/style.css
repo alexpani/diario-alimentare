@@ -1973,6 +1973,51 @@ input:focus, select:focus, textarea:focus {
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
+/* ─────────── V4 ANIMATIONS ─────────── */
+@keyframes v4p-fade {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes v4p-ring {
+  from { stroke-dashoffset: var(--ring-full); }
+  to { stroke-dashoffset: var(--ring-target); }
+}
+
+@keyframes v4p-bar-fill {
+  from { width: 0%; }
+  to { width: var(--bar-target); }
+}
+
+.v4p-fade {
+  animation: v4p-fade 0.28s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+
+.v4p-tap {
+  transition: transform 0.12s ease, background 0.12s ease;
+}
+
+.v4p-tap:active {
+  transform: scale(0.97);
+}
+
+.v4p-meal {
+  transition: transform 0.18s cubic-bezier(0.2, 0.7, 0.3, 1), box-shadow 0.18s;
+}
+
+.v4p-meal:hover {
+  transform: translateY(-1px);
+}
+
+.v4p-ring-fill {
+  animation: v4p-ring 1.2s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+
+/* Count-up animation (applied via JavaScript) */
+.count-up {
+  font-variant-numeric: tabular-nums;
+}
+
 .empty-state {
   text-align: center;
   padding: var(--space-10) var(--space-5);
