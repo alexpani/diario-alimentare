@@ -87,6 +87,14 @@ window.DiaryTab = (() => {
     gaugeFill.className = 'ds-gauge-fill' +
       (pct >= 1 ? ' over' : pct >= 0.9 ? ' warning' : '');
 
+    // Set over-target class on daily-summary for hero variant styling
+    const summary = document.querySelector('.daily-summary');
+    if (pct >= 1) {
+      summary?.classList.add('over-target');
+    } else {
+      summary?.classList.remove('over-target');
+    }
+
     document.getElementById('total-kcal').textContent  = Math.round(totalKcal);
     const remaining = Math.round(targetKcal - totalKcal);
     const remainingEl = document.getElementById('ds-remaining');

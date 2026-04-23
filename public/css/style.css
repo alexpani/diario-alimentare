@@ -47,6 +47,16 @@
   --macro-card-bg: rgba(255,255,255,0.85);
   --macro-card-bar-bg: rgba(0,0,0,0.08);
 
+  /* ── V4 Palette System (12 themes: green default) ── */
+  --v4p-accent: oklch(48% 0.13 155);
+  --v4p-accent-dark: oklch(32% 0.08 155);
+  --v4p-tint: oklch(97.5% 0.02 155);
+  --v4p-tintBorder: oklch(94% 0.04 155);
+  --v4p-shadow: rgba(46,125,70,0.25);
+
+  /* ── Density scale (1 = normal, 0.9 = compact, 1.1 = airy) ── */
+  --density-scale: 1;
+
   /* ── Layout ── */
   --tab-bar-height: 72px;
   --header-height: 52px;
@@ -148,6 +158,12 @@
   --gradient-login:           linear-gradient(145deg, #0F3212 0%, #1B5E20 60%, #2E7D32 100%);
   --macro-card-bg:            rgba(0,0,0,0.5);
   --macro-card-bar-bg:        rgba(255,255,255,0.15);
+  /* V4 Palette System - dark mode variants (lighter accent for dark bg) */
+  --v4p-accent:               oklch(58% 0.13 155);
+  --v4p-accent-dark:          oklch(48% 0.10 155);
+  --v4p-tint:                 oklch(20% 0.01 155);
+  --v4p-tintBorder:           oklch(30% 0.02 155);
+  --v4p-shadow:               rgba(46,125,70,0.35);
   --shadow-xs:                0 1px 2px rgba(0,0,0,0.35);
   --shadow-sm:                0 1px 3px rgba(0,0,0,0.40);
   --shadow:                   0 2px 8px rgba(0,0,0,0.45);
@@ -841,6 +857,76 @@ input:focus, select:focus, textarea:focus {
 }
 .progress-bar.warning { background: var(--color-gauge-over); }
 .progress-bar.over    { background: var(--color-danger); }
+
+/* ─────────── HERO VARIANTS (V4) ─────────── */
+/* Hero variant: "green" - Solid tinted background */
+.daily-summary[data-hero-style="green"] {
+  background: var(--v4p-tint);
+  border: 1px solid var(--v4p-tintBorder);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+}
+.daily-summary[data-hero-style="green"] .ds-gauge-wrap {
+  display: none;
+}
+.daily-summary[data-hero-style="green"] .ds-gauge-row {
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.daily-summary[data-hero-style="green"] .ds-side { flex: none; }
+.daily-summary[data-hero-style="green"] .ds-side-value {
+  font-size: var(--text-display);
+  color: var(--v4p-accent-dark);
+}
+
+/* Hero variant: "ring" - Current gauge ring (enhanced) */
+.daily-summary[data-hero-style="ring"] {
+  background: var(--gradient-hero);
+  padding: calc(var(--space-4) * var(--density-scale)) calc(var(--space-4) * var(--density-scale)) 0;
+}
+.daily-summary[data-hero-style="ring"] .ds-gauge-wrap {
+  display: flex;
+}
+
+/* Hero variant: "type" - Typography-focused */
+.daily-summary[data-hero-style="type"] {
+  background: var(--v4p-tint);
+  border: 1px solid var(--v4p-tintBorder);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+}
+.daily-summary[data-hero-style="type"] .ds-gauge-wrap {
+  display: none;
+}
+.daily-summary[data-hero-style="type"] .ds-gauge-row {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.daily-summary[data-hero-style="type"] .ds-side { flex: auto; text-align: left; }
+.daily-summary[data-hero-style="type"] .ds-side-value {
+  font-size: var(--text-display);
+  color: var(--v4p-accent-dark);
+}
+
+/* Hero variant: "over" - Shows excess when over target */
+.daily-summary[data-hero-style="over"] {
+  background: var(--gradient-hero);
+  padding: calc(var(--space-4) * var(--density-scale)) calc(var(--space-4) * var(--density-scale)) 0;
+}
+.daily-summary[data-hero-style="over"] .ds-gauge-wrap {
+  display: flex;
+}
+.daily-summary[data-hero-style="over"] .ds-remaining-label {
+  transition: color 0.3s ease;
+}
+.daily-summary[data-hero-style="over"].over-target .ds-remaining-label {
+  color: oklch(62% 0.14 30);
+}
+.daily-summary[data-hero-style="over"].over-target .ds-remaining {
+  color: oklch(62% 0.14 30);
+}
 
 /* Meal sections */
 .meal-section {

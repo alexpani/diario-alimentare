@@ -245,8 +245,56 @@ function switchTab(tab) {
   }
 }
 
+// ── V4 Design System ──────────────────────
+const V4_PALETTES = {
+  green:  { accent: 'oklch(48% 0.13 155)', dark: 'oklch(32% 0.08 155)', tint: 'oklch(97.5% 0.02 155)', tintBorder: 'oklch(94% 0.04 155)', shadow: 'rgba(46,125,70,0.25)' },
+  olive:  { accent: 'oklch(52% 0.09 125)', dark: 'oklch(32% 0.06 125)', tint: 'oklch(96.5% 0.02 125)', tintBorder: 'oklch(93% 0.03 125)', shadow: 'rgba(95,120,50,0.22)' },
+  teal:   { accent: 'oklch(52% 0.11 195)', dark: 'oklch(32% 0.07 195)', tint: 'oklch(97% 0.025 195)', tintBorder: 'oklch(93% 0.035 195)', shadow: 'rgba(40,110,120,0.22)' },
+  forest: { accent: 'oklch(42% 0.10 150)', dark: 'oklch(26% 0.06 150)', tint: 'oklch(96% 0.02 150)', tintBorder: 'oklch(92% 0.03 150)', shadow: 'rgba(30,85,50,0.28)' },
+  matcha: { accent: 'oklch(62% 0.14 140)', dark: 'oklch(36% 0.09 140)', tint: 'oklch(97% 0.03 140)', tintBorder: 'oklch(92% 0.045 140)', shadow: 'rgba(95,150,70,0.24)' },
+  amber:  { accent: 'oklch(58% 0.14 65)', dark: 'oklch(36% 0.09 65)', tint: 'oklch(97% 0.03 65)', tintBorder: 'oklch(93% 0.045 65)', shadow: 'rgba(170,110,30,0.22)' },
+  terra:  { accent: 'oklch(54% 0.14 35)', dark: 'oklch(34% 0.09 35)', tint: 'oklch(96.5% 0.03 35)', tintBorder: 'oklch(92% 0.045 35)', shadow: 'rgba(165,80,55,0.24)' },
+  rose:   { accent: 'oklch(58% 0.14 10)', dark: 'oklch(36% 0.09 10)', tint: 'oklch(97% 0.03 10)', tintBorder: 'oklch(93% 0.045 10)', shadow: 'rgba(180,70,90,0.22)' },
+  plum:   { accent: 'oklch(46% 0.13 340)', dark: 'oklch(28% 0.09 340)', tint: 'oklch(96.5% 0.025 340)', tintBorder: 'oklch(92% 0.04 340)', shadow: 'rgba(130,50,110,0.24)' },
+  indigo: { accent: 'oklch(48% 0.16 275)', dark: 'oklch(30% 0.11 275)', tint: 'oklch(96.5% 0.03 275)', tintBorder: 'oklch(92% 0.045 275)', shadow: 'rgba(70,60,180,0.24)' },
+  slate:  { accent: 'oklch(40% 0.02 250)', dark: 'oklch(24% 0.01 250)', tint: 'oklch(96% 0.004 250)', tintBorder: 'oklch(92% 0.005 250)', shadow: 'rgba(40,50,70,0.22)' },
+  graphite: { accent: 'oklch(28% 0.01 150)', dark: 'oklch(18% 0.005 150)', tint: 'oklch(95% 0.002 150)', tintBorder: 'oklch(90% 0.003 150)', shadow: 'rgba(30,30,30,0.25)' },
+};
+
+function applyPalette(name) {
+  const p = V4_PALETTES[name] || V4_PALETTES.green;
+  const r = document.documentElement;
+  r.style.setProperty('--v4p-accent', p.accent);
+  r.style.setProperty('--v4p-accent-dark', p.dark);
+  r.style.setProperty('--v4p-tint', p.tint);
+  r.style.setProperty('--v4p-tintBorder', p.tintBorder);
+  r.style.setProperty('--v4p-shadow', p.shadow);
+}
+
+function setHeroStyle(style) {
+  const summary = document.querySelector('.daily-summary');
+  if (summary) {
+    summary.setAttribute('data-hero-style', style);
+  }
+  localStorage.setItem('fd-hero-style', style);
+}
+
+function setDensity(level) {
+  const scale = level === 'compact' ? 0.9 : level === 'airy' ? 1.1 : 1;
+  document.documentElement.style.setProperty('--density-scale', scale);
+  localStorage.setItem('fd-density', level);
+}
+
 // ── Init ──────────────────────────────────
 async function initApp() {
+  // Carica e applica hero style e palette dal localStorage
+  const savedHeroStyle = localStorage.getItem('fd-hero-style') || 'ring';
+  const savedPalette = localStorage.getItem('fd-v4-palette') || 'green';
+  const savedDensity = localStorage.getItem('fd-density') || 'normal';
+
+  applyPalette(savedPalette);
+  setHeroStyle(savedHeroStyle);
+  setDensity(savedDensity);
   // Carica piano attivo
   const plan = await apiGet('/api/plan');
   if (plan) {
