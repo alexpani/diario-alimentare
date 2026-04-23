@@ -279,6 +279,13 @@ function setHeroStyle(style) {
   localStorage.setItem('fd-hero-style', style);
 }
 
+function setMealStyle(style) {
+  document.querySelectorAll('.meal-section').forEach(el => {
+    el.setAttribute('data-meal-style', style);
+  });
+  localStorage.setItem('fd-meal-style', style);
+}
+
 function setDensity(level) {
   const scale = level === 'compact' ? 0.9 : level === 'airy' ? 1.1 : 1;
   document.documentElement.style.setProperty('--density-scale', scale);

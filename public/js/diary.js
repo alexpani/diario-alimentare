@@ -149,7 +149,9 @@ window.DiaryTab = (() => {
         </div>` : '';
 
       const section = document.createElement('div');
+      const mealStyle = localStorage.getItem('fd-meal-style') || 'photo';
       section.className = 'meal-section';
+      section.setAttribute('data-meal-style', mealStyle);
       section.innerHTML = `
         <div class="meal-header" data-meal="${meal.id}">
           <div class="meal-header-left">

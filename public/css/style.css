@@ -938,6 +938,44 @@ input:focus, select:focus, textarea:focus {
   overflow: hidden;
 }
 
+/* ─────────── MEAL CARD VARIANTS (V4) ─────────── */
+/* Variant: "hairline" - Minimal borders, no shadow, line-based */
+.meal-section[data-meal-style="hairline"] {
+  border-radius: var(--radius-sm);
+  box-shadow: none;
+  border: 1px solid var(--color-border);
+  background: var(--color-card);
+  margin: var(--space-3) var(--space-3);
+}
+
+/* Variant: "photo" - Current style (photo images, standard) */
+.meal-section[data-meal-style="photo"] {
+  box-shadow: var(--shadow-sm);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-subtle);
+}
+
+/* Variant: "soft" - Soft shadows, rounded corners, reduced borders */
+.meal-section[data-meal-style="soft"] {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  border-radius: var(--radius-xl);
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  margin: var(--space-3) var(--space-2);
+}
+
+[data-theme="dark"] .meal-section[data-meal-style="soft"] {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Apply density scale to meal margins */
+.meal-section {
+  margin-top: calc(var(--space-2) * var(--density-scale));
+  margin-bottom: calc(var(--space-2) * var(--density-scale));
+  margin-left: calc(var(--space-3) * var(--density-scale));
+  margin-right: calc(var(--space-3) * var(--density-scale));
+}
+
 .meal-header {
   display: flex; align-items: center; justify-content: space-between;
   padding: var(--space-3) var(--space-4);
