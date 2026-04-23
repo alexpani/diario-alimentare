@@ -31,27 +31,9 @@ app.use(session({
   }
 }));
 
-// Static files — no-cache su index.html e sw.js per evitare cache stantia su nginx/browser
-app.use(express.static(path.join(__dirname, 'public'), {
-  setHeaders: (res, filePath) => {
-    if (filePath.endsWith('index.html') || filePath.endsWith('sw.js') || filePath.endsWith('manifest.json')) {
-      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-      res.setHeader('Pragma', 'no-cache');
-      res.setHeader('Expires', '0');
-    }
-  }
-}));
+// Static files
+app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-// no-cache anche sulla fallback route che serve index.html
-app.use((req, res, next) => {
-  if (req.path === '/' || req.path === '/index.html') {
-    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-    res.setHeader('Pragma', 'no-cache');
-    res.setHeader('Expires', '0');
-  }
-  next();
-});
 
 // Routes
 app.use('/', authRoutes);

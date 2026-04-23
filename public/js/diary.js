@@ -57,45 +57,7 @@ window.DiaryTab = (() => {
   }
 
   function renderDateNav() {
-    // V4: weekday + full date on two lines
-    const d = new Date(currentDate + 'T00:00:00');
-    const today = new Date(); today.setHours(0,0,0,0);
-    const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1);
-    const todayStr = today.toISOString().slice(0, 10);
-    const yesterdayStr = yesterday.toISOString().slice(0, 10);
-
-    const weekdayEl = document.getElementById('current-date-weekday');
-    const fullEl = document.getElementById('current-date-text');
-
-    let weekday;
-    if (currentDate === todayStr) weekday = 'OGGI';
-    else if (currentDate === yesterdayStr) weekday = 'IERI';
-    else weekday = d.toLocaleDateString('it-IT', { weekday: 'long' }).toUpperCase();
-
-    const full = d.toLocaleDateString('it-IT', { day: 'numeric', month: 'long' });
-
-    if (weekdayEl) weekdayEl.textContent = weekday;
-    if (fullEl) fullEl.textContent = full;
-  }
-
-  // Helper to animate a number from 0 to target
-  function animateNumber(el, target, duration = 600) {
-    const start = performance.now();
-    const startValue = 0;
-    const diff = target - startValue;
-
-    function frame(now) {
-      const progress = Math.min((now - start) / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3); // ease-out-cubic
-      const value = Math.round(startValue + diff * eased);
-      el.textContent = value;
-
-      if (progress < 1) {
-        requestAnimationFrame(frame);
-      }
-    }
-
-    requestAnimationFrame(frame);
+    document.getElementById('current-date-text').textContent = formatDate(currentDate);
   }
 
   function renderSummary() {
@@ -125,35 +87,20 @@ window.DiaryTab = (() => {
     gaugeFill.className = 'ds-gauge-fill' +
       (pct >= 1 ? ' over' : pct >= 0.9 ? ' warning' : '');
 
-    // Set over-target class on daily-summary for hero variant styling
-    const summary = document.querySelector('.daily-summary');
-    if (pct >= 1) {
-      summary?.classList.add('over-target');
-    } else {
-      summary?.classList.remove('over-target');
-    }
-
-    // Animate total kcal
-    const totalKcalEl = document.getElementById('total-kcal');
-    animateNumber(totalKcalEl, Math.round(totalKcal), 600);
-
+    document.getElementById('total-kcal').textContent  = Math.round(totalKcal);
     const remaining = Math.round(targetKcal - totalKcal);
     const remainingEl = document.getElementById('ds-remaining');
-    const remainingLabel = document.getElementById('ds-remaining-label');
+    const remainingLabel = document.querySelector('.ds-remaining-label');
     if (remaining >= 0) {
-      if (remainingLabel) remainingLabel.textContent = 'RIMANENTI';
-      animateNumber(remainingEl, remaining, 600);
+      remainingLabel.textContent = 'Rimanenti';
+      remainingEl.textContent = remaining;
       remainingEl.classList.remove('ds-over');
     } else {
-      if (remainingLabel) remainingLabel.textContent = 'OLTRE';
-      animateNumber(remainingEl, Math.abs(remaining), 600);
+      remainingLabel.textContent = 'Oltre';
+      remainingEl.textContent = '+' + Math.abs(remaining);
       remainingEl.classList.add('ds-over');
     }
     document.getElementById('target-kcal').textContent  = Math.round(targetKcal);
-
-    // V4: percentuale dentro al ring
-    const pctEl = document.getElementById('ds-pct');
-    if (pctEl) pctEl.textContent = Math.round(pct * 100) + '%';
 
     // ── Barre macro ────────────────────────────────────────────────────────
     const setMacro = (totalId, targetId, barId, total, target) => {
@@ -168,10 +115,7 @@ window.DiaryTab = (() => {
 
     // Aggiorna nome piano (snapshot del giorno o piano attivo)
     const nameEl = document.getElementById('active-plan-name');
-    if (nameEl) {
-      const planName = dayPlan?.plan_name || App.plan?.name || '';
-      nameEl.textContent = planName ? `Piano ${planName}` : '';
-    }
+    if (nameEl) nameEl.textContent = dayPlan?.plan_name || App.plan?.name || '';
   }
 
   let openMealId = null;
@@ -187,90 +131,54 @@ window.DiaryTab = (() => {
       const mealFat = mealEntries.reduce((s, e) => s + e.fat, 0);
       const mealCarbs = mealEntries.reduce((s, e) => s + e.carbs, 0);
       const isOpen = openMealId === meal.id;
-      const isEmpty = mealEntries.length === 0;
 
-      // Nomi degli alimenti (top 3, separati da " · ")
-      const sortedByKcal = [...mealEntries].sort((a, b) => (b.kcal || 0) - (a.kcal || 0));
-      const itemNames = sortedByKcal.slice(0, 3).map(e =>
-        (e.food && e.food.name) || e.food_name || '?'
-      );
-      const itemsText = sortedByKcal.length > 0
-        ? itemNames.join(' · ') + (sortedByKcal.length > 3 ? ` · +${sortedByKcal.length - 3}` : '')
-        : '';
-
-      // Foto: prima entry con immagine, altrimenti illustrazione del pasto
-      const firstWithImg = mealEntries.find(e => e.food?.image_url);
-      const photoSrc = firstWithImg
-        ? firstWithImg.food.image_url
-        : `/img/meals/${meal.image}`;
-      const photoIsIllustration = !firstWithImg;
+      const macrosHtml = mealKcal > 0 ? `
+        <div class="meal-macros">
+          <span class="meal-kcal-badge">${Math.round(mealKcal)} kcal</span>
+          <span class="meal-macro" style="color:var(--color-protein)">P:${fmt(mealProtein, 0)}g</span>
+          <span class="meal-macro" style="color:var(--color-carbs)">C:${fmt(mealCarbs, 0)}g</span>
+          <span class="meal-macro" style="color:var(--color-fat)">G:${fmt(mealFat, 0)}g</span>
+        </div>` : '';
 
       const section = document.createElement('div');
-      section.className = `meal-section v4-meal-wrap v4p-fade${isEmpty ? ' is-empty' : ''}`;
-      section.style.animationDelay = `${MEALS.indexOf(meal) * 30}ms`;
-      section.setAttribute('data-meal-id', meal.id);
-
-      // Card V4 (sempre visibile)
-      const card = `
-        <div class="v4-meal${isEmpty ? ' v4-meal-empty' : ''}" data-meal="${meal.id}">
-          <div class="v4-meal-photo">
-            ${photoIsIllustration
-              ? `<img class="v4-meal-icon" src="${photoSrc}" alt="" aria-hidden="true">`
-              : `<img src="${photoSrc}" alt="" loading="lazy">`}
+      section.className = 'meal-section';
+      section.innerHTML = `
+        <div class="meal-header" data-meal="${meal.id}">
+          <div class="meal-header-left">
+            <img class="meal-illustration" src="/img/meals/${meal.image}" alt="" aria-hidden="true">
+            <span class="meal-name">${meal.label}</span>
           </div>
-          <div class="v4-meal-info">
-            <div class="v4-meal-name">${meal.label}</div>
-            ${isEmpty
-              ? `<div class="v4-meal-action">
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                  Aggiungi
-                </div>`
-              : `<div class="v4-meal-items">${itemsText}</div>
-                 <div class="v4-meal-macros"><span class="p">P ${fmt(mealProtein, 0)}g</span> · <span class="c">C ${fmt(mealCarbs, 0)}g</span> · <span class="f">G ${fmt(mealFat, 0)}g</span></div>`}
-          </div>
-          ${!isEmpty ? `
-            <div class="v4-meal-right">
-              <div class="v4-meal-kcal">${Math.round(mealKcal)}</div>
-              <div class="v4-meal-kcal-label">KCAL</div>
-            </div>
-          ` : ''}
+          ${macrosHtml}
+        </div>
+        <div class="meal-body" id="meal-body-${meal.id}" style="${isOpen ? '' : 'display:none'}">
+          ${mealEntries.map(e => renderEntryRow(e)).join('')}
+          ${mealEntries.length === 0 ? (() => {
+            const yMeal = yesterdayEntries.filter(e => e.meal_type === meal.id);
+            if (yMeal.length === 0) return '';
+            const totalKcal = Math.round(yMeal.reduce((s, e) => s + e.kcal, 0));
+            // Mostra fino a 4 alimenti (i più calorici); se ce ne sono di più, "e N altri"
+            const sorted = [...yMeal].sort((a, b) => (b.kcal || 0) - (a.kcal || 0));
+            const shown = sorted.slice(0, 4).map(e => (e.food && e.food.name) || e.food_name || '?');
+            const extra = yMeal.length - shown.length;
+            const desc = extra > 0
+              ? `${shown.join(', ')} e ${extra === 1 ? '1 altro' : extra + ' altri'}`
+              : shown.join(', ');
+            return `<button class="btn-copy-from-yesterday" data-meal="${meal.id}">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <span class="copy-yesterday-label">Copia ${meal.label.toLowerCase()} da ieri</span>
+            <span class="copy-yesterday-detail">${desc} — ${totalKcal} kcal</span>
+          </button>`;
+          })() : ''}
+          ${mealEntries.length >= 2 ? `<button class="btn-save-as-recipe" data-meal="${meal.id}">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            Salva come ricetta
+          </button>` : ''}
+          <button class="btn-add-to-meal" data-meal="${meal.id}">
+            <svg class="icon-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            Aggiungi alimento
+          </button>
         </div>
       `;
-
-      // Body espanso (quando aperto)
-      const body = `
-        <div class="meal-body" id="meal-body-${meal.id}" style="${isOpen ? '' : 'display:none'}; padding: 0 var(--space-4) var(--space-3);">
-          <div style="background:var(--color-card); border:1px solid var(--color-border-subtle); border-radius:14px; padding:8px; margin-top:-4px;">
-            ${mealEntries.map(e => renderEntryRow(e)).join('')}
-            ${isEmpty ? (() => {
-              const yMeal = yesterdayEntries.filter(e => e.meal_type === meal.id);
-              if (yMeal.length === 0) return '';
-              const totalKcal = Math.round(yMeal.reduce((s, e) => s + e.kcal, 0));
-              const sorted = [...yMeal].sort((a, b) => (b.kcal || 0) - (a.kcal || 0));
-              const shown = sorted.slice(0, 4).map(e => (e.food && e.food.name) || e.food_name || '?');
-              const extra = yMeal.length - shown.length;
-              const desc = extra > 0
-                ? `${shown.join(', ')} e ${extra === 1 ? '1 altro' : extra + ' altri'}`
-                : shown.join(', ');
-              return `<button class="btn-copy-from-yesterday" data-meal="${meal.id}">
-                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                <span class="copy-yesterday-label">Copia ${meal.label.toLowerCase()} da ieri</span>
-                <span class="copy-yesterday-detail">${desc} — ${totalKcal} kcal</span>
-              </button>`;
-            })() : ''}
-            ${mealEntries.length >= 2 ? `<button class="btn-save-as-recipe" data-meal="${meal.id}">
-              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-              Salva come ricetta
-            </button>` : ''}
-            <button class="btn-add-to-meal" data-meal="${meal.id}">
-              <svg class="icon-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-              Aggiungi alimento
-            </button>
-          </div>
-        </div>
-      `;
-
-      section.innerHTML = card + body;
       container.appendChild(section);
     }
 
@@ -304,18 +212,16 @@ window.DiaryTab = (() => {
       });
     });
 
-    // Accordion V4: click sulla card .v4-meal
-    container.querySelectorAll('.v4-meal').forEach(cardEl => {
-      cardEl.addEventListener('click', () => {
-        const mealId = cardEl.dataset.meal;
-        // Pasto vuoto: apri direttamente il modal di aggiunta
-        if (cardEl.classList.contains('v4-meal-empty')) {
-          openAddModal(mealId);
-          return;
-        }
-        const body = document.getElementById(`meal-body-${mealId}`);
-        const isOpen = body.style.display !== 'none';
+    // Accordion: un solo pasto aperto alla volta
+    container.querySelectorAll('.meal-header').forEach(h => {
+      h.addEventListener('click', () => {
+        const mealId  = h.dataset.meal;
+        const body    = document.getElementById(`meal-body-${mealId}`);
+        const isOpen  = body.style.display !== 'none';
+
+        // Chiudi tutti
         container.querySelectorAll('.meal-body').forEach(b => { b.style.display = 'none'; });
+
         if (!isOpen) {
           body.style.display = '';
           openMealId = mealId;
@@ -2003,5 +1909,5 @@ window.DiaryTab = (() => {
     }
   });
 
-  return { refresh, setDate, openAddModal, get currentDate() { return currentDate; } };
+  return { refresh, setDate, get currentDate() { return currentDate; } };
 })();

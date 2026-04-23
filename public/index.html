@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
-  <link rel="stylesheet" href="/css/style.css?v=53">
+  <link rel="stylesheet" href="/css/style.css?v=50">
 </head>
 <body>
 
@@ -85,74 +85,60 @@
         </div>
       </div>
 
-      <!-- Date navigation V4 -->
-      <div class="v4-date-nav">
-        <button id="prev-day" class="v4-date-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15,18 9,12 15,6"/></svg>
-        </button>
-        <button id="current-date-btn" class="v4-date-center">
-          <span class="v4-date-weekday" id="current-date-weekday">OGGI</span>
-          <span class="v4-date-full" id="current-date-text">23 aprile</span>
-        </button>
-        <button id="next-day" class="v4-date-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,18 15,12 9,6"/></svg>
-        </button>
-      </div>
-
-      <!-- Riepilogo giornaliero V4 -->
-      <div id="daily-summary" class="daily-summary v4-hero">
-        <div class="v4-hero-content">
-          <div class="v4-hero-left">
-            <div class="v4-hero-label" id="ds-remaining-label">RIMANENTI</div>
-            <div class="v4-hero-main">
-              <span class="v4-hero-value" id="ds-remaining">0</span>
-              <span class="v4-hero-unit">kcal</span>
-            </div>
-            <div class="v4-hero-sub">
-              <span id="total-kcal">0</span> assunte · <span id="target-kcal">2000</span> target
-            </div>
-            <div class="v4-hero-plan" id="active-plan-name">Piano</div>
+      <!-- Riepilogo giornaliero -->
+      <div id="daily-summary" class="daily-summary">
+        <!-- Date navigation -->
+        <div class="date-nav">
+          <button id="prev-day" class="btn-icon">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15,18 9,12 15,6"/></svg>
+          </button>
+          <button id="current-date-btn" class="date-label">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span id="current-date-text">Oggi</span>
+          </button>
+          <button id="next-day" class="btn-icon">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,18 15,12 9,6"/></svg>
+          </button>
+        </div>
+        <!-- Riga gauge -->
+        <div class="ds-gauge-row">
+          <div class="ds-side">
+            <div class="ds-side-value" id="total-kcal">0</div>
+            <div class="ds-side-label">Assunte</div>
           </div>
-          <div class="v4-hero-right">
-            <div class="ds-gauge-wrap">
-              <svg class="ds-gauge-svg" viewBox="0 0 200 200">
-                <circle class="ds-gauge-bg"   cx="100" cy="100" r="80"/>
-                <circle class="ds-gauge-fill" cx="100" cy="100" r="80" id="ds-gauge-fill"/>
-              </svg>
-              <div class="ds-gauge-inner">
-                <div class="v4-hero-pct" id="ds-pct">0%</div>
-              </div>
+          <div class="ds-gauge-wrap">
+            <svg class="ds-gauge-svg" viewBox="0 0 200 200">
+              <circle class="ds-gauge-bg"   cx="100" cy="100" r="80"/>
+              <circle class="ds-gauge-fill" cx="100" cy="100" r="80" id="ds-gauge-fill"/>
+            </svg>
+            <div class="ds-gauge-inner">
+              <div class="ds-remaining-label">Rimanenti</div>
+              <div class="ds-remaining" id="ds-remaining">0</div>
+              <div class="ds-target">Obiettivo <span id="target-kcal">2000</span> kcal</div>
             </div>
           </div>
+          <div class="ds-side">
+            <div class="ds-plan-name" id="active-plan-name"></div>
+          </div>
         </div>
-      </div>
-
-      <!-- Macro chips V4 -->
-      <div class="v4-macro-row">
-        <div class="v4-macro-chip">
-          <div class="v4-macro-label">CARB</div>
-          <div class="v4-macro-values"><span class="v4-macro-cur" id="total-carbs">0</span><span class="v4-macro-tgt">/<span id="target-carbs">0</span>g</span></div>
-          <div class="v4-macro-bar"><div class="v4-macro-bar-fill carbs-bar" id="bar-carbs"></div></div>
+        <!-- Schede macro -->
+        <div class="ds-macro-cards">
+          <div class="ds-macro-card">
+            <div class="ds-mc-title">Carboidrati</div>
+            <div class="ds-mc-values"><span id="total-carbs">0</span>/<span id="target-carbs">0</span>g</div>
+            <div class="ds-mc-bar-wrap"><div class="ds-mc-bar carbs-bar" id="bar-carbs"></div></div>
+          </div>
+          <div class="ds-macro-card">
+            <div class="ds-mc-title">Proteine</div>
+            <div class="ds-mc-values"><span id="total-protein">0</span>/<span id="target-protein">0</span>g</div>
+            <div class="ds-mc-bar-wrap"><div class="ds-mc-bar protein-bar" id="bar-protein"></div></div>
+          </div>
+          <div class="ds-macro-card">
+            <div class="ds-mc-title">Grassi</div>
+            <div class="ds-mc-values"><span id="total-fat">0</span>/<span id="target-fat">0</span>g</div>
+            <div class="ds-mc-bar-wrap"><div class="ds-mc-bar fat-bar" id="bar-fat"></div></div>
+          </div>
         </div>
-        <div class="v4-macro-chip">
-          <div class="v4-macro-label">PROT</div>
-          <div class="v4-macro-values"><span class="v4-macro-cur" id="total-protein">0</span><span class="v4-macro-tgt">/<span id="target-protein">0</span>g</span></div>
-          <div class="v4-macro-bar"><div class="v4-macro-bar-fill protein-bar" id="bar-protein"></div></div>
-        </div>
-        <div class="v4-macro-chip">
-          <div class="v4-macro-label">GRASSI</div>
-          <div class="v4-macro-values"><span class="v4-macro-cur" id="total-fat">0</span><span class="v4-macro-tgt">/<span id="target-fat">0</span>g</span></div>
-          <div class="v4-macro-bar"><div class="v4-macro-bar-fill fat-bar" id="bar-fat"></div></div>
-        </div>
-      </div>
-
-      <!-- Section header pasti -->
-      <div class="v4-meals-header">
-        <div class="v4-meals-title">PASTI DI OGGI</div>
-        <button id="btn-fab-add" class="v4-meals-add">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Nuovo
-        </button>
       </div>
 
       <!-- Pasti -->
@@ -161,14 +147,6 @@
 
     <!-- TAB: DIARIO -->
     <section id="tab-diario" class="tab-pane">
-      <!-- V4 Heatmap Section -->
-      <div id="heatmap-section" style="display:none; padding:0 16px 16px">
-        <!-- Range selector will be inserted here -->
-        <div id="heatmap-range-selector"></div>
-        <!-- Heatmap or week view will be inserted here -->
-        <div id="heatmap-content"></div>
-      </div>
-
       <div class="charts-section">
         <div class="chart-card weekly-avg-card" id="weekly-avg-card">
           <h3>Media 7 giorni (fino a ieri)</h3>
@@ -314,30 +292,6 @@
         </div>
       </div>
       <div class="card" style="margin-bottom:12px">
-        <h2>V4 Design System</h2>
-        <p style="font-size:13px;color:var(--color-text-secondary);margin:8px 0 12px">Stile hero (Home)</p>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="hero-style-btn btn btn-outline flex-1" data-hero="ring" style="min-width:80px">Anello</button>
-          <button class="hero-style-btn btn btn-outline flex-1" data-hero="green" style="min-width:80px">Verde</button>
-          <button class="hero-style-btn btn btn-outline flex-1" data-hero="type" style="min-width:80px">Testo</button>
-          <button class="hero-style-btn btn btn-outline flex-1" data-hero="over" style="min-width:80px">Oltre</button>
-        </div>
-        <p style="font-size:13px;color:var(--color-text-secondary);margin:12px 0 8px">Stile card pasti</p>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="meal-style-btn btn btn-outline flex-1" data-meal="photo" style="min-width:80px">Foto</button>
-          <button class="meal-style-btn btn btn-outline flex-1" data-meal="hairline" style="min-width:80px">Linee</button>
-          <button class="meal-style-btn btn btn-outline flex-1" data-meal="soft" style="min-width:80px">Soft</button>
-        </div>
-        <p style="font-size:13px;color:var(--color-text-secondary);margin:12px 0 8px">Densità layout</p>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="density-btn btn btn-outline flex-1" data-density="compact" style="min-width:80px">Compatta</button>
-          <button class="density-btn btn btn-outline flex-1" data-density="normal" style="min-width:80px">Normale</button>
-          <button class="density-btn btn btn-outline flex-1" data-density="airy" style="min-width:80px">Respirata</button>
-        </div>
-        <p style="font-size:13px;color:var(--color-text-secondary);margin:12px 0 8px">Palette colori</p>
-        <div id="palette-colors" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px"></div>
-      </div>
-      <div class="card" style="margin-bottom:12px">
         <h2>Riconoscimento piatto</h2>
         <p style="font-size:13px;color:var(--color-text-secondary);margin:8px 0 12px">
           Modello IA usato per il riconoscimento degli alimenti da foto
@@ -400,16 +354,11 @@
 
   </main>
 
-  <!-- FAB: Floating Action Button (visibile solo su tab Home) -->
-  <button id="v4-fab" class="v4-fab hidden" title="Aggiungi alimento">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-  </button>
-
   <!-- BOTTOM TAB BAR -->
   <nav class="tab-bar">
     <button class="tab-btn active" data-tab="home">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      <span>Oggi</span>
+      <span>Home</span>
     </button>
     <button class="tab-btn" data-tab="diario">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -836,14 +785,14 @@
 
 
 <!-- App JS -->
-<script src="/js/app.js?v=18"></script>
+<script src="/js/app.js?v=16"></script>
 <script src="/js/scanner-config.js?v=2"></script>
 <script src="/js/barcode.js?v=2"></script>
 <script src="/js/foods.js?v=27"></script>
-<script src="/js/diary.js?v=63"></script>
-<script src="/js/diarylog.js?v=11"></script>
+<script src="/js/diary.js?v=61"></script>
+<script src="/js/diarylog.js?v=10"></script>
 <script src="/js/plan.js?v=5"></script>
-<script src="/js/settings.js?v=8"></script>
+<script src="/js/settings.js?v=7"></script>
 
 <script>
   // Service Worker registration (PWA) + banner "nuova versione disponibile"
