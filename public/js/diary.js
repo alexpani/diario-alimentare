@@ -61,13 +61,46 @@ window.DiaryTab = (() => {
   }
 
   function renderSummary() {
-    const plan = dayPlan || App.plan;
     let totalKcal = 0, totalProtein = 0, totalFat = 0, totalCarbs = 0;
     for (const e of entries) {
       totalKcal   += e.kcal;
       totalProtein += e.protein;
       totalFat    += e.fat;
       totalCarbs  += e.carbs;
+    }
+
+    // Se il giorno non ha nemmeno una voce diario, il piano risulta "non impostato":
+    // gauge vuoto, target macro a "—", nessun "Rimanenti".
+    const noPlan = entries.length === 0;
+    const plan = dayPlan || App.plan;
+
+    const ARC = 376.99, CIRC = 502.65;
+    const gaugeFill = document.getElementById('ds-gauge-fill');
+    const remainingEl = document.getElementById('ds-remaining');
+    const remainingLabel = document.querySelector('.ds-remaining-label');
+    const targetKcalEl = document.getElementById('target-kcal');
+    const totalKcalEl = document.getElementById('total-kcal');
+    const nameEl = document.getElementById('active-plan-name');
+
+    if (noPlan) {
+      // Stato "piano non impostato"
+      gaugeFill.style.strokeDasharray = `0 ${CIRC}`;
+      gaugeFill.className = 'ds-gauge-fill';
+      totalKcalEl.textContent = 0;
+      remainingLabel.textContent = 'Piano';
+      remainingEl.textContent = '—';
+      remainingEl.classList.remove('ds-over');
+      targetKcalEl.textContent = '—';
+      const setMacroEmpty = (totalId, targetId, barId) => {
+        document.getElementById(totalId).textContent = 0;
+        document.getElementById(targetId).textContent = '—';
+        document.getElementById(barId).style.width = '0%';
+      };
+      setMacroEmpty('total-carbs',   'target-carbs',   'bar-carbs');
+      setMacroEmpty('total-protein', 'target-protein', 'bar-protein');
+      setMacroEmpty('total-fat',     'target-fat',     'bar-fat');
+      if (nameEl) nameEl.textContent = 'Non impostato';
+      return;
     }
 
     // Obiettivi macro in grammi
@@ -78,19 +111,15 @@ window.DiaryTab = (() => {
 
     // ── Gauge calorie ──────────────────────────────────────────────────────
     // Arco totale 270° → lunghezza = 376.99; circonferenza totale = 502.65
-    const ARC = 376.99, CIRC = 502.65;
     const pct   = targetKcal > 0 ? Math.min(totalKcal / targetKcal, 1) : 0;
     const fill  = pct * ARC;
 
-    const gaugeFill = document.getElementById('ds-gauge-fill');
     gaugeFill.style.strokeDasharray = `${fill} ${CIRC}`;
     gaugeFill.className = 'ds-gauge-fill' +
       (pct >= 1 ? ' over' : pct >= 0.9 ? ' warning' : '');
 
-    document.getElementById('total-kcal').textContent  = Math.round(totalKcal);
+    totalKcalEl.textContent  = Math.round(totalKcal);
     const remaining = Math.round(targetKcal - totalKcal);
-    const remainingEl = document.getElementById('ds-remaining');
-    const remainingLabel = document.querySelector('.ds-remaining-label');
     if (remaining >= 0) {
       remainingLabel.textContent = 'Rimanenti';
       remainingEl.textContent = remaining;
@@ -100,7 +129,7 @@ window.DiaryTab = (() => {
       remainingEl.textContent = '+' + Math.abs(remaining);
       remainingEl.classList.add('ds-over');
     }
-    document.getElementById('target-kcal').textContent  = Math.round(targetKcal);
+    targetKcalEl.textContent  = Math.round(targetKcal);
 
     // ── Barre macro ────────────────────────────────────────────────────────
     const setMacro = (totalId, targetId, barId, total, target) => {
@@ -114,7 +143,6 @@ window.DiaryTab = (() => {
     setMacro('total-fat',     'target-fat',     'bar-fat',     totalFat,     targetFat);
 
     // Aggiorna nome piano (snapshot del giorno o piano attivo)
-    const nameEl = document.getElementById('active-plan-name');
     if (nameEl) nameEl.textContent = dayPlan?.plan_name || App.plan?.name || '';
   }
 
