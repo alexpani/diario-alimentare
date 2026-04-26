@@ -37,12 +37,25 @@ const storage = multer.diskStorage({
 });
 const upload = multer({
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 },
+  limits: { fileSize: 15 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     if (file.mimetype.startsWith('image/')) cb(null, true);
     else cb(new Error('Solo immagini consentite'));
   }
 });
+
+// Wrapper che converte gli errori di multer in JSON 4xx (invece di crash 500)
+function uploadSingle(field) {
+  return (req, res, next) => {
+    upload.single(field)(req, res, (err) => {
+      if (!err) return next();
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(413).json({ error: 'Foto troppo grande (max 15 MB)' });
+      }
+      return res.status(400).json({ error: err.message || 'Upload immagine fallito' });
+    });
+  };
+}
 
 
 // ── Helper: calcola macros da componenti (usa snapshot se presente, fallback DB) ──
@@ -233,7 +246,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // POST /api/foods
-router.post('/', upload.single('image'), async (req, res) => {
+router.post('/', uploadSingle('image'), async (req, res) => {
   try {
     const db = await getDb();
     const { name, brand, kcal_100g, protein_100g, fat_100g, carbs_100g,
@@ -289,7 +302,7 @@ router.post('/', upload.single('image'), async (req, res) => {
 });
 
 // PUT /api/foods/:id
-router.put('/:id', upload.single('image'), async (req, res) => {
+router.put('/:id', uploadSingle('image'), async (req, res) => {
   try {
     const db = await getDb();
     const id = req.params.id;

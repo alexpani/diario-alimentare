@@ -665,13 +665,35 @@ window.FoodsTab = (() => {
     const url = id ? `/api/foods/${id}` : '/api/foods';
     const method = id ? 'PUT' : 'POST';
 
-    const res = await fetch(url, { method, body: formData });
-    const data = await res.json();
+    // Feedback immediato: disabilita il bottone e cambia il label
+    const saveBtn = document.getElementById('btn-save-food');
+    const saveBtnLabel = saveBtn ? saveBtn.textContent : '';
+    if (saveBtn) {
+      saveBtn.disabled = true;
+      saveBtn.textContent = id ? 'Salvo…' : 'Creo…';
+    }
 
-    if (!res.ok) {
-      showMsg(msgEl, data.error || 'Errore durante il salvataggio', 'error');
+    let res, data;
+    try {
+      res = await fetch(url, { method, body: formData });
+      data = await res.json().catch(() => ({}));
+    } catch (err) {
+      console.error('[food save] errore di rete', err);
+      if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = saveBtnLabel; }
+      showMsg(msgEl, 'Errore di rete o file troppo grande (max 15 MB)', 'error');
       return;
     }
+
+    if (!res.ok) {
+      if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = saveBtnLabel; }
+      const msg = (data && data.error)
+        || (res.status === 413 ? 'Foto troppo grande (max 15 MB)' : `Errore ${res.status}`);
+      showMsg(msgEl, msg, 'error');
+      return;
+    }
+
+    // Reset del bottone (ininfluente perché ora chiudiamo, ma evita stati appesi se la chiusura fallisse)
+    if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = saveBtnLabel; }
 
     // Salvataggio riuscito: la chiusura non è un "annullo", quindi disattiva il cb di chiusura
     _onFoodClosed = null;
