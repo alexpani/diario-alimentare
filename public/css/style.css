@@ -778,6 +778,12 @@ input:focus, select:focus, textarea:focus {
   letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
 }
+.ds-remaining.ds-no-plan {
+  font-size: 16px;
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0;
+  opacity: 0.8;
+}
 .ds-target {
   font-size: 10px;
   opacity: 0.75;

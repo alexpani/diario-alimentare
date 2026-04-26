@@ -82,15 +82,19 @@ window.DiaryTab = (() => {
     const totalKcalEl = document.getElementById('total-kcal');
     const nameEl = document.getElementById('active-plan-name');
 
+    const targetLineEl = document.getElementById('ds-target-line');
+
     if (noPlan) {
       // Stato "piano non impostato"
       gaugeFill.style.strokeDasharray = `0 ${CIRC}`;
       gaugeFill.className = 'ds-gauge-fill';
       totalKcalEl.textContent = 0;
       remainingLabel.textContent = 'Piano';
-      remainingEl.textContent = '—';
+      remainingEl.textContent = 'non impostato';
       remainingEl.classList.remove('ds-over');
+      remainingEl.classList.add('ds-no-plan');
       targetKcalEl.textContent = '—';
+      if (targetLineEl) targetLineEl.style.visibility = 'hidden';
       const setMacroEmpty = (totalId, targetId, barId) => {
         document.getElementById(totalId).textContent = 0;
         document.getElementById(targetId).textContent = '—';
@@ -99,9 +103,13 @@ window.DiaryTab = (() => {
       setMacroEmpty('total-carbs',   'target-carbs',   'bar-carbs');
       setMacroEmpty('total-protein', 'target-protein', 'bar-protein');
       setMacroEmpty('total-fat',     'target-fat',     'bar-fat');
-      if (nameEl) nameEl.textContent = 'Non impostato';
+      if (nameEl) nameEl.textContent = '';
       return;
     }
+
+    // Reset stato no-plan se torniamo a un giorno con voci
+    remainingEl.classList.remove('ds-no-plan');
+    if (targetLineEl) targetLineEl.style.visibility = '';
 
     // Obiettivi macro in grammi
     const targetKcal    = plan.kcal_target || 2000;
