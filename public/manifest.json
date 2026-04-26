@@ -4,6 +4,7 @@
   "description": "Il tuo diario alimentare personale",
   "start_url": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#F5F5F5",
   "theme_color": "#4CAF50",
   "icons": [
