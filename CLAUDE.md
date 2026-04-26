@@ -548,6 +548,16 @@ ssh root@192.168.68.173 "chown fooddiary:fooddiary /opt/diario-alimentare/databa
 ### Note SSH
 - Login root abilitato (`PermitRootLogin yes` in `/etc/ssh/sshd_config`)
 - Git richiede: `git config --global --add safe.directory /opt/diario-alimentare`
+- **Accesso passwordless da Claude**: la chiave pubblica ed25519 del Mac (`~/.ssh/id_ed25519.pub`, `alessandro@mac`) è autorizzata in `/root/.ssh/authorized_keys` sull'LXC. Claude può quindi fare deploy e diagnostica direttamente, senza che l'utente debba aprire un terminale. Pattern abituale dopo un commit+push su `main`:
+  ```bash
+  ssh root@192.168.68.173 'bash /opt/diario-alimentare/update.sh'
+  ```
+  Per i log / restart / status:
+  ```bash
+  ssh root@192.168.68.173 "su -s /bin/bash fooddiary -c 'pm2 logs food-diary --lines 50 --nostream'"
+  ssh root@192.168.68.173 "su -s /bin/bash fooddiary -c 'pm2 restart food-diary'"
+  ssh root@192.168.68.173 "su -s /bin/bash fooddiary -c 'pm2 status'"
+  ```
 
 ---
 
